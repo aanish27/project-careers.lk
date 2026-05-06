@@ -1,15 +1,15 @@
+import { User } from '@database/prisma/client.js';
 import {
   BadRequestException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
-import { RegisterDto, AuthResponseDto, LoginDto } from './dto/auth.dto';
+import { AuthResponseDto, LoginDto, RegisterDto } from './dto/auth.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
-import { User } from 'generated/prisma/client';
-import { ConfigService } from '@nestjs/config';
 
 type UserWithoutPassword = Omit<User, 'password'>;
 
