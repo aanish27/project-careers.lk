@@ -1,5 +1,5 @@
 {
-  "name": "@database/prisma",
+  "name": "@careerslk/database",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -28,6 +28,6 @@
     "@prisma/client": "^7.8.0"
   },
   "exports": {
-    "./*": "./generated/prisma/*"
+    "./prisma/*": "./generated/prisma/*"
   }
 }
