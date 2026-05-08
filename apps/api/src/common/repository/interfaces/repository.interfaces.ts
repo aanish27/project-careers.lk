@@ -1,4 +1,4 @@
-import { Prisma } from 'generated/prisma/client';
+import { Prisma } from '@careerslk/database';
 import {
   BatchResult,
   DefaultTypeMap,

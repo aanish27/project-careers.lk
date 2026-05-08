@@ -1,4 +1,4 @@
-import { User } from '@careerslk/database/prisma/client.js';
+import { User } from '@careerslk/database';
 import {
   BadRequestException,
   Injectable,

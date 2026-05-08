@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { User } from 'generated/prisma/client';
+import { User } from '@careerslk/database';
 import * as bcrypt from 'bcrypt';
 import { plainToInstance } from 'class-transformer';
 import {
@@ -97,24 +97,24 @@ export class UsersService {
       // Forward: start after the given cursor id
       const afterId = decodeCursor(cursor);
       users = await this.usersRepository.findAll({
-        where: { id: { gt: afterId } } as any,
+        where: { id: { gt: afterId } },
         take,
-        orderBy: { id: 'asc' } as any,
+        orderBy: { id: 'asc' },
       });
     } else if (prevCursor) {
       // Backward: fetch items before the given cursor id in descending order, then flip
       const beforeId = decodeCursor(prevCursor);
       const reversed = await this.usersRepository.findAll({
-        where: { id: { lt: beforeId } } as any,
+        where: { id: { lt: beforeId } },
         take,
-        orderBy: { id: 'desc' } as any,
+        orderBy: { id: 'desc' },
       });
       users = reversed.reverse();
     } else {
       // First page
       users = await this.usersRepository.findAll({
         take,
-        orderBy: { id: 'asc' } as any,
+        orderBy: { id: 'asc' },
       });
     }
 

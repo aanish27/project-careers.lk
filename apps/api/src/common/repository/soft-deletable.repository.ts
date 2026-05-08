@@ -51,11 +51,11 @@ export class SoftDeletableRepository<
   // ========================================
 
   async softDelete(id: string): Promise<T> {
-    return await this.update(id, { deletedAt: new Date() } as M['UpdateInput']);
+    return await this.update(id, { deletedAt: new Date() });
   }
 
   async restore(id: string): Promise<T> {
-    return await this.update(id, { deletedAt: null } as M['UpdateInput']);
+    return await this.update(id, { deletedAt: null });
   }
 
   /**
@@ -77,7 +77,7 @@ export class SoftDeletableRepository<
       ...(params?.where as Record<string, unknown>),
       deletedAt: null,
     };
-    return await super.findAll({ ...params, where } as FindAllParams<M>);
+    return await super.findAll({ ...params, where });
   }
 
   /**
@@ -87,10 +87,7 @@ export class SoftDeletableRepository<
     id: string,
     options?: { include?: M['Include']; select?: M['Select'] },
   ): Promise<T | null> {
-    return await this.findOne(
-      { id, deletedAt: null } as M['WhereInput'],
-      options,
-    );
+    return await this.findOne({ id, deletedAt: null }, options);
   }
 
   /**
@@ -104,7 +101,7 @@ export class SoftDeletableRepository<
       {
         ...(where as Record<string, unknown>),
         deletedAt: null,
-      } as M['WhereInput'],
+      },
       options,
     );
   }
@@ -116,14 +113,14 @@ export class SoftDeletableRepository<
     return await super.count({
       ...(where as Record<string, unknown>),
       deletedAt: null,
-    } as M['WhereInput']);
+    });
   }
 
   /**
    * Check existence only for non-deleted records
    */
   override async exists(id: string): Promise<boolean> {
-    const result = await this.count({ id } as M['WhereInput']);
+    const result = await this.count({ id });
     return result > 0;
   }
 }

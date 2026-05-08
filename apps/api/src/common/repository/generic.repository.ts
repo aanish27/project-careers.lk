@@ -1,13 +1,13 @@
-import { Prisma } from 'generated/prisma/client';
 import { PrismaService } from '@/database/prisma.service';
+import { Prisma } from '@careerslk/database';
 import { IBulkRepository, IRepository, ITransactional } from './interfaces';
-import { WriteRepository } from './write.repository';
 import {
   BatchResult,
   DefaultTypeMap,
   ModelName,
   RepositoryTypeMap,
 } from './types';
+import { WriteRepository } from './write.repository';
 
 /**
  * Generic Repository
