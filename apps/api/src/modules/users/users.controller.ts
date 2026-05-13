@@ -23,7 +23,7 @@ import {
 } from './dto/users.response.dto';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { RolesGuard } from '@/common/guards/role.guard';
-import { UserRole } from 'generated/prisma/enums';
+import { UserRole } from '@careerslk/database';
 import { plainToInstance } from 'class-transformer';
 import {
   CursorPaginationDto,

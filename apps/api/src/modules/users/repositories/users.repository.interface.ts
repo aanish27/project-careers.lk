@@ -1,4 +1,4 @@
-import { User } from 'generated/prisma/client';
+import { User } from '@careerslk/database';
 import { IRepository } from '@/common/repository';
 
 /**

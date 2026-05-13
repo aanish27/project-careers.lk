@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRole } from 'generated/prisma/enums';
+import { UserRole } from '@careerslk/database';
 
 @Exclude()
 export class UserResponseDto {
@@ -31,7 +31,7 @@ export class UserResponseDto {
   @ApiProperty({
     description: 'User role',
     enum: UserRole,
-    example: UserRole.CUSTOMER,
+    example: UserRole.ADMIN,
   })
   role: UserRole;
 

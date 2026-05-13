@@ -1,4 +1,5 @@
-import { Prisma } from 'generated/prisma/client';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Prisma } from '@careerslk/database';
 
 // ============================================
 // Prisma Types

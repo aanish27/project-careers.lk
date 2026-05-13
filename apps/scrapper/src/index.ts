@@ -1,6 +1,10 @@
-import { prisma } from '@careerslk/database';
+import { PrismaClient } from '@careerslk/database';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { Worker } from 'bullmq';
 import { processScrapeJob } from './processors/scrape-processor';
+
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+export const prisma = new PrismaClient({ adapter });
 
 const scraperWorker = new Worker(
   'scrape-queue',

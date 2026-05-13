@@ -32,7 +32,7 @@ import {
   REFRESH_TOKEN_MAX_AGE_MS,
 } from '../../common/constants/routes.constant';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { User } from 'generated/prisma/client';
+import { User } from '@careerslk/database';
 import { Throttle } from '@nestjs/throttler';
 import { plainToInstance } from 'class-transformer';
 import { UserResponseDto } from '../users/dto/users.response.dto';

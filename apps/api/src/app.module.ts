@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { UsersModule } from '@/modules/users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import configuration from '@/config';
+import { envValidationSchema } from '@/config/env.validation';
 import { DatabaseModule } from '@/database/database.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -17,6 +18,11 @@ import { AppService } from './app.service';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
+      validationSchema: envValidationSchema,
+      validationOptions: {
+        allowUnknown: true,
+        abortEarly: false,
+      },
     }),
     ThrottlerModule.forRoot({
       throttlers: [

@@ -18,9 +18,10 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.0",
+    "@careerslk/database": "workspace:*",
+    "@prisma/adapter-pg": "^7.8.0",
     "bullmq": "^5.76.4",
     "ioredis": "^5.10.1",
-    "playwright-extra": "^4.3.6",
-    "@careerslk/database": "workspace:*"
+    "playwright-extra": "^4.3.6"
   }
 }
