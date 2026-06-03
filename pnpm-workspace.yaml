@@ -3,6 +3,7 @@ packages:
   - packages/*
 allowBuilds:
   '@nestjs/core': true
+  '@playwright/browser-chromium': true
   '@prisma/engines': true
   '@scarf/scarf': true
   '@swc/core': true
