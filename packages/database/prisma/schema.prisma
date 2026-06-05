@@ -65,7 +65,7 @@ enum JobStatus {
 
 // scrape status not needed?
 model Company {
-  id                     String       @id @default(uuid())
+  id                     String         @id @default(uuid())
   name                   String
   logoUrl                String?
   websiteUrl             String
@@ -73,13 +73,15 @@ model Company {
   atsPlatform            String?
   pageHash               String?
   lastScrapedAt          DateTime?
-  scrapeStatus           ScrapeStatus @default(EMPTY)
+  scrapeStatus           ScrapeStatus   @default(EMPTY)
   htmlSelector           String?
   htmlSelectorType       String?
   htmlSelectorReason     String?
   htmlSelectorConfidence String?
-  createdAt              DateTime     @default(now())
-  updatedAt              DateTime     @updatedAt
+  paginationType         String?
+  paginationBtn          String?
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
 
   jobs            Job[]
   scrapeLogs      ScrapeLog[]

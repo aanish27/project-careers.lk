@@ -32,6 +32,22 @@ export const CONFIG_1 = {
               enum: ['high', 'medium', 'low'],
             },
             reason: { type: 'string' },
+            paginationButton: { type: ['string', 'null'] },
+            paginationType: {
+              anyOf: [
+                {
+                  type: 'string',
+                  enum: [
+                    'infinite_scrolling',
+                    'load_more_button',
+                    'next_button',
+                    'pagination_numbers',
+                  ],
+                },
+                { type: 'null' },
+              ],
+            },
+            paginationReason: { type: 'string' },
           },
           required: ['selector', 'type', 'confidence', 'reason'],
           additionalProperties: false,

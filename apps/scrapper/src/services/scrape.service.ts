@@ -6,6 +6,7 @@ import {
 import { randomInt } from 'node:crypto';
 import { Browser, chromium, devices } from 'playwright';
 import { prisma } from '..';
+import { PaginationType } from '../utils/enum';
 import { ClaudeService } from './claude.service';
 import { HashService } from './hash.service';
 import { fetchPage } from './playwright.service';
@@ -50,6 +51,8 @@ export class ScrapeService {
             const pageHtml = await fetchPage(
               company.careerUrl,
               browser,
+              company.paginationType as PaginationType,
+              company.paginationBtn,
               company.htmlSelector,
             );
             const strippedHtml = HashService.strip(
@@ -63,7 +66,6 @@ export class ScrapeService {
                 data: {
                   status: ScrapeLogStatus.SUSPECTED_FAILURE,
                   htmlLength: strippedHtml.length,
-                  jobsFound: 0,
                   durationMs: Date.now() - startedAt,
                   errorMessage: 'STRIPPED HTML EXCEEDED 25000 CHARACTERS',
                   company: { update: { scrapeStatus: ScrapeStatus.CHECK } },
@@ -81,7 +83,6 @@ export class ScrapeService {
                 data: {
                   status: ScrapeLogStatus.SUCCESS,
                   htmlLength: strippedHtml.length,
-                  jobsFound: 0,
                   durationMs: Date.now() - startedAt,
                   errorMessage: 'SKIPPED DUE TO SAME HASH',
                   company: { update: { scrapeStatus: ScrapeStatus.SKIPPED } },
@@ -103,7 +104,6 @@ export class ScrapeService {
                 where: { id: scrapeLog.id },
                 data: {
                   status: ScrapeLogStatus.ERROR,
-                  jobsFound: 0,
                   durationMs: Date.now() - startedAt,
                   errorMessage: err.message,
                   company: { update: { scrapeStatus: ScrapeStatus.ERROR } },

@@ -20,7 +20,10 @@ OUTPUT SCHEMA:
     "selector": string | null,
     "type": "id" | "class" | "data-attribute" | "semantic" | null,
     "confidence": "high" | "medium" | "low",
-    "reason": string
+    "reason": string,
+    "paginationButton": string | null,
+    "paginationType": "infinite_scrolling" | "load_more_button" | "next_button" | "pagination_numbers" | null,
+    "paginationReason": string
   },
   "jobs": [
     {
@@ -76,6 +79,33 @@ CONFIDENCE LEVELS:
 - low: best guess only — insufficient evidence in the HTML
 - If no identifiable container exists, set selector to null and confidence to "low"
 
+
+PAGINATION RULES:
+The container may show only the first batch of jobs, with more loaded on demand. Detect how additional listings are revealed and how to trigger them.
+
+paginationType
+- Classify the pagination mechanism into exactly one of these values:
+  - "infinite_scrolling": more jobs load automatically as the user scrolls down (no explicit button).
+  - "load_more_button": a single button (e.g. "Load more", "Show more") appends additional jobs to the same list.
+  - "next_button": a single "Next"/"›" control advances to the next page, replacing the current listings.
+  - "pagination_numbers": numbered page links (1, 2, 3 …) navigate between discrete pages.
+- If all listings are clearly present at once with no pagination of any kind, set paginationType to null.
+
+paginationButton
+- The CSS selector of the control used to trigger the next batch of listings (for "load_more_button", "next_button", or "pagination_numbers").
+- This value is passed DIRECTLY to Playwright as page.locator(paginationButton).click(), so it MUST be a single, valid CSS selector that resolves to exactly ONE clickable element.
+- Prefer ID selectors first: "#load-more", "#next-page"
+- Then data attributes: "[data-action='load-more']", "[data-testid='pagination-next']"
+- Then specific class names: ".pagination__next", ".jobs-load-more"
+- Avoid generic selectors like "button", "a", "li" alone — too broad, they match multiple elements.
+- Prefer the "next"/"load more" control over individual numbered links — it can be clicked repeatedly to walk every page.
+- Do NOT select filter, sort, "apply", or unrelated navigation buttons.
+- For "infinite_scrolling" there is usually no button — set paginationButton to null.
+- If paginationType is null, set paginationButton to null.
+
+paginationReason
+- Briefly explain the evidence behind paginationType and paginationButton (e.g. "Found a 'Load more' button with id #load-more below the list").
+- If no pagination was detected, state that all listings appear on a single page.
 ---
 
 JOB FIELD RULES:

@@ -1,3 +1,5 @@
+import { PaginationType } from './enum';
+
 export interface ClaudeJob {
   title: string;
   location: string | null;
@@ -27,6 +29,9 @@ export interface ClaudeParsedResult {
     type: 'id' | 'class' | 'data-attribute' | 'semantic' | null;
     confidence: 'high' | 'medium' | 'low';
     reason: string;
+    paginationButton: string | null;
+    paginationType: PaginationType | null;
+    paginationReason: string;
   };
   jobs: ClaudeJob[];
 }
