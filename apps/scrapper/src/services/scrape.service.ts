@@ -91,6 +91,11 @@ export class ScrapeService {
               return null;
             }
 
+            await prisma.company.update({
+              where: { id: company.id },
+              data: { pageHash: HashService.hash(strippedHtml) },
+            });
+
             return {
               careerUrl: company.careerUrl,
               html: strippedHtml,

@@ -53,8 +53,8 @@ export class ClaudeService {
                 {
                   type: 'text' as const,
                   text: content.htmlSelector
-                    ? PROMPT_1_SYSTEM
-                    : PROMPT_2_SYSTEM,
+                    ? PROMPT_2_SYSTEM
+                    : PROMPT_1_SYSTEM,
                   cache_control: { type: 'ephemeral' as const },
                 },
               ],
@@ -63,11 +63,11 @@ export class ClaudeService {
                 {
                   role: 'user' as const,
                   content: content.htmlSelector
-                    ? PROMPT_1_USER(content.html)
-                    : PROMPT_2_USER(content.html),
+                    ? PROMPT_2_USER(content.html)
+                    : PROMPT_1_USER(content.html),
                 },
               ],
-              output_config: content.htmlSelector ? CONFIG_1 : CONFIG_2,
+              output_config: content.htmlSelector ? CONFIG_2 : CONFIG_1,
             },
           })),
         ],
