@@ -6,8 +6,9 @@ import {
 import { randomInt } from 'node:crypto';
 import { Browser, chromium, devices } from 'playwright';
 import { prisma } from '..';
-import { PaginationType } from '../utils/enum';
+import { AIProvider, PaginationType } from '../utils/enum';
 import { ClaudeService } from './claude.service';
+import { DeepSeeakService } from './deepseek.service';
 import { HashService } from './hash.service';
 import { fetchPage } from './playwright.service';
 
@@ -26,28 +27,31 @@ export class ScrapeService {
     try {
       const companies = await prisma.company.findMany();
 
-      const results: (ClaudeBatchContent | null)[] = await Promise.all(
+      const results = await Promise.all(
         companies.map(async (company) => {
           const startedAt = Date.now();
-          const [scrapeLog] = await prisma.$transaction([
-            prisma.scrapeLog.create({
-              data: {
-                companyId: company.id,
-                triggeredBy: ScrapeLogTrigger.MANUAL,
-                status: ScrapeLogStatus.EMPTY,
-                durationMs: Date.now() - startedAt,
-              },
-            }),
-            prisma.company.update({
-              where: { id: company.id },
-              data: {
-                scrapeStatus: ScrapeStatus.ACTIVE,
-                lastScrapedAt: new Date(),
-              },
-            }),
-          ]);
 
+          let scrapeLogId: string | undefined;
           try {
+            const [scrapeLog] = await prisma.$transaction([
+              prisma.scrapeLog.create({
+                data: {
+                  companyId: company.id,
+                  triggeredBy: ScrapeLogTrigger.MANUAL,
+                  status: ScrapeLogStatus.EMPTY,
+                  durationMs: Date.now() - startedAt,
+                },
+              }),
+              prisma.company.update({
+                where: { id: company.id },
+                data: {
+                  scrapeStatus: ScrapeStatus.ACTIVE,
+                  lastScrapedAt: new Date(),
+                },
+              }),
+            ]);
+            scrapeLogId = scrapeLog.id;
+
             const pageHtml = await fetchPage(
               company.careerUrl,
               browser,
@@ -62,7 +66,7 @@ export class ScrapeService {
 
             if (strippedHtml.length > 25000) {
               await prisma.scrapeLog.update({
-                where: { id: scrapeLog.id },
+                where: { id: scrapeLogId },
                 data: {
                   status: ScrapeLogStatus.SUSPECTED_FAILURE,
                   htmlLength: strippedHtml.length,
@@ -79,7 +83,7 @@ export class ScrapeService {
               HashService.compareHash(strippedHtml, company.pageHash)
             ) {
               await prisma.scrapeLog.update({
-                where: { id: scrapeLog.id },
+                where: { id: scrapeLogId },
                 data: {
                   status: ScrapeLogStatus.SUCCESS,
                   htmlLength: strippedHtml.length,
@@ -101,12 +105,12 @@ export class ScrapeService {
               html: strippedHtml,
               htmlSelector: company.htmlSelector,
               companyId: company.id,
-              scrapeLogId: scrapeLog.id,
+              scrapeLogId,
             };
           } catch (err) {
-            if (err instanceof Error) {
+            if (err instanceof Error && scrapeLogId) {
               await prisma.scrapeLog.update({
-                where: { id: scrapeLog.id },
+                where: { id: scrapeLogId },
                 data: {
                   status: ScrapeLogStatus.ERROR,
                   durationMs: Date.now() - startedAt,
@@ -125,7 +129,11 @@ export class ScrapeService {
         (typeof results)[number]
       >[];
 
-      await ClaudeService.batchCall(companiesHtml);
+      if (process.env.AI_PROVIDER === AIProvider.DEEPSEEK) {
+        await DeepSeeakService.batchCall(companiesHtml);
+      } else {
+        await ClaudeService.batchCall(companiesHtml);
+      }
       // await fs.writeFile('./claudebatch.txt', claude.toString());
       // console.log(HashService.hash(strippedData), strippedData.length);
       // console.log(strippedData);

@@ -16,3 +16,10 @@ export const PaginationType = {
 
 export type PaginationType =
   (typeof PaginationType)[keyof typeof PaginationType];
+
+export const AIProvider = {
+  DEEPSEEK: 'deepseek',
+  CLAUDE: 'claude',
+} as const;
+
+export type AIProvider = (typeof AIProvider)[keyof typeof AIProvider];

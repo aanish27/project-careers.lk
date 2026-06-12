@@ -65,7 +65,7 @@ enum JobStatus {
 
 // scrape status not needed?
 model Company {
-  id                     String         @id @default(uuid())
+  id                     String       @id @default(uuid())
   name                   String
   logoUrl                String?
   websiteUrl             String
@@ -73,15 +73,15 @@ model Company {
   atsPlatform            String?
   pageHash               String?
   lastScrapedAt          DateTime?
-  scrapeStatus           ScrapeStatus   @default(EMPTY)
+  scrapeStatus           ScrapeStatus @default(EMPTY)
   htmlSelector           String?
   htmlSelectorType       String?
   htmlSelectorReason     String?
   htmlSelectorConfidence String?
   paginationType         String?
   paginationBtn          String?
-  createdAt              DateTime       @default(now())
-  updatedAt              DateTime       @updatedAt
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
 
   jobs            Job[]
   scrapeLogs      ScrapeLog[]
@@ -90,10 +90,10 @@ model Company {
 }
 
 model Job {
-  id             String         @id @default(uuid())
+  id             String          @id @default(uuid())
   companyId      String
-  company        Company        @relation(fields: [companyId], references: [id])
-  fingerprint    String         @unique
+  company        Company         @relation(fields: [companyId], references: [id])
+  fingerprint    String          @unique
   title          String
   location       String?
   workMode       String?
@@ -107,13 +107,13 @@ model Job {
   description    String?
   deadline       DateTime?
   applyUrl       String?
-  status         JobStatus      @default(ACTIVE)
+  status         JobStatus       @default(ACTIVE)
   lastSeenAt     DateTime
   deletedAt      DateTime?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  batchId        String
-  batch          ClaudeBatchLog @relation(fields: [batchId], references: [id])
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  batchId        String?
+  batch          ClaudeBatchLog? @relation(fields: [batchId], references: [id])
 
   skills   JobSkill[]
   keywords JobKeyword[]
@@ -185,13 +185,13 @@ model ScrapeLog {
 }
 
 model ClaudeLog {
-  id           String         @id
+  id           String          @id
   companyId    String
-  company      Company        @relation(fields: [companyId], references: [id])
+  company      Company         @relation(fields: [companyId], references: [id])
   scrapeLogId  String
-  scrapeLog    ScrapeLog      @relation(fields: [scrapeLogId], references: [id])
-  batchId      String
-  batchLog     ClaudeBatchLog @relation(fields: [batchId], references: [id])
+  scrapeLog    ScrapeLog       @relation(fields: [scrapeLogId], references: [id])
+  batchId      String?
+  batchLog     ClaudeBatchLog? @relation(fields: [batchId], references: [id])
   status       String
   stopReason   String?
   model        String?

@@ -17,17 +17,20 @@ export async function fetchPage(
   const timeOut = randomInt(100000, 150000);
   const context = await browser.newContext(devices['Desktop Chrome']);
   const page = await context.newPage();
-  let element;
+  let element = '';
 
   try {
     await page.goto(url, {
       timeout: timeOut,
+      waitUntil: 'domcontentloaded',
     });
 
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {
+      // networkidle may never fire on SPAs; continue with whatever loaded
+    });
 
     if (selector && paginationType === PaginationType.NEXT_BUTTON) {
-      element = await page.locator(`${selector}`).innerHTML();
+      element = await page.locator(`${selector}`).first().innerHTML();
       let prevHash = HashService.hash(element);
 
       const nextBtn = page.locator(`${paginationBtn}`);
@@ -37,7 +40,7 @@ export async function fetchPage(
           if ((await nextBtn.isDisabled()) || (await nextBtn.isHidden())) break;
           await nextBtn.click({ timeout: 100000 });
 
-          const html = await page.locator(`${selector}`).innerHTML();
+          const html = await page.locator(`${selector}`).first().innerHTML();
           const currentHash = HashService.hash(html);
 
           // Stop once a click no longer changes the listing content.
@@ -66,10 +69,9 @@ export async function fetchPage(
         }
       }
 
-      element = await page.locator(`${selector}`).innerHTML();
+      element = await page.locator(`${selector}`).first().innerHTML();
     } else if (selector) {
       let previousHeight;
-      // let scrollCount = 0;
       while (true) {
         previousHeight = await page.evaluate('document.body.scrollHeight');
         await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
@@ -79,12 +81,9 @@ export async function fetchPage(
         if (newHeight === previousHeight) {
           break;
         }
-        // scrollCount++;
       }
 
-      element = await page.locator(`${selector}`).innerHTML();
-
-      // const isInfite = !scrollCount;
+      element = await page.locator(`${selector}`).first().innerHTML();
     } else {
       element = await page.content();
     }
