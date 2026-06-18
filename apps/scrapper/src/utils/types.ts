@@ -1,6 +1,6 @@
 import { PaginationType } from './enum';
 
-export interface ClaudeJob {
+export interface AiJob {
   title: string;
   location: string | null;
   work_mode: 'hybrid' | 'remote' | 'onsite' | null;
@@ -18,20 +18,30 @@ export interface ClaudeJob {
   keywords: string[];
 }
 
-export interface ClaudeParsedResult {
-  company?: {
-    name: string | null;
-    website_url: string | null;
-    logo_url: string | null;
-  };
-  container?: {
-    selector: string | null;
-    type: 'id' | 'class' | 'data-attribute' | 'semantic' | null;
-    confidence: 'high' | 'medium' | 'low';
-    reason: string;
-    paginationButton: string | null;
-    paginationType: PaginationType | null;
-    paginationReason: string;
-  };
-  jobs: ClaudeJob[];
+export interface AiCompanyInfo {
+  name: string | null;
+  website_url: string | null;
+  logo_url: string | null;
+  ats_platform: string | null;
+}
+
+export interface AiHtmlContainer {
+  selector: string | null;
+  type: 'id' | 'class' | 'data-attribute' | 'semantic' | null;
+  confidence: 'high' | 'medium' | 'low';
+  reason: string;
+  paginationButton: string | null;
+  paginationType: PaginationType | null;
+  paginationReason: string;
+}
+
+export interface AiCompanyParsed {
+  company: AiCompanyInfo;
+  container: AiHtmlContainer;
+}
+
+export interface AiParsedResult {
+  company?: AiCompanyInfo;
+  container?: AiHtmlContainer;
+  jobs: AiJob[];
 }

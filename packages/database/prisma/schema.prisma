@@ -36,7 +36,7 @@ enum WorkMode {
 // CHECK -> suspected failure
 
 model User {
-  id               String    @id @default(uuid())
+  id               Int       @id @default(autoincrement())
   email            String    @unique
   username         String    @unique
   password         String
@@ -50,7 +50,7 @@ model User {
   updatedAt        DateTime  @updatedAt
   lastLoginAt      DateTime  @default(now())
 
-  createdById  String?
+  createdById  Int?
   createdBy    User?      @relation("UserCreatedBy", fields: [createdById], references: [id])
   createdUsers User[]     @relation("UserCreatedBy")
   auditLogs    AuditLog[]
@@ -65,7 +65,7 @@ enum JobStatus {
 
 // scrape status not needed?
 model Company {
-  id                     String       @id @default(uuid())
+  id                     Int          @id @default(autoincrement())
   name                   String
   logoUrl                String?
   websiteUrl             String
@@ -80,6 +80,7 @@ model Company {
   htmlSelectorConfidence String?
   paginationType         String?
   paginationBtn          String?
+  paginationReason       String?
   createdAt              DateTime     @default(now())
   updatedAt              DateTime     @updatedAt
 
@@ -90,8 +91,8 @@ model Company {
 }
 
 model Job {
-  id             String          @id @default(uuid())
-  companyId      String
+  id             Int             @id @default(autoincrement())
+  companyId      Int
   company        Company         @relation(fields: [companyId], references: [id])
   fingerprint    String          @unique
   title          String
@@ -129,8 +130,8 @@ enum SkillType {
 }
 
 model JobSkill {
-  id    String    @id @default(uuid())
-  jobId String
+  id    Int       @id @default(autoincrement())
+  jobId Int
   job   Job       @relation(fields: [jobId], references: [id])
   name  String
   type  SkillType
@@ -142,8 +143,8 @@ model JobSkill {
 }
 
 model JobKeyword {
-  id            String  @id @default(uuid())
-  jobId         String
+  id            Int     @id @default(autoincrement())
+  jobId         Int
   job           Job     @relation(fields: [jobId], references: [id])
   keyword       String
   editedByAdmin Boolean @default(false)
@@ -167,8 +168,8 @@ enum ScrapeLogStatus {
 }
 
 model ScrapeLog {
-  id           String           @id @default(uuid())
-  companyId    String
+  id           Int              @id @default(autoincrement())
+  companyId    Int
   company      Company          @relation(fields: [companyId], references: [id])
   triggeredBy  ScrapeLogTrigger
   jobsFound    Int              @default(0)
@@ -176,6 +177,7 @@ model ScrapeLog {
   errorMessage String?
   durationMs   Int              @default(0)
   htmlLength   Int?
+  type         String
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
   claudeLogs   ClaudeLog[]
@@ -186,9 +188,9 @@ model ScrapeLog {
 
 model ClaudeLog {
   id           String          @id
-  companyId    String
+  companyId    Int
   company      Company         @relation(fields: [companyId], references: [id])
-  scrapeLogId  String
+  scrapeLogId  Int
   scrapeLog    ScrapeLog       @relation(fields: [scrapeLogId], references: [id])
   batchId      String?
   batchLog     ClaudeBatchLog? @relation(fields: [batchId], references: [id])
@@ -209,6 +211,7 @@ model ClaudeBatchLog {
   id         String      @id
   status     String
   response   Json
+  type       String
   claudeLogs ClaudeLog[]
   jobs       Job[]
   companies  Company[]
@@ -220,7 +223,7 @@ model ClaudeBatchLog {
 }
 
 model AlertSubscription {
-  id        String   @id @default(uuid())
+  id        Int      @id @default(autoincrement())
   email     String
   criteria  Json
   confirmed Boolean  @default(false)
@@ -231,8 +234,8 @@ model AlertSubscription {
 }
 
 model AuditLog {
-  id         String   @id @default(uuid())
-  userId     String
+  id         Int      @id @default(autoincrement())
+  userId     Int
   user       User     @relation(fields: [userId], references: [id])
   userRole   UserRole
   action     String
@@ -264,7 +267,7 @@ enum InvoiceStatus {
 }
 
 model Advertiser {
-  id             String        @id @default(uuid())
+  id             Int           @id @default(autoincrement())
   name           String
   contactEmail   String
   packageType    PackageType
@@ -296,7 +299,7 @@ enum SeoPageType {
 }
 
 model SeoPage {
-  id               String      @id @default(uuid())
+  id               Int         @id @default(autoincrement())
   pageType         SeoPageType
   slug             String      @unique
   roleId           String?
@@ -324,7 +327,7 @@ model SeoPage {
 }
 
 model SeoRole {
-  id   String @id @default(uuid())
+  id   Int    @id @default(autoincrement())
   name String
   slug String @unique
 
@@ -333,7 +336,7 @@ model SeoRole {
 }
 
 model SeoLocation {
-  id      String @id @default(uuid())
+  id      Int    @id @default(autoincrement())
   name    String
   slug    String @unique
   country String
@@ -343,7 +346,7 @@ model SeoLocation {
 }
 
 model SeoSkill {
-  id   String @id @default(uuid())
+  id   Int    @id @default(autoincrement())
   name String
   slug String @unique
 

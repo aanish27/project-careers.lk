@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import { createHash } from 'node:crypto';
+import { ScrapeType } from '../utils/enum';
 
 // return hash, stripped content, length
 export class HashService {
@@ -11,12 +12,11 @@ export class HashService {
     return createHash('md5').update(content).digest('hex');
   }
 
-  static strip(htmlContent: string, isFirstScrape: boolean) {
+  static strip(htmlContent: string, type: ScrapeType) {
     const $ = cheerio.load(htmlContent);
-
     let companyMeta = '';
 
-    if (isFirstScrape) {
+    if (type == ScrapeType.COMPANY) {
       // Extract company metadata before stripping
       const metaParts: string[] = [];
 
@@ -55,7 +55,7 @@ export class HashService {
       })
       .remove();
 
-    if (!isFirstScrape) {
+    if (type == ScrapeType.JOBS) {
       // remove all the attributes except href
       const keepAttrs = new Set(['href']);
       $('*').each((_, el) => {
@@ -107,7 +107,7 @@ export class HashService {
 
     const cleanedJobs = $.html().replace(/\s+/g, ' ').trim();
 
-    return isFirstScrape
+    return type == ScrapeType.COMPANY
       ? `COMPANY METADATA:\n${companyMeta}\n\nJOBS CONTENT:\n${cleanedJobs}`
       : cleanedJobs;
   }

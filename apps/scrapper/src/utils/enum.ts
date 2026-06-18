@@ -23,3 +23,10 @@ export const AIProvider = {
 } as const;
 
 export type AIProvider = (typeof AIProvider)[keyof typeof AIProvider];
+
+export const ScrapeType = {
+  COMPANY: 'company',
+  JOBS: 'jobs',
+} as const;
+
+export type ScrapeType = (typeof ScrapeType)[keyof typeof ScrapeType];

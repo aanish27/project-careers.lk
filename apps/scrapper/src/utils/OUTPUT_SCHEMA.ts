@@ -1,4 +1,66 @@
-export const CONFIG_1 = {
+export const CLAUDE_SCHEMA_COMPANY = {
+  format: {
+    type: 'json_schema',
+    schema: {
+      type: 'object',
+      properties: {
+        company: {
+          type: 'object',
+          properties: {
+            name: { type: ['string', 'null'] },
+            website_url: { type: ['string', 'null'] },
+            logo_url: { type: ['string', 'null'] },
+            ats_platform: { type: ['string', 'null'] },
+          },
+          required: ['name', 'website_url', 'logo_url', 'ats_platform'],
+          additionalProperties: false,
+        },
+        container: {
+          type: 'object',
+          properties: {
+            selector: { type: ['string', 'null'] },
+            type: {
+              anyOf: [
+                {
+                  type: 'string',
+                  enum: ['id', 'class', 'data-attribute', 'semantic'],
+                },
+                { type: 'null' },
+              ],
+            },
+            confidence: {
+              type: 'string',
+              enum: ['high', 'medium', 'low'],
+            },
+            reason: { type: 'string' },
+            paginationButton: { type: ['string', 'null'] },
+            paginationType: {
+              anyOf: [
+                {
+                  type: 'string',
+                  enum: [
+                    'infinite_scrolling',
+                    'load_more_button',
+                    'next_button',
+                    'pagination_numbers',
+                  ],
+                },
+                { type: 'null' },
+              ],
+            },
+            paginationReason: { type: 'string' },
+          },
+          required: ['selector', 'type', 'confidence', 'reason'],
+          additionalProperties: false,
+        },
+      },
+      required: ['company', 'container'],
+      additionalProperties: false,
+    },
+  },
+} as const;
+
+export const CLAUDE_SCHEMA_COMPANY_JOBS = {
   format: {
     type: 'json_schema',
     schema: {
@@ -60,13 +122,8 @@ export const CONFIG_1 = {
               title: { type: 'string' },
               location: { type: ['string', 'null'] },
               work_mode: {
-                anyOf: [
-                  {
-                    type: 'string',
-                    enum: ['hybrid', 'remote', 'onsite'],
-                  },
-                  { type: 'null' },
-                ],
+                type: 'string',
+                enum: ['hybrid', 'remote', 'onsite'],
               },
               employment_type: {
                 anyOf: [
@@ -110,7 +167,7 @@ export const CONFIG_1 = {
               },
               department: { type: ['string', 'null'] },
               description: { type: ['string', 'null'] },
-              apply_url: { type: ['string', 'null'] },
+              apply_url: { type: 'string' },
               keywords: {
                 type: 'array',
                 items: { type: 'string' },
@@ -137,7 +194,7 @@ export const CONFIG_1 = {
   },
 } as const;
 
-export const CONFIG_2 = {
+export const CLAUDE_SCHEMA_JOBS = {
   format: {
     type: 'json_schema',
     schema: {
@@ -151,13 +208,8 @@ export const CONFIG_2 = {
               title: { type: 'string' },
               location: { type: ['string', 'null'] },
               work_mode: {
-                anyOf: [
-                  {
-                    type: 'string',
-                    enum: ['hybrid', 'remote', 'onsite'],
-                  },
-                  { type: 'null' },
-                ],
+                type: 'string',
+                enum: ['hybrid', 'remote', 'onsite'],
               },
               employment_type: {
                 anyOf: [
@@ -201,7 +253,7 @@ export const CONFIG_2 = {
               },
               department: { type: ['string', 'null'] },
               description: { type: ['string', 'null'] },
-              apply_url: { type: ['string', 'null'] },
+              apply_url: { type: 'string' },
               keywords: {
                 type: 'array',
                 items: { type: 'string' },

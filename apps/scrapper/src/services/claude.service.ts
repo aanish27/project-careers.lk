@@ -1,60 +1,221 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Prisma, ScrapeLogStatus, ScrapeStatus } from '@careerslk/database';
 import { prisma } from '..';
-import { CONFIG_1, CONFIG_2 } from '../utils/OUTPUT_CONFIGS';
-import {
-  PROMPT_1_SYSTEM,
-  PROMPT_1_USER,
-  PROMPT_2_SYSTEM,
-  PROMPT_2_USER,
-} from '../utils/SYSTEM_PROMPTS';
 
-import { ClaudeBatchStatus } from '../utils/enum';
-import { ClaudeParsedResult } from '../utils/types';
+import { ClaudeBatchStatus, ScrapeType } from '../utils/enum';
+import {
+  CLAUDE_SCHEMA_COMPANY,
+  CLAUDE_SCHEMA_JOBS,
+} from '../utils/OUTPUT_SCHEMA';
+import {
+  SYSTEM_PROMPT_COMPANY,
+  SYSTEM_PROMPT_JOBS,
+  USER_PROMPT_COMPANY,
+  USER_PROMPT_JOBS,
+} from '../utils/PROMPTS';
+import { AiCompanyParsed, AiJob } from '../utils/types';
 import { HashService } from './hash.service';
 import { ClaudeBatchContent } from './scrape.service';
 
-const anthropic = new Anthropic();
+const anthropic = new Anthropic({
+  apiKey: process.env.CLAUDE_API_KEY,
+  baseURL: process.env.CLAUDE_BASE_URL,
+});
 
 export class ClaudeService {
-  static async singleCall(content: string, isFirstRun: boolean) {
-    const msg = await anthropic.messages.create({
+  static async callModel(content: string, type: ScrapeType, careerUrl: string) {
+    return anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 4000,
       system: [
         {
           type: 'text',
-          text: isFirstRun ? PROMPT_1_SYSTEM : PROMPT_2_SYSTEM,
+          text:
+            type == ScrapeType.COMPANY
+              ? SYSTEM_PROMPT_COMPANY
+              : SYSTEM_PROMPT_JOBS,
           cache_control: { type: 'ephemeral' },
         },
       ],
       messages: [
         {
           role: 'user',
-          content: isFirstRun ? PROMPT_1_USER(content) : PROMPT_2_USER(content),
+          content:
+            type == ScrapeType.COMPANY
+              ? USER_PROMPT_COMPANY(content, careerUrl)
+              : USER_PROMPT_JOBS(content, careerUrl),
         },
       ],
-      output_config: isFirstRun ? CONFIG_1 : CONFIG_2,
+      output_config:
+        type == ScrapeType.COMPANY ? CLAUDE_SCHEMA_COMPANY : CLAUDE_SCHEMA_JOBS,
     });
-    console.log(msg);
-
-    return msg;
   }
 
-  static async batchCall(contents: ClaudeBatchContent[]) {
+  static async singleCall(
+    { companyId, html, scrapeLogId, careerUrl }: ClaudeBatchContent,
+    type: ScrapeType,
+  ) {
+    try {
+      const msg = await this.callModel(html, type, careerUrl);
+      let jobsCount = 0;
+
+      const scrapeLog = await prisma.scrapeLog.findFirstOrThrow({
+        where: { id: scrapeLogId },
+      });
+
+      for (const element of msg.content) {
+        if (element.type === 'text') {
+          let parsed;
+
+          try {
+            parsed = JSON.parse(element.text);
+          } catch (err) {
+            console.error(
+              `Failed to parse Claude response for ${companyId}:`,
+              err,
+            );
+            await prisma.company.update({
+              where: { id: companyId },
+              data: {
+                scrapeStatus: ScrapeStatus.ERROR,
+                scrapeLogs: {
+                  update: {
+                    where: { id: scrapeLog.id },
+                    data: {
+                      status: ScrapeLogStatus.ERROR,
+                      jobsFound: jobsCount,
+                      durationMs: Date.now() - scrapeLog.createdAt.getTime(),
+                      errorMessage:
+                        err instanceof Error
+                          ? `Invalid JSON: ${err.message}`
+                          : 'Invalid JSON in Claude response',
+                    },
+                  },
+                },
+              },
+            });
+            continue;
+          }
+
+          if (type == ScrapeType.COMPANY) {
+            const { company, container }: AiCompanyParsed = parsed;
+
+            await prisma.company.update({
+              where: { id: companyId },
+              data: {
+                logoUrl: company?.logo_url,
+                atsPlatform: company?.ats_platform,
+                htmlSelector: container?.selector,
+                htmlSelectorReason: container?.reason,
+                htmlSelectorType: container?.type,
+                htmlSelectorConfidence: container?.confidence,
+                paginationBtn: container?.paginationButton,
+                paginationType: container?.paginationType,
+                paginationReason: container?.paginationReason,
+              },
+            });
+          } else {
+            const jobs: AiJob[] = parsed.jobs;
+
+            if (jobs.length > 0) {
+              for (const job of jobs) {
+                const fingerprint = HashService.hash(
+                  `${companyId} + ${job.title} + ${job.location} + ${job.employment_type} + ${job.department} + ${job.work_mode} + ${job.role_category} + ${job.apply_url}`,
+                );
+
+                await prisma.job.upsert({
+                  where: { fingerprint: fingerprint },
+                  update: { lastSeenAt: new Date() },
+                  create: {
+                    title: job.title,
+                    applyUrl: job.apply_url,
+                    description: job.description,
+                    department: job.department,
+                    roleCategory: job.role_category,
+                    workMode: job.work_mode,
+                    location: job.location,
+                    employmentType: job.employment_type,
+                    company: { connect: { id: companyId } },
+                    lastSeenAt: new Date(),
+                    fingerprint: fingerprint,
+                    keywords: {
+                      createMany: {
+                        data: job.keywords.map((keyword) => ({ keyword })),
+                      },
+                    },
+                  },
+                });
+
+                jobsCount++;
+              }
+            }
+          }
+        }
+      }
+
+      await prisma.company.update({
+        where: { id: companyId },
+        data: {
+          scrapeStatus: ScrapeStatus.EMPTY,
+          scrapeLogs: {
+            update: {
+              where: { id: scrapeLog.id },
+              data: {
+                status: ScrapeLogStatus.SUCCESS,
+                jobsFound: jobsCount,
+                durationMs: Date.now() - scrapeLog.createdAt.getTime(),
+              },
+            },
+          },
+          claudeLogs: {
+            create: {
+              id: msg.id,
+              status: 'succeeded',
+              scrapeLogId: scrapeLog.id,
+              stopReason: msg.stop_reason,
+              inputTokens: msg.usage.input_tokens,
+              outputTokens: msg.usage.output_tokens,
+              model: msg.model,
+            },
+          },
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        await prisma.company.update({
+          where: { id: companyId },
+          data: {
+            scrapeStatus: ScrapeStatus.ERROR,
+            scrapeLogs: {
+              update: {
+                where: { id: scrapeLogId },
+                data: {
+                  status: ScrapeLogStatus.ERROR,
+                  errorMessage: error.message,
+                },
+              },
+            },
+          },
+        });
+      }
+    }
+  }
+
+  static async batchCall(contents: ClaudeBatchContent[], type: ScrapeType) {
     try {
       const msg = await anthropic.messages.batches.create({
         requests: [
           ...contents.map((content) => ({
-            custom_id: content.companyId,
+            custom_id: content.companyId.toString(),
             params: {
               model: 'claude-haiku-4-5-20251001',
               system: [
                 {
                   type: 'text' as const,
-                  text: content.htmlSelector
-                    ? PROMPT_2_SYSTEM
-                    : PROMPT_1_SYSTEM,
+                  text:
+                    type == ScrapeType.COMPANY
+                      ? SYSTEM_PROMPT_COMPANY
+                      : SYSTEM_PROMPT_JOBS,
                   cache_control: { type: 'ephemeral' as const },
                 },
               ],
@@ -62,12 +223,16 @@ export class ClaudeService {
               messages: [
                 {
                   role: 'user' as const,
-                  content: content.htmlSelector
-                    ? PROMPT_2_USER(content.html)
-                    : PROMPT_1_USER(content.html),
+                  content:
+                    type == ScrapeType.COMPANY
+                      ? USER_PROMPT_COMPANY(content.html, content.careerUrl)
+                      : USER_PROMPT_JOBS(content.html, content.careerUrl),
                 },
               ],
-              output_config: content.htmlSelector ? CONFIG_2 : CONFIG_1,
+              output_config:
+                type == ScrapeType.COMPANY
+                  ? CLAUDE_SCHEMA_COMPANY
+                  : CLAUDE_SCHEMA_JOBS,
             },
           })),
         ],
@@ -77,6 +242,7 @@ export class ClaudeService {
         data: {
           id: msg.id,
           status: msg.processing_status,
+          type: type,
           response: msg as unknown as Prisma.InputJsonValue,
           companies: {
             connect: contents.map((content) => ({ id: content.companyId })),
@@ -84,7 +250,7 @@ export class ClaudeService {
         },
       });
 
-      await this.processBatch(msg.id, msg.processing_status);
+      await this.processBatch(msg.id, msg.processing_status, type);
       console.log(msg);
 
       return msg;
@@ -93,10 +259,16 @@ export class ClaudeService {
     }
   }
 
-  static async processBatch(batchId: string, status: ClaudeBatchStatus) {
+  static async processBatch(
+    batchId: string,
+    status: ClaudeBatchStatus,
+    type: ScrapeType,
+  ) {
     if (status == ClaudeBatchStatus.IN_PROGRESS) {
       let messageBatch;
-      while (true) {
+      let retry = 0;
+      let ended = false;
+      while (retry < 5) {
         messageBatch = await anthropic.messages.batches.retrieve(batchId);
         if (messageBatch.processing_status === ClaudeBatchStatus.ENDED) {
           await prisma.claudeBatchLog.update({
@@ -106,11 +278,18 @@ export class ClaudeService {
               response: messageBatch as unknown as Prisma.InputJsonValue,
             },
           });
+          ended = true;
           break;
         }
-
+        retry++;
         console.log(`Batch ${batchId} is still processing... waiting`);
-        await new Promise((resolve) => setTimeout(resolve, 60_000));
+        await new Promise((resolve) => setTimeout(resolve, 120_000));
+      }
+
+      if (!ended) {
+        throw new Error(
+          `Batch ${batchId} did not finish after ${retry} retries`,
+        );
       }
     }
 
@@ -118,7 +297,7 @@ export class ClaudeService {
       batchId,
     )) {
       let jobsCount = 0;
-      const { custom_id: companyId } = result;
+      const companyId = Number(result.custom_id);
       const scrapeLog = await prisma.scrapeLog.findFirstOrThrow({
         orderBy: { createdAt: 'desc' },
         where: { companyId: companyId },
@@ -130,7 +309,7 @@ export class ClaudeService {
 
           for (const element of result.result.message.content) {
             if (element.type === 'text') {
-              let parsed: ClaudeParsedResult;
+              let parsed;
               try {
                 parsed = JSON.parse(element.text);
               } catch (err) {
@@ -162,52 +341,56 @@ export class ClaudeService {
                 continue resultsLoop;
               }
 
-              const { company, container, jobs } = parsed;
+              if (type == ScrapeType.COMPANY) {
+                const { company, container }: AiCompanyParsed = parsed;
 
-              if (company || container) {
                 await prisma.company.update({
                   where: { id: companyId },
                   data: {
                     logoUrl: company?.logo_url,
+                    atsPlatform: company?.ats_platform,
                     htmlSelector: container?.selector,
                     htmlSelectorReason: container?.reason,
                     htmlSelectorType: container?.type,
                     htmlSelectorConfidence: container?.confidence,
+                    paginationBtn: container?.paginationButton,
+                    paginationType: container?.paginationType,
+                    paginationReason: container?.paginationReason,
                   },
                 });
-              }
+              } else {
+                const jobs: AiJob[] = parsed.jobs;
+                if (jobs.length > 0) {
+                  for (const job of jobs) {
+                    const fingerprint = HashService.hash(
+                      `${companyId} + ${job.title} + ${job.location} + ${job.employment_type} + ${job.department} + ${job.work_mode} + ${job.role_category} + ${job.apply_url}`,
+                    );
 
-              if (jobs.length > 0) {
-                for (const job of jobs) {
-                  const fingerprint = HashService.hash(
-                    `${companyId} + ${job.title} + ${job.location} + ${job.employment_type} + ${job.department} + ${job.work_mode} + ${job.role_category}`,
-                  );
-
-                  await prisma.job.upsert({
-                    where: { fingerprint: fingerprint },
-                    update: { lastSeenAt: new Date() },
-                    create: {
-                      title: job.title,
-                      applyUrl: job.apply_url,
-                      description: job.description,
-                      department: job.department,
-                      roleCategory: job.role_category,
-                      workMode: job.work_mode,
-                      location: job.location,
-                      employmentType: job.employment_type,
-                      company: { connect: { id: companyId } },
-                      batch: { connect: { id: batchId } },
-                      lastSeenAt: new Date(),
-                      fingerprint: fingerprint,
-                      keywords: {
-                        createMany: {
-                          data: job.keywords.map((keyword) => ({ keyword })),
+                    await prisma.job.upsert({
+                      where: { fingerprint: fingerprint },
+                      update: { lastSeenAt: new Date() },
+                      create: {
+                        title: job.title,
+                        applyUrl: job.apply_url,
+                        description: job.description,
+                        department: job.department,
+                        roleCategory: job.role_category,
+                        workMode: job.work_mode,
+                        location: job.location,
+                        employmentType: job.employment_type,
+                        company: { connect: { id: companyId } },
+                        lastSeenAt: new Date(),
+                        fingerprint: fingerprint,
+                        keywords: {
+                          createMany: {
+                            data: job.keywords.map((keyword) => ({ keyword })),
+                          },
                         },
                       },
-                    },
-                  });
+                    });
 
-                  jobsCount++;
+                    jobsCount++;
+                  }
                 }
               }
             }
