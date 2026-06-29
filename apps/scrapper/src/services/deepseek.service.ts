@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { ScrapeLogStatus, ScrapeStatus } from '@careerslk/database';
-import { prisma } from '..';
+import { prisma } from '../utils/prisma';
 import {
   SYSTEM_PROMPT_COMPANY,
   SYSTEM_PROMPT_JOBS,
@@ -114,7 +114,7 @@ export class DeepSeekService {
             if (jobs.length > 0) {
               for (const job of jobs) {
                 const fingerprint = HashService.hash(
-                  `${companyId} + ${job.title} + ${job.location} + ${job.employment_type} + ${job.department} + ${job.work_mode} + ${job.role_category} + ${job.apply_url}`,
+                  `${companyId} + ${job.title} + ${job.apply_url}`,
                 );
 
                 await prisma.job.upsert({

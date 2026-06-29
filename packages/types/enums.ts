@@ -55,3 +55,10 @@ export enum ScrapeTriggeredBy {
   SCHEDULED = 'scheduled',
   MANUAL = 'manual',
 }
+
+export const ScrapeType = {
+  COMPANY: 'company',
+  JOBS: 'jobs',
+} as const;
+
+export type ScrapeType = (typeof ScrapeType)[keyof typeof ScrapeType];

@@ -6,7 +6,7 @@ import {
 } from '@careerslk/database';
 import { randomInt } from 'node:crypto';
 import { Browser, chromium, devices } from 'playwright';
-import { prisma } from '..';
+import { prisma } from '../utils/prisma';
 import { AIProvider, PaginationType, ScrapeType } from '../utils/enum';
 import { ClaudeService } from './claude.service';
 import { DeepSeekService } from './deepseek.service';

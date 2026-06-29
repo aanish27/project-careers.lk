@@ -13,6 +13,13 @@ export const envValidationSchema = Joi.object({
   // Database
   DATABASE_URL: Joi.string().required(),
 
+  // Redis / Queue
+  REDIS_URL: Joi.string().required(),
+
+  // Scraper schedule (fall back to '0 2 * * *' / 'Asia/Colombo' in code)
+  SCRAPE_CRON: Joi.string().optional(),
+  SCRAPE_TZ: Joi.string().optional(),
+
   // JWT
   JWT_SECRET: Joi.string().min(32).required(),
   JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.string().default('15m'),

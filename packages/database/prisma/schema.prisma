@@ -63,9 +63,14 @@ enum JobStatus {
   EXPIRED
 }
 
+enum CompanyStatus {
+  ACTIVE
+  INACTIVE
+}
+
 // scrape status not needed?
 model Company {
-  id                     Int          @id @default(autoincrement())
+  id                     Int           @id @default(autoincrement())
   name                   String
   logoUrl                String?
   websiteUrl             String
@@ -73,7 +78,8 @@ model Company {
   atsPlatform            String?
   pageHash               String?
   lastScrapedAt          DateTime?
-  scrapeStatus           ScrapeStatus @default(EMPTY)
+  status                 CompanyStatus @default(ACTIVE)
+  scrapeStatus           ScrapeStatus  @default(EMPTY)
   htmlSelector           String?
   htmlSelectorType       String?
   htmlSelectorReason     String?
@@ -81,8 +87,8 @@ model Company {
   paginationType         String?
   paginationBtn          String?
   paginationReason       String?
-  createdAt              DateTime     @default(now())
-  updatedAt              DateTime     @updatedAt
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
 
   jobs            Job[]
   scrapeLogs      ScrapeLog[]

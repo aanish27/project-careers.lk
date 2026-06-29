@@ -1,17 +1,19 @@
-import { Module } from '@nestjs/common';
-import { UsersModule } from '@/modules/users/users.module';
-import { ConfigModule } from '@nestjs/config';
 import configuration from '@/config';
 import { envValidationSchema } from '@/config/env.validation';
 import { DatabaseModule } from '@/database/database.module';
 import { AuthModule } from '@/modules/auth/auth.module';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { StorageModule } from './shared/storage/storage.module';
+import { ScraperModule } from '@/modules/scraper/scraper.module';
+import { UsersModule } from '@/modules/users/users.module';
+import { BullModule } from '@nestjs/bullmq';
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import IORedis from 'ioredis';
 import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerGuard } from '@nestjs/throttler';
-import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { StorageModule } from './shared/storage/storage.module';
 
 @Module({
   imports: [
@@ -32,10 +34,19 @@ import { AppService } from './app.service';
         },
       ],
     }),
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        connection: new IORedis(config.getOrThrow<string>('REDIS_URL'), {
+          maxRetriesPerRequest: null,
+        }),
+      }),
+    }),
     DatabaseModule,
     UsersModule,
     AuthModule,
     StorageModule,
+    ScraperModule,
   ],
   controllers: [AppController],
   providers: [

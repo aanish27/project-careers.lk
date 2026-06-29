@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Prisma, ScrapeLogStatus, ScrapeStatus } from '@careerslk/database';
-import { prisma } from '..';
+import { prisma } from '../utils/prisma';
 
 import { ClaudeBatchStatus, ScrapeType } from '../utils/enum';
 import {
