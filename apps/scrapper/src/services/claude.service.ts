@@ -1,5 +1,12 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Prisma, ScrapeLogStatus, ScrapeStatus } from '@careerslk/database';
+import {
+  BATCH_POLL_DELAY_MS,
+  BATCH_POLL_MAX_ATTEMPTS,
+  BatchPollJobData,
+  SCRAPER_BATCH_POLL_QUEUE,
+} from '@careerslk/types';
+import { Queue } from 'bullmq';
 import { prisma } from '../utils/prisma';
 
 import { ClaudeBatchStatus, ScrapeType } from '../utils/enum';
@@ -14,12 +21,18 @@ import {
   USER_PROMPT_JOBS,
 } from '../utils/PROMPTS';
 import { AiCompanyParsed, AiJob } from '../utils/types';
-import { HashService } from './hash.service';
+import { connection } from '../utils/redis';
+import { upsertJobs } from './job.service';
 import { ClaudeBatchContent } from './scrape.service';
 
 const anthropic = new Anthropic({
   apiKey: process.env.CLAUDE_API_KEY,
   baseURL: process.env.CLAUDE_BASE_URL,
+});
+
+const batchPollQueue = new Queue<BatchPollJobData>(SCRAPER_BATCH_POLL_QUEUE, {
+  connection,
+  defaultJobOptions: { removeOnComplete: true, removeOnFail: 100 },
 });
 
 export class ClaudeService {
@@ -55,6 +68,7 @@ export class ClaudeService {
     { companyId, html, scrapeLogId, careerUrl }: ClaudeBatchContent,
     type: ScrapeType,
   ) {
+    const startedAt = Date.now();
     try {
       const msg = await this.callModel(html, type, careerUrl);
       let jobsCount = 0;
@@ -116,39 +130,7 @@ export class ClaudeService {
             });
           } else {
             const jobs: AiJob[] = parsed.jobs;
-
-            if (jobs.length > 0) {
-              for (const job of jobs) {
-                const fingerprint = HashService.hash(
-                  `${companyId} + ${job.title} + ${job.location} + ${job.employment_type} + ${job.department} + ${job.work_mode} + ${job.role_category} + ${job.apply_url}`,
-                );
-
-                await prisma.job.upsert({
-                  where: { fingerprint: fingerprint },
-                  update: { lastSeenAt: new Date() },
-                  create: {
-                    title: job.title,
-                    applyUrl: job.apply_url,
-                    description: job.description,
-                    department: job.department,
-                    roleCategory: job.role_category,
-                    workMode: job.work_mode,
-                    location: job.location,
-                    employmentType: job.employment_type,
-                    company: { connect: { id: companyId } },
-                    lastSeenAt: new Date(),
-                    fingerprint: fingerprint,
-                    keywords: {
-                      createMany: {
-                        data: job.keywords.map((keyword) => ({ keyword })),
-                      },
-                    },
-                  },
-                });
-
-                jobsCount++;
-              }
-            }
+            jobsCount = await upsertJobs(companyId, jobs);
           }
         }
       }
@@ -191,6 +173,7 @@ export class ClaudeService {
                 where: { id: scrapeLogId },
                 data: {
                   status: ScrapeLogStatus.ERROR,
+                  durationMs: Date.now() - startedAt,
                   errorMessage: error.message,
                 },
               },
@@ -250,8 +233,15 @@ export class ClaudeService {
         },
       });
 
-      await this.processBatch(msg.id, msg.processing_status, type);
-      console.log(msg);
+      await batchPollQueue.add(
+        'poll',
+        { batchId: msg.id, type },
+        {
+          delay: BATCH_POLL_DELAY_MS,
+          attempts: BATCH_POLL_MAX_ATTEMPTS,
+          backoff: { type: 'fixed', delay: BATCH_POLL_DELAY_MS },
+        },
+      );
 
       return msg;
     } catch (error) {
@@ -259,39 +249,22 @@ export class ClaudeService {
     }
   }
 
-  static async processBatch(
-    batchId: string,
-    status: ClaudeBatchStatus,
-    type: ScrapeType,
-  ) {
-    if (status == ClaudeBatchStatus.IN_PROGRESS) {
-      let messageBatch;
-      let retry = 0;
-      let ended = false;
-      while (retry < 5) {
-        messageBatch = await anthropic.messages.batches.retrieve(batchId);
-        if (messageBatch.processing_status === ClaudeBatchStatus.ENDED) {
-          await prisma.claudeBatchLog.update({
-            where: { id: batchId },
-            data: {
-              status: messageBatch.processing_status,
-              response: messageBatch as unknown as Prisma.InputJsonValue,
-            },
-          });
-          ended = true;
-          break;
-        }
-        retry++;
-        console.log(`Batch ${batchId} is still processing... waiting`);
-        await new Promise((resolve) => setTimeout(resolve, 120_000));
-      }
+  static async processBatch(batchId: string, type: ScrapeType) {
+    const messageBatch = await anthropic.messages.batches.retrieve(batchId);
 
-      if (!ended) {
-        throw new Error(
-          `Batch ${batchId} did not finish after ${retry} retries`,
-        );
-      }
+    if (messageBatch.processing_status !== ClaudeBatchStatus.ENDED) {
+      throw new Error(
+        `Batch ${batchId} is still ${messageBatch.processing_status}`,
+      );
     }
+
+    await prisma.claudeBatchLog.update({
+      where: { id: batchId },
+      data: {
+        status: messageBatch.processing_status,
+        response: messageBatch as unknown as Prisma.InputJsonValue,
+      },
+    });
 
     resultsLoop: for await (const result of await anthropic.messages.batches.results(
       batchId,
@@ -360,38 +333,7 @@ export class ClaudeService {
                 });
               } else {
                 const jobs: AiJob[] = parsed.jobs;
-                if (jobs.length > 0) {
-                  for (const job of jobs) {
-                    const fingerprint = HashService.hash(
-                      `${companyId} + ${job.title} + ${job.location} + ${job.employment_type} + ${job.department} + ${job.work_mode} + ${job.role_category} + ${job.apply_url}`,
-                    );
-
-                    await prisma.job.upsert({
-                      where: { fingerprint: fingerprint },
-                      update: { lastSeenAt: new Date() },
-                      create: {
-                        title: job.title,
-                        applyUrl: job.apply_url,
-                        description: job.description,
-                        department: job.department,
-                        roleCategory: job.role_category,
-                        workMode: job.work_mode,
-                        location: job.location,
-                        employmentType: job.employment_type,
-                        company: { connect: { id: companyId } },
-                        lastSeenAt: new Date(),
-                        fingerprint: fingerprint,
-                        keywords: {
-                          createMany: {
-                            data: job.keywords.map((keyword) => ({ keyword })),
-                          },
-                        },
-                      },
-                    });
-
-                    jobsCount++;
-                  }
-                }
+                jobsCount = await upsertJobs(companyId, jobs);
               }
             }
           }

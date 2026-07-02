@@ -4,8 +4,8 @@ import { ScrapeType } from '../utils/enum';
 
 // return hash, stripped content, length
 export class HashService {
-  static compareHash(storedContent: string, hashedContent: string) {
-    return this.hash(storedContent) === hashedContent;
+  static compareHash(newContent: string, storedHash: string) {
+    return this.hash(newContent) === storedHash;
   }
 
   static hash(content: string) {

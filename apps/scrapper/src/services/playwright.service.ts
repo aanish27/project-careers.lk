@@ -1,6 +1,7 @@
 import { randomInt } from 'node:crypto';
 import { Browser, devices } from 'playwright';
 import { PaginationType } from '../utils/enum';
+import { assertNotSsrf } from '../utils/ssrf';
 import { HashService } from './hash.service';
 
 // https://scrape.do/blog/web-scraping-with-playwright/ check this out after complete implementation
@@ -12,7 +13,7 @@ export async function fetchPage(
   paginationBtn: string | null,
   selector?: string | null,
 ) {
-  // implement ssrf check
+  await assertNotSsrf(url);
 
   const timeOut = randomInt(100000, 150000);
   const context = await browser.newContext(devices['Desktop Chrome']);
@@ -70,6 +71,36 @@ export async function fetchPage(
       }
 
       element = await page.locator(`${selector}`).first().innerHTML();
+    } else if (
+      selector &&
+      paginationType === PaginationType.PAGINATION_NUMBERS
+    ) {
+      element = await page.locator(`${selector}`).first().innerHTML();
+      let prevHash = HashService.hash(element);
+
+      while (true) {
+        try {
+          const nextBtn = page.locator(`${paginationBtn}`);
+          if ((await nextBtn.isDisabled()) || (await nextBtn.isHidden())) break;
+
+          await nextBtn.click({ timeout: 100000 });
+          // waitForLoadState handles both traditional page navigation and SPA DOM updates
+          await page
+            .waitForLoadState('domcontentloaded', { timeout: 30000 })
+            .catch(() => {});
+
+          const html = await page.locator(`${selector}`).first().innerHTML();
+          const currentHash = HashService.hash(html);
+
+          if (currentHash === prevHash) break;
+
+          prevHash = currentHash;
+          element += ` ${html}`;
+        } catch (e) {
+          console.log('An error occurred:', e);
+          break;
+        }
+      }
     } else if (selector) {
       let previousHeight;
       while (true) {

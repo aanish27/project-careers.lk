@@ -1,5 +1,13 @@
-import { CompanyStatus, JobStatus, ScrapeStatus } from '@careerslk/database';
 import {
+  CompanyStatus,
+  JobStatus,
+  ScrapeLogTrigger,
+  ScrapeStatus,
+} from '@careerslk/database';
+import {
+  BATCH_POLL_DELAY_MS,
+  BatchPollJobData,
+  SCRAPER_BATCH_POLL_QUEUE,
   SCRAPER_COMPANY_QUEUE,
   SCRAPER_JOB_QUEUE,
   SCRAPE_BACKOFF_MS,
@@ -7,6 +15,7 @@ import {
 } from '@careerslk/types';
 import { Worker, WorkerOptions } from 'bullmq';
 import { v4 as uuidv4 } from 'uuid';
+import { ClaudeService } from './services/claude.service';
 import { HashService } from './services/hash.service';
 import { ScrapeService } from './services/scrape.service';
 import { ScrapeType } from './utils/enum';
@@ -46,7 +55,11 @@ const companyWorker = new Worker<ScraperJobData>(
   SCRAPER_COMPANY_QUEUE,
   async (job) => {
     const contents = await resolveCompanies(job.data);
-    await ScrapeService.scrape(contents, ScrapeType.COMPANY);
+    await ScrapeService.scrape(
+      contents,
+      ScrapeType.COMPANY,
+      ScrapeLogTrigger.SCHEDULED,
+    );
   },
   workerOptions,
 );
@@ -55,7 +68,15 @@ const jobsWorker = new Worker<ScraperJobData>(
   SCRAPER_JOB_QUEUE,
   async (job) => {
     const contents = await resolveCompanies(job.data);
-    await ScrapeService.scrape(contents, ScrapeType.JOBS);
+    await ScrapeService.scrape(
+      contents,
+      ScrapeType.JOBS,
+      ScrapeLogTrigger.SCHEDULED,
+    );
+
+    const companyIds = Array.isArray(contents)
+      ? contents.map((c) => c.id)
+      : [contents.id];
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -64,6 +85,7 @@ const jobsWorker = new Worker<ScraperJobData>(
 
     await prisma.job.updateMany({
       where: {
+        companyId: { in: companyIds },
         company: {
           status: CompanyStatus.ACTIVE,
           scrapeStatus: ScrapeStatus.EMPTY,
@@ -80,7 +102,24 @@ const jobsWorker = new Worker<ScraperJobData>(
   workerOptions,
 );
 
-for (const worker of [companyWorker, jobsWorker]) {
+const batchPollWorker = new Worker<BatchPollJobData>(
+  SCRAPER_BATCH_POLL_QUEUE,
+  async (job) => {
+    await ClaudeService.processBatch(
+      job.data.batchId,
+      job.data.type as ScrapeType,
+    );
+  },
+  {
+    connection,
+    concurrency: 5,
+    settings: {
+      backoffStrategy: () => BATCH_POLL_DELAY_MS,
+    },
+  },
+);
+
+for (const worker of [companyWorker, jobsWorker, batchPollWorker]) {
   worker.on('completed', (job) =>
     console.log(`✅ [${worker.name}] queue job ${job.id} completed`),
   );
@@ -95,11 +134,16 @@ console.log(
   '🚀 Scraper workers ready:',
   SCRAPER_COMPANY_QUEUE,
   SCRAPER_JOB_QUEUE,
+  SCRAPER_BATCH_POLL_QUEUE,
 );
 
 // Graceful shutdown so in-flight jobs aren't dropped mid-scrape.
 async function shutdown() {
-  await Promise.all([companyWorker.close(), jobsWorker.close()]);
+  await Promise.all([
+    companyWorker.close(),
+    jobsWorker.close(),
+    batchPollWorker.close(),
+  ]);
   await prisma.$disconnect();
   await connection.quit();
   process.exit(0);

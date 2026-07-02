@@ -10,7 +10,7 @@ import {
 
 import { ScrapeType } from '../utils/enum';
 import { AiCompanyParsed, AiJob } from '../utils/types';
-import { HashService } from './hash.service';
+import { upsertJobs } from './job.service';
 import { ClaudeBatchContent } from './scrape.service';
 
 const anthropic = new Anthropic({
@@ -51,9 +51,9 @@ export class DeepSeekService {
     { companyId, html, scrapeLogId, careerUrl }: ClaudeBatchContent,
     type: ScrapeType,
   ) {
+    const startedAt = Date.now();
     try {
       const msg = await this.callModel(html, type, careerUrl);
-      console.log(companyId);
       let jobsCount = 0;
 
       const scrapeLog = await prisma.scrapeLog.findFirstOrThrow({
@@ -110,39 +110,7 @@ export class DeepSeekService {
             });
           } else {
             const jobs: AiJob[] = parsed;
-
-            if (jobs.length > 0) {
-              for (const job of jobs) {
-                const fingerprint = HashService.hash(
-                  `${companyId} + ${job.title} + ${job.apply_url}`,
-                );
-
-                await prisma.job.upsert({
-                  where: { fingerprint: fingerprint },
-                  update: { lastSeenAt: new Date() },
-                  create: {
-                    title: job.title,
-                    applyUrl: job.apply_url,
-                    description: job.description,
-                    department: job.department,
-                    roleCategory: job.role_category,
-                    workMode: job.work_mode,
-                    location: job.location,
-                    employmentType: job.employment_type,
-                    company: { connect: { id: companyId } },
-                    lastSeenAt: new Date(),
-                    fingerprint: fingerprint,
-                    keywords: {
-                      createMany: {
-                        data: job.keywords.map((keyword) => ({ keyword })),
-                      },
-                    },
-                  },
-                });
-
-                jobsCount++;
-              }
-            }
+            jobsCount = await upsertJobs(companyId, jobs);
           }
         }
       }
@@ -185,6 +153,7 @@ export class DeepSeekService {
                 where: { id: scrapeLogId },
                 data: {
                   status: ScrapeLogStatus.ERROR,
+                  durationMs: Date.now() - startedAt,
                   errorMessage: error.message,
                 },
               },
@@ -196,6 +165,8 @@ export class DeepSeekService {
   }
 
   static async batchCall(companies: ClaudeBatchContent[], type: ScrapeType) {
-    companies.forEach(async (company) => await this.singleCall(company, type));
+    await Promise.all(
+      companies.map((company) => this.singleCall(company, type)),
+    );
   }
 }
