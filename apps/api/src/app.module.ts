@@ -7,13 +7,14 @@ import { UsersModule } from '@/modules/users/users.module';
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import IORedis from 'ioredis';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, RouterModule } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import IORedis from 'ioredis';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { StorageModule } from './shared/storage/storage.module';
+import { CompaniesModule } from './companies/companies.module';
 
 @Module({
   imports: [
@@ -43,10 +44,28 @@ import { StorageModule } from './shared/storage/storage.module';
       }),
     }),
     DatabaseModule,
-    UsersModule,
     AuthModule,
     StorageModule,
-    ScraperModule,
+    RouterModule.register([
+      {
+        path: 'admin',
+        children: [
+          {
+            path: 'scraper',
+            module: ScraperModule,
+          },
+          {
+            path: 'users',
+            module: UsersModule,
+          },
+          {
+            path: 'companies',
+            module: UsersModule,
+          },
+        ],
+      },
+    ]),
+    CompaniesModule,
   ],
   controllers: [AppController],
   providers: [

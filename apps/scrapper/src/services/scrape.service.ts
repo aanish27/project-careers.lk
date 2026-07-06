@@ -5,7 +5,8 @@ import {
   ScrapeStatus,
 } from '@careerslk/database';
 import { Browser, chromium } from 'playwright';
-import { AIProvider, PaginationType, ScrapeType } from '../utils/enum';
+import { AIProvider, ScrapeType } from '../utils/enum';
+import { PaginationType } from '@careerslk/types';
 import { prisma } from '../utils/prisma';
 import { ClaudeService } from './claude.service';
 import { DeepSeekService } from './deepseek.service';

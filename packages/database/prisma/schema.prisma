@@ -73,7 +73,7 @@ model Company {
   id                     Int           @id @default(autoincrement())
   name                   String
   logoUrl                String?
-  websiteUrl             String
+  websiteUrl             String        @unique
   careerUrl              String
   atsPlatform            String?
   pageHash               String?

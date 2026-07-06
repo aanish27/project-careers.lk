@@ -7,16 +7,6 @@ export const ClaudeBatchStatus = {
 export type ClaudeBatchStatus =
   (typeof ClaudeBatchStatus)[keyof typeof ClaudeBatchStatus];
 
-export const PaginationType = {
-  INFINITE_SCROLLING: 'infinite_scrolling',
-  LOAD_MORE_BUTTON: 'load_more_button',
-  NEXT_BUTTON: 'next_button',
-  PAGINATION_NUMBERS: 'pagination_numbers',
-} as const;
-
-export type PaginationType =
-  (typeof PaginationType)[keyof typeof PaginationType];
-
 export const AIProvider = {
   DEEPSEEK: 'deepseek',
   CLAUDE: 'claude',

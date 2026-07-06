@@ -1,5 +1,4 @@
-import { PaginationType } from './enum';
-
+import { PaginationType } from '@careerslk/types';
 export interface AiJob {
   title: string;
   location: string | null;

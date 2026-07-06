@@ -1,7 +1,6 @@
+import { assertNotSsrf, PaginationType } from '@careerslk/types';
 import { randomInt } from 'node:crypto';
 import { Browser, devices } from 'playwright';
-import { PaginationType } from '../utils/enum';
-import { assertNotSsrf } from '../utils/ssrf';
 import { HashService } from './hash.service';
 
 // https://scrape.do/blog/web-scraping-with-playwright/ check this out after complete implementation

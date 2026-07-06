@@ -62,3 +62,13 @@ export const ScrapeType = {
 } as const;
 
 export type ScrapeType = (typeof ScrapeType)[keyof typeof ScrapeType];
+
+export const PaginationType = {
+  INFINITE_SCROLLING: 'infinite_scrolling',
+  LOAD_MORE_BUTTON: 'load_more_button',
+  NEXT_BUTTON: 'next_button',
+  PAGINATION_NUMBERS: 'pagination_numbers',
+} as const;
+
+export type PaginationType =
+  (typeof PaginationType)[keyof typeof PaginationType];

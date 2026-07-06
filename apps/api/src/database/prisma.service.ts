@@ -19,5 +19,6 @@ export class PrismaService extends PrismaClient {
       log: ['info', 'warn', 'error'],
       omit: { user: { password: true } },
     });
+    // this.$extends();
   }
 }
