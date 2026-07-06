@@ -5,8 +5,8 @@ import { UserRole } from '@careerslk/database';
 @Exclude()
 export class UserResponseDto {
   @Expose()
-  @ApiProperty({ description: 'User unique identifier', example: 'uuid-456' })
-  id: string;
+  @ApiProperty({ description: 'User unique identifier', example: 1 })
+  id: number;
 
   @Expose()
   @ApiProperty({

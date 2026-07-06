@@ -162,7 +162,7 @@ export class AuthService {
     return this.excludePassword(user);
   }
 
-  async logout(userId: string): Promise<void> {
+  async logout(userId: number): Promise<void> {
     await this.usersService.clearRefreshTokenHash(userId);
   }
 }

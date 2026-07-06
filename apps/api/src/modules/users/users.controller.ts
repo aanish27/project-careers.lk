@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Query,
   UseGuards,
   NotFoundException,
@@ -87,9 +88,9 @@ export class UsersController {
   })
   @ApiParam({
     name: 'id',
-    type: String,
+    type: Number,
     description: 'User unique identifier',
-    example: 'uuid-123',
+    example: 1,
   })
   @ApiResponse({
     status: 200,
@@ -105,7 +106,9 @@ export class UsersController {
   @ApiForbiddenResponse({
     description: 'User does not have ADMIN role',
   })
-  async findOne(@Param('id') id: string): Promise<UserResponseDto> {
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<UserResponseDto> {
     const user = await this.usersService.getFindById(id);
     if (!user) throw new NotFoundException('Not found user');
     const result = plainToInstance(UserResponseDto, user, {

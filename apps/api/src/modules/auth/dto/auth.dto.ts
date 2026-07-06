@@ -93,8 +93,8 @@ export class RegisterDto {
 }
 
 export class UserDataDto {
-  @ApiProperty({ description: 'User unique identifier', example: 'uuid-123' })
-  id: string;
+  @ApiProperty({ description: 'User unique identifier', example: 1 })
+  id: number;
 
   @ApiProperty({ description: 'User email', example: 'john.doe@example.com' })
   email: string;

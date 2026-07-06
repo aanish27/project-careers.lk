@@ -54,10 +54,10 @@ Services should return data matching the `PaginationResult<T>` interface:
 
 ```typescript
 interface PaginationResult<T> {
-  items: T[];      // Array of items for current page
-  page: number;    // Current page number (1-indexed)
-  limit: number;   // Items per page
-  total: number;   // Total count of all items
+  items: T[]; // Array of items for current page
+  page: number; // Current page number (1-indexed)
+  limit: number; // Items per page
+  total: number; // Total count of all items
 }
 ```
 
@@ -68,19 +68,19 @@ The Transform Interceptor automatically converts the service response into:
 ```typescript
 interface ApiResponse<T> {
   success: boolean;
-  data: T[];  // The items array
+  data: T[]; // The items array
   meta: {
     statusCode: number;
     timestamp: string;
     path: string;
     requestId: string;
     pagination: {
-      page: number;        // Current page number
-      limit: number;       // Items per page
-      total: number;       // Total count of items
-      totalPages: number;  // Calculated: Math.ceil(total / limit)
-      hasNext: boolean;    // Calculated: page < totalPages
-      hasPrev: boolean;    // Calculated: page > 1
+      page: number; // Current page number
+      limit: number; // Items per page
+      total: number; // Total count of items
+      totalPages: number; // Calculated: Math.ceil(total / limit)
+      hasNext: boolean; // Calculated: page < totalPages
+      hasPrev: boolean; // Calculated: page > 1
     };
   };
 }
@@ -151,7 +151,7 @@ async findAll(@Query('page') page = 1, @Query('limit') limit = 10) {
 
 ### Step 2: Service Implementation
 
-Implement the service method to return `PaginationResult<T>`:
+Implement the service method to return `PaginationResult<T>`, querying `PrismaService` directly — there is no repository layer in between:
 
 ```typescript
 async getAll(page: number, limit: number) {
@@ -160,8 +160,8 @@ async getAll(page: number, limit: number) {
 
   // Fetch items and total count in parallel
   const [users, total] = await Promise.all([
-    this.usersRepository.findAll({ skip, take: limit }),
-    this.usersRepository.count(),
+    this.prisma.user.findMany({ skip, take: limit }),
+    this.prisma.user.count(),
   ]);
 
   // Return pagination result (will be auto-transformed by interceptor)
@@ -174,34 +174,7 @@ async getAll(page: number, limit: number) {
 }
 ```
 
-**Reference**: See [users.service.ts:43-56](../src/modules/users/users.service.ts#L43-L56)
-
-### Step 3: Repository Methods
-
-Ensure your repository supports pagination:
-
-```typescript
-interface IUsersRepository {
-  findAll(options: { skip: number; take: number }): Promise<User[]>;
-  count(): Promise<number>;
-}
-```
-
-**Prisma Example**:
-
-```typescript
-async findAll({ skip, take }: { skip: number; take: number }): Promise<User[]> {
-  return this.prisma.user.findMany({
-    skip,
-    take,
-    orderBy: { createdAt: 'desc' },
-  });
-}
-
-async count(): Promise<number> {
-  return this.prisma.user.count();
-}
-```
+**Reference**: See [users.service.ts](../src/modules/users/users.service.ts)
 
 ## Usage Examples
 
@@ -254,16 +227,16 @@ Fetch items and count in parallel for better performance:
 ```typescript
 // Good: Parallel execution
 const [items, total] = await Promise.all([
-  this.repository.findAll({ skip, take: limit }),
-  this.repository.count(),
+  this.prisma.user.findMany({ skip, take: limit }),
+  this.prisma.user.count(),
 ]);
 
 // Bad: Sequential execution
-const items = await this.repository.findAll({ skip, take: limit });
-const total = await this.repository.count(); // Waits for items first
+const items = await this.prisma.user.findMany({ skip, take: limit });
+const total = await this.prisma.user.count(); // Waits for items first
 ```
 
-**Reference**: See [users.service.ts:45-48](../src/modules/users/users.service.ts#L45-L48)
+**Reference**: See [users.service.ts](../src/modules/users/users.service.ts)
 
 ### 4. Add Filters to Pagination
 
@@ -274,8 +247,8 @@ async getAll(page: number, limit: number, filters?: { status?: string }) {
   const skip = (page - 1) * limit;
 
   const [items, total] = await Promise.all([
-    this.repository.findAll({ skip, take: limit, where: filters }),
-    this.repository.count({ where: filters }),
+    this.prisma.user.findMany({ skip, take: limit, where: filters }),
+    this.prisma.user.count({ where: filters }),
   ]);
 
   return { items, page, limit, total };
@@ -295,12 +268,12 @@ async getAll(
   const skip = (page - 1) * limit;
 
   const [items, total] = await Promise.all([
-    this.repository.findAll({
+    this.prisma.user.findMany({
       skip,
       take: limit,
       orderBy: orderBy || { createdAt: 'desc' },
     }),
-    this.repository.count(),
+    this.prisma.user.count(),
   ]);
 
   return { items, page, limit, total };
@@ -383,7 +356,7 @@ All pagination-related interfaces are defined in [response.interface.ts](../src/
          │
          ▼
 ┌─────────────────┐
-│   Repository    │  Executes findAll({ skip, take })
+│  PrismaService  │  Executes findMany({ skip, take })
 └─────────────────┘  and count() in parallel
          │
          ▼

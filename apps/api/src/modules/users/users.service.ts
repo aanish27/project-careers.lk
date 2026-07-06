@@ -1,11 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { User } from '@careerslk/database';
 import * as bcrypt from 'bcrypt';
 import { plainToInstance } from 'class-transformer';
-import {
-  IUsersRepository,
-  USER_REPOSITORY,
-} from './repositories/users.repository.interface';
+import { PrismaService } from '@/database/prisma.service';
 import {
   CursorPaginatedUsersResponseDto,
   PaginatedUsersResponseDto,
@@ -20,27 +17,23 @@ type CreateUserInput = Pick<
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @Inject(USER_REPOSITORY)
-    private readonly usersRepository: IUsersRepository,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async getUserByEmail(email: string): Promise<User | null> {
-    return this.usersRepository.findByEmail(email);
+    return this.prisma.user.findUnique({ where: { email } });
   }
 
-  async getFindById(id: string): Promise<User | null> {
-    return this.usersRepository.findById(id);
+  async getFindById(id: number): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { id } });
   }
 
   async getUserByUsername(username: string): Promise<User | null> {
-    return this.usersRepository.findByUsername(username);
+    return this.prisma.user.findUnique({ where: { username } });
   }
 
   async createUser(data: CreateUserInput): Promise<User> {
     // Check if exists
-    const existing =
-      data.email && (await this.usersRepository.findByEmail(data.email));
+    const existing = data.email && (await this.getUserByEmail(data.email));
     if (existing) {
       throw new Error('User already exists');
     }
@@ -53,7 +46,7 @@ export class UsersService {
       lastName: data.lastName,
     };
 
-    return await this.usersRepository.create(safeData);
+    return await this.prisma.user.create({ data: safeData });
   }
 
   async getAll(
@@ -62,8 +55,8 @@ export class UsersService {
   ): Promise<PaginatedUsersResponseDto> {
     const skip = (page - 1) * limit;
     const [users, total] = await Promise.all([
-      this.usersRepository.findAll({ skip, take: limit }),
-      this.usersRepository.count(),
+      this.prisma.user.findMany({ skip, take: limit }),
+      this.prisma.user.count(),
     ]);
 
     return {
@@ -96,7 +89,7 @@ export class UsersService {
     if (cursor) {
       // Forward: start after the given cursor id
       const afterId = decodeCursor(cursor);
-      users = await this.usersRepository.findAll({
+      users = await this.prisma.user.findMany({
         where: { id: { gt: afterId } },
         take,
         orderBy: { id: 'asc' },
@@ -104,7 +97,7 @@ export class UsersService {
     } else if (prevCursor) {
       // Backward: fetch items before the given cursor id in descending order, then flip
       const beforeId = decodeCursor(prevCursor);
-      const reversed = await this.usersRepository.findAll({
+      const reversed = await this.prisma.user.findMany({
         where: { id: { lt: beforeId } },
         take,
         orderBy: { id: 'desc' },
@@ -112,7 +105,7 @@ export class UsersService {
       users = reversed.reverse();
     } else {
       // First page
-      users = await this.usersRepository.findAll({
+      users = await this.prisma.user.findMany({
         take,
         orderBy: { id: 'asc' },
       });
@@ -144,16 +137,20 @@ export class UsersService {
   }
 
   async setRefreshTokenHash(
-    userId: string,
+    userId: number,
     refreshTokenHash: string,
   ): Promise<void> {
     const hash = await bcrypt.hash(refreshTokenHash, 10);
-    await this.usersRepository.update(userId, {
-      refreshTokenHash: hash,
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshTokenHash: hash },
     });
   }
 
-  async clearRefreshTokenHash(userId: string): Promise<void> {
-    await this.usersRepository.update(userId, { refreshTokenHash: null });
+  async clearRefreshTokenHash(userId: number): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshTokenHash: null },
+    });
   }
 }

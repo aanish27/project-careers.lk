@@ -175,7 +175,7 @@ export class AuthController {
     type: LogoutResponseDto,
   })
   async logout(
-    @CurrentUser('id') userId: string,
+    @CurrentUser('id') userId: number,
     @Res({ passthrough: true }) res: Response,
   ): Promise<LogoutResponseDto> {
     await this.authService.logout(userId);

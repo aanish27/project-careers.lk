@@ -2,13 +2,13 @@
 
 ## Directory Philosophy
 
-| Directory    | Purpose                                                   | Example                                        |
-|--------------|-----------------------------------------------------------|------------------------------------------------|
-| `config/`    | Environment & app configuration                           | App, Database, JWT, Storage configs            |
-| `database/`  | Database setup (Prisma)                                   | `PrismaService`, `DatabaseModule`              |
-| `common/`    | Reusable utilities, base classes & cross-cutting concerns | Decorators, Guards, Filters, Repository pattern |
-| `modules/`   | Feature modules (domain logic)                            | Auth, Users                                    |
-| `shared/`    | Infrastructure modules shared across features             | StorageModule                                  |
+| Directory   | Purpose                                                   | Example                             |
+| ----------- | --------------------------------------------------------- | ----------------------------------- |
+| `config/`   | Environment & app configuration                           | App, Database, JWT, Storage configs |
+| `database/` | Database setup (Prisma)                                   | `PrismaService`, `DatabaseModule`   |
+| `common/`   | Reusable utilities, base classes & cross-cutting concerns | Decorators, Guards, Filters         |
+| `modules/`  | Feature modules (domain logic)                            | Auth, Users                         |
+| `shared/`   | Infrastructure modules shared across features             | StorageModule                       |
 
 ## Full Structure
 
@@ -33,23 +33,10 @@ src/
 │   ├── guards/                         # JwtAuthGuard, RoleGuard
 │   ├── interceptors/                   # TransformInterceptor
 │   ├── interfaces/                     # Response interface
-│   ├── utils/
-│   │   ├── build-key.util.ts           # UUID-based storage key builder
-│   │   ├── request-id.util.ts          # Request ID generator
-│   │   └── validate-env.util.ts        # Env variable validator
-│   └── repository/                     # Generic repository pattern
-│       ├── interfaces/
-│       │   ├── repository.interfaces.ts
-│       │   └── index.ts
-│       ├── types/
-│       │   ├── repository.types.ts
-│       │   └── index.ts
-│       ├── base.repository.ts          # Prisma model access
-│       ├── read.repository.ts          # Query operations
-│       ├── write.repository.ts         # Mutation operations
-│       ├── generic.repository.ts       # Full CRUD + bulk + transactions
-│       ├── soft-deletable.repository.ts
-│       └── index.ts
+│   └── utils/
+│       ├── build-key.util.ts           # UUID-based storage key builder
+│       ├── request-id.util.ts          # Request ID generator
+│       └── validate-env.util.ts        # Env variable validator
 │
 ├── modules/                            # Feature modules
 │   ├── auth/
@@ -67,9 +54,6 @@ src/
 │       ├── dto/
 │       │   ├── users.dto.ts
 │       │   └── users.response.dto.ts
-│       ├── repositories/               # Domain-specific repository
-│       │   ├── users.repository.interface.ts
-│       │   └── users.repository.ts
 │       ├── users.module.ts
 │       ├── users.controller.ts
 │       └── users.service.ts
@@ -98,33 +82,21 @@ src/
 `@/*` maps to `src/*` (configured in `tsconfig.json`).
 
 ```ts
-import { GenericRepository } from '@/common/repository';
 import { PrismaService } from '@/database/prisma.service';
 import configuration from '@/config';
 ```
 
-### Repository Pattern (Inheritance Chain)
+### Data Access
 
-```
-BaseRepository              → Prisma model access
-  └── ReadRepository        → findById, findOne, findAll, count, exists
-       └── WriteRepository  → create, update, delete, upsert, findOrCreate
-            └── GenericRepository          → bulk ops + transactions
-                 └── SoftDeletableRepository → softDelete, restore
-```
-
-To create a new repository, extend `GenericRepository` (or `SoftDeletableRepository` if needed):
+Services inject `PrismaService` directly and call the Prisma client — there is no repository abstraction layer:
 
 ```ts
 @Injectable()
-export class UsersRepository extends GenericRepository<User> {
-  constructor(prisma: PrismaService) {
-    super(prisma, Prisma.ModelName.User);
-  }
+export class UsersService {
+  constructor(private readonly prisma: PrismaService) {}
 
-  // Add domain-specific methods only
   async findByEmail(email: string): Promise<User | null> {
-    return this.model.findUnique({ where: { email } });
+    return this.prisma.user.findUnique({ where: { email } });
   }
 }
 ```
@@ -132,7 +104,7 @@ export class UsersRepository extends GenericRepository<User> {
 ### Adding a New Feature Module
 
 1. Create folder under `src/modules/<name>/`
-2. Follow the pattern: `module.ts`, `controller.ts`, `service.ts`, `dto/`, `repositories/`
+2. Follow the pattern: `module.ts`, `controller.ts`, `service.ts`, `dto/`
 3. Import the module in `app.module.ts`
 
 ### Adding a New Shared Module
@@ -141,14 +113,14 @@ Infrastructure that needs to be reused across multiple feature modules (e.g. sto
 
 ### Barrel Exports
 
-`config/` and `common/repository/` have `index.ts` barrel files. Always import from the barrel:
+`config/` has an `index.ts` barrel file. Always import from the barrel:
 
 ```ts
 // Good
-import { GenericRepository, IRepository } from '@/common/repository';
+import configuration from '@/config';
 
 // Avoid
-import { GenericRepository } from '@/common/repository/generic.repository';
+import appConfig from '@/config/app.config';
 ```
 
 ### Database
