@@ -14,7 +14,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { StorageModule } from './shared/storage/storage.module';
-import { CompaniesModule } from './companies/companies.module';
+import { CompaniesModule } from './modules/companies/companies.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { JobsModule } from './modules/jobs/jobs.module';
+import { KeywordsModule } from './modules/keywords/keywords.module';
+import { ScrapeLogsModule } from './modules/scrape-logs/scrape-logs.module';
 
 @Module({
   imports: [
@@ -66,6 +70,10 @@ import { CompaniesModule } from './companies/companies.module';
       },
     ]),
     CompaniesModule,
+    JobsModule,
+    KeywordsModule,
+    ScrapeLogsModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [

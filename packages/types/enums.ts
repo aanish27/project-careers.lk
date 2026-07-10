@@ -24,8 +24,8 @@ export enum SkillType {
 }
 
 export enum JobStatus {
-  ACTIVE = 'active',
-  EXPIRED = 'expired',
+  ACTIVE = 'ACTIVE',
+  EXPIRED = 'EXPIRED',
 }
 
 export enum InvoiceStatus {
@@ -72,3 +72,10 @@ export const PaginationType = {
 
 export type PaginationType =
   (typeof PaginationType)[keyof typeof PaginationType];
+
+export const CompanyStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+} as const;
+
+export type CompanyStatus = (typeof CompanyStatus)[keyof typeof CompanyStatus];

@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
+import { createSoftDeleteExtension } from 'prisma-extension-soft-delete';
 
 @Injectable()
 export class PrismaService extends PrismaClient {
@@ -19,6 +20,21 @@ export class PrismaService extends PrismaClient {
       log: ['info', 'warn', 'error'],
       omit: { user: { password: true } },
     });
-    // this.$extends();
+    this.$extends(
+      createSoftDeleteExtension({
+        models: {
+          User: true,
+          Company: true,
+          Job: true,
+        },
+        defaultConfig: {
+          field: 'deletedAt',
+          createValue: (deleted) => {
+            if (deleted) return new Date();
+            return null;
+          },
+        },
+      }),
+    );
   }
 }

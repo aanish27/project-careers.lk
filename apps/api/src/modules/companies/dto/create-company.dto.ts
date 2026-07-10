@@ -1,5 +1,4 @@
-import { CompanyStatus } from '@careerslk/database';
-import { PaginationType } from '@careerslk/types';
+import { CompanyStatus, PaginationType } from '@careerslk/types';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString, IsUrl } from 'class-validator';
 
@@ -50,6 +49,10 @@ export class CreateCompanyDto {
   @IsString()
   @IsOptional()
   htmlSelector: string;
+
+  @IsString()
+  @IsOptional()
+  htmlSelectorType: string;
 
   @ApiProperty({
     description: 'CSS selector for the pagination/load-more button',

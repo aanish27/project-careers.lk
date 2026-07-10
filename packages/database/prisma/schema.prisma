@@ -87,6 +87,7 @@ model Company {
   paginationType         String?
   paginationBtn          String?
   paginationReason       String?
+  deletedAt              DateTime?
   createdAt              DateTime      @default(now())
   updatedAt              DateTime      @updatedAt
 
@@ -142,23 +143,36 @@ model JobSkill {
   name  String
   type  SkillType
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@index([jobId])
 }
 
+model Keyword {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  jobs JobKeyword[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model JobKeyword {
-  id            Int     @id @default(autoincrement())
   jobId         Int
-  job           Job     @relation(fields: [jobId], references: [id])
-  keyword       String
+  job           Job     @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  keywordId     Int
+  keyword       Keyword @relation(fields: [keywordId], references: [id], onDelete: Cascade)
   editedByAdmin Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@id([jobId, keywordId])
   @@index([jobId])
+  @@index([keywordId])
 }
 
 enum ScrapeLogTrigger {
@@ -184,6 +198,7 @@ model ScrapeLog {
   durationMs   Int              @default(0)
   htmlLength   Int?
   type         String
+  deletedAt    DateTime?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
   claudeLogs   ClaudeLog[]
@@ -206,8 +221,9 @@ model ClaudeLog {
   inputTokens  Int?
   outputTokens Int?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@index([companyId])
   @@index([createdAt])
@@ -222,8 +238,9 @@ model ClaudeBatchLog {
   jobs       Job[]
   companies  Company[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@index([createdAt])
 }
@@ -240,9 +257,9 @@ model AlertSubscription {
 }
 
 model AuditLog {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   userId     Int
-  user       User     @relation(fields: [userId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
   userRole   UserRole
   action     String
   entityType String
@@ -251,8 +268,9 @@ model AuditLog {
   newValue   Json?
   ipAddress  String
   userAgent  String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  deletedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   @@index([userId])
   @@index([entityType, entityId])
