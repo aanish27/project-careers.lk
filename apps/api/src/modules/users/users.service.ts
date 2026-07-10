@@ -12,7 +12,7 @@ import { encodeCursor, decodeCursor } from '@/common/utils/cursor.util';
 
 type CreateUserInput = Pick<
   User,
-  'email' | 'username' | 'password' | 'firstName' | 'lastName'
+  'email' | 'password' | 'firstName' | 'lastName'
 >;
 
 @Injectable()
@@ -23,12 +23,15 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { email } });
   }
 
-  async getFindById(id: number): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { id } });
+  async getUserByEmailWithPassword(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { email },
+      omit: { password: false },
+    });
   }
 
-  async getUserByUsername(username: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { username } });
+  async getFindById(id: number): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { id } });
   }
 
   async createUser(data: CreateUserInput): Promise<User> {
@@ -40,7 +43,6 @@ export class UsersService {
 
     const safeData: CreateUserInput = {
       email: data.email,
-      username: data.username,
       password: data.password,
       firstName: data.firstName,
       lastName: data.lastName,

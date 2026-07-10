@@ -58,7 +58,7 @@ export class AuthController {
     description: 'Invalid input data',
   })
   @ApiConflictResponse({
-    description: 'User with this email or username already exists',
+    description: 'User with this email already exists',
   })
   async register(
     @Body() registerDto: RegisterDto,

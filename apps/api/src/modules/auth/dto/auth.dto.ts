@@ -10,12 +10,12 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class LoginDto {
   @ApiProperty({
-    description: 'Username for authentication',
-    example: 'johndoe',
+    description: 'Email address for authentication',
+    example: 'john.doe@example.com',
   })
-  @IsString()
+  @IsEmail()
   @IsNotEmpty()
-  username: string;
+  email: string;
 
   @ApiProperty({
     description: 'User password',
@@ -52,18 +52,6 @@ export class RegisterDto {
   password: string;
 
   @ApiProperty({
-    description: 'Username for the account',
-    example: 'johndoe',
-  })
-  @IsString()
-  @IsNotEmpty()
-  @Matches(/^[a-zA-Z0-9_-]+$/, {
-    message:
-      'username can only contain letters, numbers, underscores and hyphens',
-  })
-  username: string;
-
-  @ApiProperty({
     description: 'User first name',
     example: 'John',
     minLength: 2,
@@ -98,9 +86,6 @@ export class UserDataDto {
 
   @ApiProperty({ description: 'User email', example: 'john.doe@example.com' })
   email: string;
-
-  @ApiProperty({ description: 'Username', example: 'johndoe' })
-  username: string;
 
   @ApiProperty({ description: 'User first name', example: 'John' })
   firstName: string;

@@ -16,10 +16,6 @@ export class UserResponseDto {
   email: string;
 
   @Expose()
-  @ApiProperty({ description: 'Username', example: 'janesmith' })
-  username: string;
-
-  @Expose()
   @ApiProperty({ description: 'User first name', example: 'Jane' })
   firstName: string;
 

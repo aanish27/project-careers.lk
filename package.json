@@ -3,11 +3,17 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "prepare": "husky",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "build:packages": "tsdown",
+    "dev:packages": "tsdown --watch",
+    "dev:api": "pnpm --filter backend dev",
+    "dev:web": "pnpm --filter frontend dev",
+    "dev": "pnpm --parallel --filter backend --filter frontend run dev"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +28,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.3",
+    "tsdown": "^0.22.4",
     "typescript-eslint": "^8.59.0"
   },
   "lint-staged": {

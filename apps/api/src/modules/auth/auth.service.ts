@@ -11,7 +11,7 @@ import { UsersService } from '../users/users.service';
 import { AuthResponseDto, LoginDto, RegisterDto } from './dto/auth.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 
-type UserWithoutPassword = Omit<User, 'password'>;
+export type UserWithoutPassword = Omit<User, 'password'>;
 
 interface TokenPair {
   accessToken: string;
@@ -31,7 +31,6 @@ export class AuthService {
   private generateTokenPair(user: UserWithoutPassword): TokenPair {
     const payload = {
       sub: user.id,
-      username: user.username,
       email: user.email,
       role: user.role,
     };
@@ -67,7 +66,6 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
-        username: user.username,
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
@@ -81,24 +79,20 @@ export class AuthService {
     return userWithoutPassword;
   }
 
-  private async isExitUser(email: string, username: string): Promise<void> {
-    const [byEmail, byUsername] = await Promise.all([
-      this.usersService.getUserByEmail(email),
-      this.usersService.getUserByUsername(username),
-    ]);
-    if (byEmail) throw new BadRequestException('Email is already registered');
-    if (byUsername) throw new BadRequestException('Username is already taken');
+  private async isExitUser(email: string): Promise<void> {
+    const existing = await this.usersService.getUserByEmail(email);
+    if (existing) throw new BadRequestException('Email is already registered');
   }
 
   async login(dto: LoginDto): Promise<AuthResponseDto & TokenPair> {
-    const user = await this.validateCredentials(dto.username, dto.password);
+    const user = await this.validateCredentials(dto.email, dto.password);
     const result = this.generateAuthResponseWithTokens(user);
     await this.usersService.setRefreshTokenHash(user.id, result.refreshToken);
     return result;
   }
 
   async register(dto: RegisterDto): Promise<AuthResponseDto & TokenPair> {
-    await this.isExitUser(dto.email, dto.username);
+    await this.isExitUser(dto.email);
 
     const hashedPassword = await bcrypt.hash(dto.password, this.SALT_ROUNDS);
 
@@ -146,10 +140,10 @@ export class AuthService {
   }
 
   async validateCredentials(
-    username: string,
+    email: string,
     password: string,
   ): Promise<UserWithoutPassword> {
-    const user = await this.usersService.getUserByUsername(username);
+    const user = await this.usersService.getUserByEmailWithPassword(email);
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');

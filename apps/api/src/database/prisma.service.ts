@@ -1,9 +1,9 @@
+import { createSoftDeleteExtension } from '@candoimage/prisma-extension-soft-delete';
 import { PrismaClient } from '@careerslk/database';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
-import { createSoftDeleteExtension } from 'prisma-extension-soft-delete';
 
 @Injectable()
 export class PrismaService extends PrismaClient {
