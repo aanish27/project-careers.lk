@@ -1,3 +1,5 @@
+import { TooltipProvider } from '@ui/tooltip';
+import { cn } from '@utils/utils';
 import type { Metadata } from 'next';
 import {
   Geist,
@@ -6,7 +8,6 @@ import {
   Playfair_Display,
 } from 'next/font/google';
 import './globals.css';
-import { cn } from '@/lib/utils';
 
 const playfairDisplayHeading = Playfair_Display({
   subsets: ['latin'],
@@ -48,7 +49,11 @@ export default function RootLayout({
         playfairDisplayHeading.variable,
       )}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {/* <StoreProvider> */}
+        <TooltipProvider>{children}</TooltipProvider>
+        {/* </StoreProvider> */}
+      </body>
     </html>
   );
 }

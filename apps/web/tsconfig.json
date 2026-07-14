@@ -19,7 +19,34 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@ui/*": ["./src/components/ui/*"],
+      "@components/*": ["./src/components/*"],
+      "@config/*": ["./src/config/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@stores/*": ["./src/stores/*"],
+      "@testing/*": ["./src/testing/*"],
+      "@types/*": ["./src/types/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@jobboard/*": ["./src/jobboard/*"],
+      "@jobboard-components/*": ["./src/jobboard/components/*"],
+      "@jobboard-config/*": ["./src/jobboard/config/*"],
+      "@jobboard-hooks/*": ["./src/jobboard/hooks/*"],
+      "@jobboard-lib/*": ["./src/jobboard/lib/*"],
+      "@jobboard-stores/*": ["./src/jobboard/stores/*"],
+      "@jobboard-types/*": ["./src/jobboard/types/*"],
+      "@jobboard-utils/*": ["./src/jobboard/utils/*"],
+      "@jobboard-features/*": ["./src/jobboard/features/*"],
+      "@dashboard/*": ["./src/dashboard/*"],
+      "@dashboard-components/*": ["./src/dashboard/components/*"],
+      "@dashboard-config/*": ["./src/dashboard/config/*"],
+      "@dashboard-hooks/*": ["./src/dashboard/hooks/*"],
+      "@dashboard-lib/*": ["./src/dashboard/lib/*"],
+      "@dashboard-stores/*": ["./src/dashboard/stores/*"],
+      "@dashboard-types/*": ["./src/dashboard/types/*"],
+      "@dashboard-utils/*": ["./src/dashboard/utils/*"],
+      "@dashboard-features/*": ["./src/dashboard/features/*"]
     }
   },
   "include": [
