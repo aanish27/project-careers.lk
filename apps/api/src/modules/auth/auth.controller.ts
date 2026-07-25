@@ -32,10 +32,8 @@ import {
   REFRESH_TOKEN_MAX_AGE_MS,
 } from '../../common/constants/routes.constant';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { User } from '@careerslk/database';
 import { Throttle } from '@nestjs/throttler';
-import { plainToInstance } from 'class-transformer';
-import { UserResponseDto } from '../users/dto/users.response.dto';
+import { AuthenticatedPrincipal } from './interfaces/jwt-payload.interface';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -142,7 +140,7 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<RefreshResponseDto> {
-    const refreshToken = req.cookies[REFRESH_COOKIE];
+    const refreshToken = req.cookies[REFRESH_COOKIE] as string | undefined;
 
     if (!refreshToken) {
       throw new UnauthorizedException('No refresh token');
@@ -175,7 +173,7 @@ export class AuthController {
     type: LogoutResponseDto,
   })
   async logout(
-    @CurrentUser('id') userId: number,
+    @CurrentUser('userId') userId: number,
     @Res({ passthrough: true }) res: Response,
   ): Promise<LogoutResponseDto> {
     await this.authService.logout(userId);
@@ -192,15 +190,11 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'Current user information',
-    type: UserResponseDto,
   })
   @ApiUnauthorizedResponse({
     description: 'Unauthorized - Invalid or missing token',
   })
-  me(@CurrentUser() user: User) {
-    const result = plainToInstance(UserResponseDto, user, {
-      excludeExtraneousValues: true,
-    });
-    return result;
+  async me(@CurrentUser() principal: AuthenticatedPrincipal) {
+    return this.authService.getCurrentUser(principal.userId);
   }
 }

@@ -1,5 +1,5 @@
 import { PrismaService } from '@/database/prisma.service';
-import { assertNotSsrf } from '@careerslk/types';
+import { assertNotSsrf } from '@careerslk/types/ssrf';
 import { Injectable } from '@nestjs/common';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';

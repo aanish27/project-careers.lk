@@ -26,6 +26,10 @@ export const envValidationSchema = Joi.object({
   JWT_REFRESH_SECRET: Joi.string().min(32).required(),
   JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.string().default('7d'),
 
+  // Only read by the seed script (packages/database/prisma/seed.ts), not the app itself.
+  SUPER_ADMIN_EMAIL: Joi.string().optional(),
+  SUPER_ADMIN_PASSWORD: Joi.string().optional(),
+
   // Storage
   STORAGE_PROVIDER: Joi.string().valid('s3', 'local').default('local'),
   MAX_FILE_SIZE_MB: Joi.number().default(10),

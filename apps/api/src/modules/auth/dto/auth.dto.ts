@@ -7,6 +7,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import type { PermissionKey } from '@careerslk/types';
 
 export class LoginDto {
   @ApiProperty({
@@ -93,8 +94,18 @@ export class UserDataDto {
   @ApiProperty({ description: 'User last name', example: 'Doe' })
   lastName: string;
 
-  @ApiProperty({ description: 'User role', example: 'USER' })
-  role: string;
+  @ApiProperty({
+    description: 'Role slugs',
+    type: [String],
+    example: ['admin'],
+  })
+  roles: string[];
+
+  @ApiProperty({ description: 'Effective permission keys', type: [String] })
+  permissions: PermissionKey[];
+
+  @ApiProperty({ description: 'Whether the user holds the super admin role' })
+  isSuperAdmin: boolean;
 }
 
 export class AuthResponseDto {

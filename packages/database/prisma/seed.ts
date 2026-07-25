@@ -7,7 +7,9 @@ import { seedCompanies } from './seeders/companies.seeder.ts';
 import { seedJobs } from './seeders/jobs.seeder.ts';
 import { seedScrapeLogs } from './seeders/scrape-logs.seeder.ts';
 import { seedSeoPages } from './seeders/seo.seeder.ts';
-import { seedUsers } from './seeders/users.seeder.ts';
+import { seedPermissions } from './seeders/permissions.seeder.ts';
+import { seedSuperAdmin } from './seeders/rbac.seeder.ts';
+import { seedAdminUsers } from './seeders/admin-users.seeder.ts';
 
 function envInt(name: string, fallback: number): number {
   const value = process.env[name];
@@ -31,7 +33,12 @@ async function main() {
   };
   const advertiserCount = envInt('SEED_ADVERTISER_COUNT', 6);
 
-  await seedUsers(prisma);
+  await seedPermissions(prisma);
+  await seedSuperAdmin(prisma, {
+    email: process.env['SUPER_ADMIN_EMAIL'],
+    password: process.env['SUPER_ADMIN_PASSWORD'],
+  });
+  await seedAdminUsers(prisma);
 
   const companies = await seedCompanies(prisma, companyCount);
   await seedJobs(prisma, companies, jobsPerCompany);

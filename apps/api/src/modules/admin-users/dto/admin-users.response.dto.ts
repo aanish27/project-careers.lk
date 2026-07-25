@@ -1,6 +1,9 @@
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRole } from '@careerslk/database';
+
+interface RoleAssignmentLike {
+  role: { slug: string };
+}
 
 @Exclude()
 export class UserResponseDto {
@@ -24,16 +27,26 @@ export class UserResponseDto {
   lastName: string;
 
   @Expose()
+  @Transform(({ obj }: { obj: { roleAssignments?: RoleAssignmentLike[] } }) =>
+    (obj.roleAssignments ?? []).map((a) => a.role.slug),
+  )
   @ApiProperty({
-    description: 'User role',
-    enum: UserRole,
-    example: UserRole.ADMIN,
+    description: 'Role slugs',
+    type: [String],
+    example: ['admin'],
   })
-  role: UserRole;
+  roles: string[];
 
   @Expose()
   @ApiProperty({ description: 'User account status', example: true })
   isActive: boolean;
+
+  @Expose()
+  @ApiProperty({
+    description: 'Last login timestamp',
+    example: '2024-01-20T14:45:00Z',
+  })
+  lastLoginAt: Date;
 
   @Expose()
   @ApiProperty({

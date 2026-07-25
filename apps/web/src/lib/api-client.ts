@@ -1,12 +1,14 @@
-import { UserRole } from '@careerslk/types';
-import 'server-only';
+import { PermissionKey } from "@careerslk/types";
+import "server-only";
 
 export interface AuthUser {
   id: number;
   email: string;
   firstName: string;
   lastName: string;
-  role: UserRole;
+  roles: string[];
+  permissions: PermissionKey[];
+  isSuperAdmin: boolean;
 }
 
 interface ApiSuccessBody<T> {
@@ -27,7 +29,7 @@ export class ApiError extends Error {
     public details?: unknown,
   ) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 }
 
@@ -39,10 +41,10 @@ export async function apiFetch<T>(
   try {
     res = await fetch(`${process.env.API_URL}${path}`, {
       ...init,
-      headers: { 'Content-Type': 'application/json', ...init?.headers },
+      headers: { "Content-Type": "application/json", ...init?.headers },
     });
   } catch {
-    throw new ApiError(0, 'NETWORK_ERROR', 'Unable to reach the API server');
+    throw new ApiError(0, "NETWORK_ERROR", "Unable to reach the API server");
   }
 
   const body = (await res.json()) as ApiSuccessBody<T> | ApiErrorBody;
@@ -64,8 +66,8 @@ export function extractCookieValue(
   name: string,
 ): string | undefined {
   for (const setCookie of setCookies) {
-    const [pair] = setCookie.split(';');
-    const [key, value] = pair.split('=');
+    const [pair] = setCookie.split(";");
+    const [key, value] = pair.split("=");
     if (key === name) return value;
   }
   return undefined;
@@ -78,20 +80,20 @@ export async function loginRequest(
   const { data, setCookies } = await apiFetch<{
     user: AuthUser;
     accessToken: string;
-  }>('/auth/login', {
-    method: 'POST',
+  }>("/auth/login", {
+    method: "POST",
     body: JSON.stringify({ email, password }),
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
   });
 
-  const refreshToken = extractCookieValue(setCookies, 'refreshToken');
+  const refreshToken = extractCookieValue(setCookies, "refreshToken");
   if (!refreshToken) {
     throw new ApiError(
       500,
-      'MISSING_REFRESH_COOKIE',
-      'Login response did not include a refresh token',
+      "MISSING_REFRESH_COOKIE",
+      "Login response did not include a refresh token",
     );
   }
 
@@ -99,26 +101,33 @@ export async function loginRequest(
 }
 
 export async function logoutRequest(accessToken: string): Promise<void> {
-  await apiFetch('/auth/logout', {
-    method: 'POST',
+  await apiFetch("/auth/logout", {
+    method: "POST",
     headers: { Authorization: `Bearer ${accessToken}` },
   });
+}
+
+export async function fetchCurrentUser(accessToken: string): Promise<AuthUser> {
+  const { data } = await apiFetch<AuthUser>("/auth/me", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return data;
 }
 
 export async function refreshRequest(
   refreshToken: string,
 ): Promise<{ accessToken: string; refreshToken: string }> {
   const { data, setCookies } = await apiFetch<{ accessToken: string }>(
-    '/auth/refresh',
-    { method: 'POST', headers: { Cookie: `refreshToken=${refreshToken}` } },
+    "/auth/refresh",
+    { method: "POST", headers: { Cookie: `refreshToken=${refreshToken}` } },
   );
 
-  const rotatedRefreshToken = extractCookieValue(setCookies, 'refreshToken');
+  const rotatedRefreshToken = extractCookieValue(setCookies, "refreshToken");
   if (!rotatedRefreshToken) {
     throw new ApiError(
       500,
-      'MISSING_REFRESH_COOKIE',
-      'Refresh response did not include a rotated refresh token',
+      "MISSING_REFRESH_COOKIE",
+      "Refresh response did not include a rotated refresh token",
     );
   }
 

@@ -1,9 +1,10 @@
 import configuration from '@/config';
 import { envValidationSchema } from '@/config/env.validation';
 import { DatabaseModule } from '@/database/database.module';
+import { AdminUsersModule } from '@/modules/admin-users/admin-users.module';
 import { AuthModule } from '@/modules/auth/auth.module';
+import { RbacModule } from '@/modules/rbac/rbac.module';
 import { ScraperModule } from '@/modules/scraper/scraper.module';
-import { UsersModule } from '@/modules/users/users.module';
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -13,12 +14,12 @@ import IORedis from 'ioredis';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
-import { StorageModule } from './shared/storage/storage.module';
 import { CompaniesModule } from './modules/companies/companies.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { KeywordsModule } from './modules/keywords/keywords.module';
 import { ScrapeLogsModule } from './modules/scrape-logs/scrape-logs.module';
+import { StorageModule } from './shared/storage/storage.module';
 
 @Module({
   imports: [
@@ -55,21 +56,36 @@ import { ScrapeLogsModule } from './modules/scrape-logs/scrape-logs.module';
         path: 'admin',
         children: [
           {
-            path: 'scraper',
+            path: '',
+            module: AdminUsersModule,
+          },
+          {
+            path: '',
+            module: RbacModule,
+          },
+          {
+            path: '',
             module: ScraperModule,
           },
           {
-            path: 'users',
-            module: UsersModule,
+            path: '',
+            module: CompaniesModule,
           },
           {
-            path: 'companies',
-            module: UsersModule,
+            path: '',
+            module: JobsModule,
+          },
+          {
+            path: '',
+            module: ScrapeLogsModule,
           },
         ],
       },
     ]),
+    AdminUsersModule,
+    RbacModule,
     CompaniesModule,
+    ScraperModule,
     JobsModule,
     KeywordsModule,
     ScrapeLogsModule,

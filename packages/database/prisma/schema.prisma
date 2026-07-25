@@ -14,11 +14,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum UserRole {
-  SUPER_ADMIN
-  ADMIN
-}
-
 enum ScrapeStatus {
   ACTIVE
   EMPTY
@@ -35,13 +30,12 @@ enum WorkMode {
 
 // CHECK -> suspected failure
 
-model User {
+model AdminUser {
   id               Int       @id @default(autoincrement())
   email            String    @unique
   password         String
   firstName        String
   lastName         String
-  role             UserRole  @default(ADMIN)
   isActive         Boolean   @default(true)
   refreshTokenHash String?
   deletedAt        DateTime?
@@ -50,11 +44,68 @@ model User {
   lastLoginAt      DateTime  @default(now())
 
   createdById  Int?
-  createdBy    User?      @relation("UserCreatedBy", fields: [createdById], references: [id])
-  createdUsers User[]     @relation("UserCreatedBy")
+  createdBy    AdminUser?  @relation("AdminUserCreatedBy", fields: [createdById], references: [id])
+  createdUsers AdminUser[] @relation("AdminUserCreatedBy")
   auditLogs    AuditLog[]
 
+  roleAssignments RoleAssignment[]
+
   @@index([email])
+  @@map("admin_users")
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  slug        String   @unique
+  name        String
+  description String?
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userAssignments       RoleAssignment[]
+  permissionAssignments RolePermission[]
+
+  @@index([slug])
+}
+
+model Permission {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  module      String
+  action      String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  roleAssignments RolePermission[]
+
+  @@index([module])
+}
+
+model RoleAssignment {
+  userId     Int
+  roleId     Int
+  assignedAt DateTime @default(now())
+
+  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role      @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  roleId       Int
+  permissionId Int
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+  @@map("role_permissions")
 }
 
 enum JobStatus {
@@ -256,22 +307,22 @@ model AlertSubscription {
 }
 
 model AuditLog {
-  id         Int       @id @default(autoincrement())
-  userId     Int
-  user       User      @relation(fields: [userId], references: [id])
-  userRole   UserRole
-  action     String
-  entityType String
-  entityId   String?
-  oldValue   Json?
-  newValue   Json?
-  ipAddress  String
-  userAgent  String
-  deletedAt  DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id          Int        @id @default(autoincrement())
+  actorUserId Int?
+  actor       AdminUser? @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorEmail  String?
+  action      String
+  entityType  String
+  entityId    String?
+  oldValue    Json?
+  newValue    Json?
+  ipAddress   String?
+  userAgent   String?
+  deletedAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
-  @@index([userId])
+  @@index([actorUserId])
   @@index([entityType, entityId])
   @@index([createdAt])
 }

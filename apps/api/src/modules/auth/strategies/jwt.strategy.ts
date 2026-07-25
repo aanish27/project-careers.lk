@@ -1,15 +1,22 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { UsersService } from '../../users/users.service';
-import { JwtPayload } from '../interfaces/jwt-payload.interface';
+import {
+  IPrincipalCache,
+  PRINCIPAL_CACHE,
+} from '@/modules/rbac/principal-cache.service';
+import {
+  AuthenticatedPrincipal,
+  JwtPayload,
+} from '../interfaces/jwt-payload.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly configService: ConfigService,
-    private readonly usersService: UsersService,
+    @Inject(PRINCIPAL_CACHE)
+    private readonly principals: IPrincipalCache,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -18,17 +25,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayload) {
-    const user = await this.usersService.getFindById(payload.sub);
+  async validate(payload: JwtPayload): Promise<AuthenticatedPrincipal> {
+    const principal = await this.principals.get(payload.sub);
 
-    if (!user || !user.isActive) {
+    if (!principal || !principal.isActive) {
       throw new UnauthorizedException();
     }
 
-    return {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    };
+    return principal;
   }
 }

@@ -18,12 +18,12 @@ export class PrismaService extends PrismaClient {
     super({
       adapter,
       log: ['info', 'warn', 'error'],
-      omit: { user: { password: true } },
+      omit: { adminUser: { password: true } },
     });
     this.$extends(
       createSoftDeleteExtension({
         models: {
-          User: true,
+          AdminUser: true,
           Company: true,
           Job: true,
         },

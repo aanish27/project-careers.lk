@@ -1,3 +1,4 @@
+/** @deprecated superseded by the dynamic Role/Permission system in ./permissions.ts; retained only for the legacy RolesGuard on StorageController */
 export enum UserRole {
   SUPER_ADMIN = 'SUPER_ADMIN',
   ADMIN = 'ADMIN',

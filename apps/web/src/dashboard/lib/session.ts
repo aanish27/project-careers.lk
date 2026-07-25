@@ -1,4 +1,5 @@
-import { UserRole } from "@careerslk/types";
+import type { PermissionKey } from "@careerslk/types";
+import { can, canAny } from "@dashboard-utils/permissions";
 import {
   ACCESS_TOKEN_TTL_MS,
   REFRESH_THRESHOLD_MS,
@@ -8,7 +9,7 @@ import {
 import { type AuthUser, refreshRequest } from "@lib/api-client";
 import * as jose from "jose";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import "server-only";
 
@@ -139,12 +140,28 @@ export const getValidAccessToken = async (): Promise<string | null> => {
   }
 };
 
-export const requireRole = async (
-  allowedRoles: UserRole[],
+// Unlike verifySession() (no session at all -> redirect to login), a missing
+// PERMISSION on an otherwise-valid session renders 404, not a redirect. This
+// is deliberate: redirecting (to login, or back to the dashboard) confirms to
+// the caller that the route exists but is off-limits. A 404 gives no signal
+// either way about whether the URL is real, which matters for someone
+// guessing/enumerating admin routes they don't hold a role for.
+export const requirePermission = async (
+  permission: PermissionKey,
 ): Promise<SessionPayload> => {
   const session = await verifySession();
-  if (!allowedRoles.includes(session.user.role)) {
-    redirect("/admin/login");
+  if (!can(session.user, permission)) {
+    notFound();
+  }
+  return session;
+};
+
+export const requireAnyPermission = async (
+  permissions: PermissionKey[],
+): Promise<SessionPayload> => {
+  const session = await verifySession();
+  if (!canAny(session.user, permissions)) {
+    notFound();
   }
   return session;
 };

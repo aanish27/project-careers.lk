@@ -1,5 +1,5 @@
 "use client";
-import { Avatar, AvatarFallback, AvatarImage } from "@ui/avatar";
+import { Avatar, AvatarFallback } from "@ui/avatar";
 import { Badge } from "@ui/badge";
 import {
   Breadcrumb,
@@ -11,6 +11,8 @@ import {
 } from "@ui/breadcrumb";
 
 import { useSidebarContext } from "@dashboard-hooks/use-sidebar-context";
+import { useAuth } from "@dashboard-hooks/use-auth";
+import { logout } from "@dashboard-features/auth/api/auth.actions";
 import { Button } from "@ui/button";
 import {
   DropdownMenu,
@@ -30,6 +32,9 @@ import {
 
 export function Topbar() {
   const { isSidebarOpen, setSidebarOpen } = useSidebarContext();
+  const { user } = useAuth();
+  const initials =
+    `${user.firstName[0] ?? ""}${user.lastName[0] ?? ""}`.toUpperCase();
 
   return (
     <div className="flex items-center justify-between">
@@ -90,11 +95,10 @@ export function Topbar() {
                 className="bg-background rounded-full p-2 shadow-lg"
               >
                 <Avatar className="h-6 w-6">
-                  <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" />
-                  <AvatarFallback>AJ</AvatarFallback>
+                  <AvatarFallback>{initials}</AvatarFallback>
                 </Avatar>
                 <span className="text-foreground hidden max-w-20 truncate text-xs font-medium sm:inline-block">
-                  {/* {user?.username} */} axnish27
+                  {user.firstName} {user.lastName}
                 </span>
               </Button>
             }
@@ -102,11 +106,9 @@ export function Topbar() {
           <DropdownMenuContent align="end" className="w-56">
             <div className="px-2 py-1.5">
               <p className="text-foreground text-xs font-semibold">
-                {/* {user?.name} */}Aanish
+                {user.firstName} {user.lastName}
               </p>
-              <p className="text-muted-foreground text-xs">
-                {/* {user?.email} */} aanish2710@gmail.com
-              </p>
+              <p className="text-muted-foreground text-xs">{user.email}</p>
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="cursor-pointer text-xs">
@@ -118,7 +120,12 @@ export function Topbar() {
               Preferences
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer text-xs text-red-600">
+            <DropdownMenuItem
+              className="cursor-pointer text-xs text-red-600"
+              onClick={() => {
+                void logout();
+              }}
+            >
               <LogOut className="mr-2 h-3 w-3" />
               Sign Out
             </DropdownMenuItem>

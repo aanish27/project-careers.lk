@@ -1,17 +1,18 @@
-'use client';
+"use client";
 
-import { cn } from '@utils/utils';
-import Link from 'next/link';
-import { useState } from 'react';
-import { SidebarSection } from '@dashboard-config/sidebar-links';
-import { SidebarSearch } from './sidebar-search';
+import { SidebarSection } from "@dashboard-config/sidebar-links";
+import { useAuth } from "@dashboard-hooks/use-auth";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@ui/accordion';
-import { Button } from '@ui/button';
+} from "@ui/accordion";
+import { Button } from "@ui/button";
+import { cn } from "@utils/utils";
+import Link from "next/link";
+import { useState } from "react";
+import { SidebarSearch } from "./sidebar-search";
 
 interface SidebarProps {
   sections: SidebarSection[];
@@ -24,6 +25,7 @@ export function SidebarMenu({
   activeItem,
   sectionTitle,
 }: SidebarProps) {
+  const { can } = useAuth();
   const [prevSections, setPrevSections] = useState(sections);
   const [openSections, setOpenSections] = useState<string[]>(() =>
     sections.map((section) => section.title),
@@ -43,7 +45,7 @@ export function SidebarMenu({
       </div>
 
       <nav className="w-full flex-1 overflow-y-auto px-1">
-        {sectionTitle === 'search' ? (
+        {sectionTitle === "search" ? (
           <SidebarSearch />
         ) : (
           <Accordion
@@ -51,37 +53,45 @@ export function SidebarMenu({
             value={openSections}
             onValueChange={setOpenSections}
           >
-            {sections.map((section) => (
-              <AccordionItem
-                key={section.title}
-                value={section.title}
-                className="border-none"
-              >
-                <AccordionTrigger className="text-foreground hover:bg-accent/50 rounded-md px-3 py-2 text-xs font-semibold capitalize hover:no-underline">
-                  {section.title}
-                </AccordionTrigger>
-                <AccordionContent>
-                  {section.items.map(({ href, label, icon: Icon }) => (
-                    <Button
-                      variant="ghost"
-                      key={href}
-                      className={cn(
-                        'flex justify-start gap-2 rounded-md text-xs font-medium transition-all',
-                        activeItem === label
-                          ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm'
-                          : 'text-foreground hover:bg-accent/50',
-                      )}
-                      render={
-                        <Link href={href}>
-                          <Icon className="h-4 w-4" />
-                          <span className="capitalize">{label}</span>
-                        </Link>
-                      }
-                    ></Button>
-                  ))}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
+            {sections.map((section) => {
+              const visibleItems = section.items.filter(
+                (item) => !item.permission || can(item.permission),
+              );
+
+              if (visibleItems.length === 0) return null;
+
+              return (
+                <AccordionItem
+                  key={section.title}
+                  value={section.title}
+                  className="border-none"
+                >
+                  <AccordionTrigger className="text-foreground hover:bg-accent/50 rounded-md px-3 py-2 text-xs font-semibold capitalize hover:no-underline">
+                    {section.title}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    {visibleItems.map(({ href, label, icon: Icon }) => (
+                      <Button
+                        variant="ghost"
+                        key={href}
+                        className={cn(
+                          "flex justify-start gap-2 rounded-md text-xs font-medium transition-all",
+                          activeItem === label
+                            ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+                            : "text-foreground hover:bg-accent/50",
+                        )}
+                        render={
+                          <Link href={href}>
+                            <Icon className="h-4 w-4" />
+                            <span className="capitalize">{label}</span>
+                          </Link>
+                        }
+                      ></Button>
+                    ))}
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
           </Accordion>
         )}
 

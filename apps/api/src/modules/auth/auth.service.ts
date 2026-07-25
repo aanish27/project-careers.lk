@@ -1,4 +1,4 @@
-import { User } from '@careerslk/database';
+import { AdminUser } from '@careerslk/database';
 import {
   BadRequestException,
   Injectable,
@@ -7,11 +7,12 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { UsersService } from '../users/users.service';
+import { AdminUsersService } from '../admin-users/admin-users.service';
+import { PrincipalService } from '../rbac/principal.service';
 import { AuthResponseDto, LoginDto, RegisterDto } from './dto/auth.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 
-export type UserWithoutPassword = Omit<User, 'password'>;
+export type UserWithoutPassword = Omit<AdminUser, 'password'>;
 
 interface TokenPair {
   accessToken: string;
@@ -23,16 +24,16 @@ export class AuthService {
   private readonly SALT_ROUNDS = 10;
 
   constructor(
-    private readonly usersService: UsersService,
+    private readonly usersService: AdminUsersService,
+    private readonly principals: PrincipalService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
 
   private generateTokenPair(user: UserWithoutPassword): TokenPair {
-    const payload = {
+    const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
-      role: user.role,
     };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -56,10 +57,11 @@ export class AuthService {
     };
   }
 
-  private generateAuthResponseWithTokens(
+  private async generateAuthResponseWithTokens(
     user: UserWithoutPassword,
-  ): AuthResponseDto & TokenPair {
+  ): Promise<AuthResponseDto & TokenPair> {
     const tokens = this.generateTokenPair(user);
+    const snapshot = await this.principals.load(user.id);
 
     return {
       ...tokens,
@@ -68,12 +70,14 @@ export class AuthService {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        role: user.role,
+        roles: snapshot ? [...snapshot.roleSlugs] : [],
+        permissions: snapshot ? [...snapshot.permissions] : [],
+        isSuperAdmin: snapshot?.isSuperAdmin ?? false,
       },
     };
   }
 
-  private excludePassword(user: User): UserWithoutPassword {
+  private excludePassword(user: AdminUser): UserWithoutPassword {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...userWithoutPassword } = user;
     return userWithoutPassword;
@@ -86,7 +90,7 @@ export class AuthService {
 
   async login(dto: LoginDto): Promise<AuthResponseDto & TokenPair> {
     const user = await this.validateCredentials(dto.email, dto.password);
-    const result = this.generateAuthResponseWithTokens(user);
+    const result = await this.generateAuthResponseWithTokens(user);
     await this.usersService.setRefreshTokenHash(user.id, result.refreshToken);
     return result;
   }
@@ -101,7 +105,7 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    const result = this.generateAuthResponseWithTokens(
+    const result = await this.generateAuthResponseWithTokens(
       this.excludePassword(user),
     );
     await this.usersService.setRefreshTokenHash(user.id, result.refreshToken);
@@ -158,5 +162,24 @@ export class AuthService {
 
   async logout(userId: number): Promise<void> {
     await this.usersService.clearRefreshTokenHash(userId);
+  }
+
+  async getCurrentUser(userId: number): Promise<AuthResponseDto['user']> {
+    const user = await this.usersService.getFindById(userId);
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    const snapshot = await this.principals.load(userId);
+
+    return {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      roles: snapshot ? [...snapshot.roleSlugs] : [],
+      permissions: snapshot ? [...snapshot.permissions] : [],
+      isSuperAdmin: snapshot?.isSuperAdmin ?? false,
+    };
   }
 }

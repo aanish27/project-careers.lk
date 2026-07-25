@@ -1,5 +1,6 @@
+import type { PermissionKey } from "@careerslk/types";
+import { PERMISSIONS } from "@careerslk/types";
 import {
-  Accessibility,
   BarChart,
   Bell,
   Box,
@@ -16,12 +17,14 @@ import {
   Users,
   Zap,
   type LucideIcon,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface SidebarItem {
   label: string;
   icon: LucideIcon;
   href: string;
+  /** Omit to always show — only gate items backed by a real permission. */
+  permission?: PermissionKey;
 }
 
 export interface SidebarSection {
@@ -36,108 +39,125 @@ interface SidebarLinks {
 
 export const sidebarLinks: SidebarLinks[] = [
   {
-    moduleName: 'search',
+    moduleName: "search",
     sections: [
       {
-        title: 'example',
+        title: "example",
         items: [
           {
-            label: 'example',
+            label: "example",
             icon: LayoutDashboard,
-            href: '/example',
+            href: "/example",
           },
         ],
       },
     ],
   },
   {
-    moduleName: 'vendors',
+    moduleName: "vendors",
     sections: [
       {
-        title: 'overview',
+        title: "overview",
         items: [
           {
-            label: 'dashboard',
+            label: "dashboard",
             icon: LayoutDashboard,
-            href: '/vendors',
+            href: "/vendors",
           },
-          { label: 'products', icon: Box, href: '/vendors/products' },
+          { label: "products", icon: Box, href: "/vendors/products" },
         ],
       },
       {
-        title: 'manage',
+        title: "manage",
         items: [
-          { label: 'Projects', icon: FolderOpen, href: '/vendors/projects' },
+          { label: "Projects", icon: FolderOpen, href: "/vendors/projects" },
           {
-            label: 'Notifications',
+            label: "Notifications",
             icon: Bell,
-            href: '/vendors/notifications',
+            href: "/vendors/notifications",
           },
-          { label: 'Integrations', icon: Zap, href: '/vendors/integrations' },
+          { label: "Integrations", icon: Zap, href: "/vendors/integrations" },
         ],
       },
     ],
   },
   {
-    moduleName: 'shops',
+    moduleName: "shops",
     sections: [
       {
-        title: 'manage',
+        title: "manage",
         items: [
-          { label: 'Overview', icon: LayoutDashboard, href: '/shops/overview' },
-          { label: 'Products', icon: Package, href: '/shops/products' },
-          { label: 'Orders', icon: ShoppingCart, href: '/shops/orders' },
+          { label: "Overview", icon: LayoutDashboard, href: "/shops/overview" },
+          { label: "Products", icon: Package, href: "/shops/products" },
+          { label: "Orders", icon: ShoppingCart, href: "/shops/orders" },
         ],
       },
       {
-        title: 'settings',
+        title: "settings",
         items: [
-          { label: 'Payments', icon: CreditCard, href: '/shops/payments' },
-          { label: 'Shipping', icon: Truck, href: '/shops/shipping' },
-          { label: 'Integrations', icon: Zap, href: '/shops/integrations' },
+          { label: "Payments", icon: CreditCard, href: "/shops/payments" },
+          { label: "Shipping", icon: Truck, href: "/shops/shipping" },
+          { label: "Integrations", icon: Zap, href: "/shops/integrations" },
         ],
       },
     ],
   },
   {
-    moduleName: 'users',
+    moduleName: "users",
     sections: [
       {
-        title: 'manage',
+        title: "manage",
         items: [
-          { label: 'All Users', icon: Users, href: '/users' },
-          { label: 'Roles', icon: Shield, href: '/users/roles' },
-          { label: 'Permissions', icon: Key, href: '/users/permissions' },
-        ],
-      },
-      {
-        title: 'Activity',
-        items: [
-          { label: 'Logs', icon: Accessibility, href: '/users/logs' },
-          { label: 'Notifications', icon: Bell, href: '/users/notifications' },
-        ],
-      },
-    ],
-  },
-  {
-    moduleName: 'dashboard',
-    sections: [
-      {
-        title: 'Overview',
-        items: [
-          { label: 'Home', icon: LayoutDashboard, href: '/dashboard' },
-          { label: 'Analytics', icon: BarChart, href: '/dashboard/analytics' },
-          { label: 'Reports', icon: FileText, href: '/dashboard/reports' },
-        ],
-      },
-      {
-        title: 'System',
-        items: [
-          { label: 'Settings', icon: Settings, href: '/dashboard/settings' },
           {
-            label: 'Notifications',
+            label: "All Users",
+            icon: Users,
+            href: "/admin/users",
+            permission: PERMISSIONS.USERS_READ,
+          },
+          {
+            label: "Roles",
+            icon: Shield,
+            href: "/admin/users/roles",
+            permission: PERMISSIONS.ROLES_READ,
+          },
+          {
+            label: "Permissions",
+            icon: Key,
+            href: "/admin/users/permissions",
+            permission: PERMISSIONS.PERMISSIONS_READ,
+          },
+        ],
+      },
+      // Logs/Notifications have no backing pages yet — left commented out
+      // rather than linking to routes that don't exist.
+      // {
+      //   title: 'Activity',
+      //   items: [
+      //     { label: 'Logs', icon: Accessibility, href: '/admin/users/logs' },
+      //     { label: 'Notifications', icon: Bell, href: '/admin/users/notifications' },
+      //   ],
+      // },
+    ],
+  },
+  {
+    moduleName: "dashboard",
+    sections: [
+      {
+        title: "Overview",
+        items: [
+          { label: "Home", icon: LayoutDashboard, href: "/dashboard" },
+          { label: "Analytics", icon: BarChart, href: "/dashboard/analytics" },
+          { label: "Reports", icon: FileText, href: "/dashboard/reports" },
+        ],
+      },
+      {
+        title: "System",
+        items: [
+          { label: "Settings", icon: Settings, href: "/dashboard/settings" },
+          {
+            label: "Notifications",
             icon: Bell,
-            href: '/dashboard/notifications',
+            href: "/dashboard/notifications",
           },
         ],
       },
