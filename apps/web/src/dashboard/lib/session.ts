@@ -1,16 +1,16 @@
-import { UserRole } from '@careerslk/types';
-import * as jose from 'jose';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { cache } from 'react';
-import 'server-only';
-import { type AuthUser, refreshRequest } from '@lib/api-client';
+import { UserRole } from "@careerslk/types";
 import {
   ACCESS_TOKEN_TTL_MS,
   REFRESH_THRESHOLD_MS,
   SESSION_COOKIE_NAME,
   SESSION_MAX_AGE_MS,
-} from '@dashboard-config/constants';
+} from "@dashboard-config/constants";
+import { type AuthUser, refreshRequest } from "@lib/api-client";
+import * as jose from "jose";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { cache } from "react";
+import "server-only";
 
 const encodedSecretKey = new TextEncoder().encode(process.env.SESSION_SECRET);
 
@@ -25,7 +25,7 @@ export const encryptSession = async (
   payload: SessionPayload,
 ): Promise<string> => {
   return await new jose.SignJWT(payload)
-    .setProtectedHeader({ alg: 'HS256' })
+    .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(new Date(Date.now() + SESSION_MAX_AGE_MS))
     .sign(encodedSecretKey);
@@ -38,7 +38,7 @@ export const decryptSession = async (
     const { payload } = await jose.jwtVerify<SessionPayload>(
       token,
       encodedSecretKey,
-      { algorithms: ['HS256'] },
+      { algorithms: ["HS256"] },
     );
     return payload;
   } catch {
@@ -50,9 +50,9 @@ export const createSession = async (payload: SessionPayload): Promise<void> => {
   const signed = await encryptSession(payload);
   (await cookies()).set(SESSION_COOKIE_NAME, signed, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
     maxAge: SESSION_MAX_AGE_MS / 1000,
   });
 };
@@ -66,7 +66,7 @@ export const updateSessionTokens = async (patch: {
   const cookie = cookieStore.get(SESSION_COOKIE_NAME);
   const session = cookie ? await decryptSession(cookie.value) : null;
   if (!session) {
-    throw new Error('No active session to update');
+    throw new Error("No active session to update");
   }
 
   const updated: SessionPayload = {
@@ -79,9 +79,9 @@ export const updateSessionTokens = async (patch: {
   const signed = await encryptSession(updated);
   cookieStore.set(SESSION_COOKIE_NAME, signed, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
     maxAge: SESSION_MAX_AGE_MS / 1000,
   });
 
@@ -107,7 +107,7 @@ export const getSession = cache(async (): Promise<SessionPayload | null> => {
 
 export const verifySession = cache(async (): Promise<SessionPayload> => {
   const s = await getSession();
-  if (!s) redirect('/admin/login');
+  if (!s) redirect("/admin/login");
   return s;
 });
 
@@ -144,7 +144,7 @@ export const requireRole = async (
 ): Promise<SessionPayload> => {
   const session = await verifySession();
   if (!allowedRoles.includes(session.user.role)) {
-    redirect('/admin/login');
+    redirect("/admin/login");
   }
   return session;
 };
