@@ -11,7 +11,7 @@ Companion to [`rbac-architecture.md`](./rbac-architecture.md) (read that first i
 
 ### Step 1 — Add permission keys to the registry
 
-Edit [`packages/types/permissions.ts`](../packages/types/permissions.ts). Add one entry per distinct action to `PERMISSION_DESCRIPTIONS`, using the `module.resource.action` (or `module.action`) key format:
+Edit [`packages/lib/permissions/index.ts`](../packages/lib/permissions/index.ts) (published as `@careerslk/lib`, not `@careerslk/types` — see architecture doc §10 for why the registry lives in a separate package from the plain type definitions). Add one entry per distinct action to `PERMISSION_DESCRIPTIONS`, using the `module.resource.action` (or `module.action`) key format:
 
 ```ts
 export const PERMISSION_DESCRIPTIONS = {
@@ -44,17 +44,17 @@ There's a compile-time check right below `PERMISSIONS` in that file — if you a
 Build the package so the API and web pick up the new keys:
 
 ```
-pnpm --filter @careerslk/types build
+pnpm --filter @careerslk/lib build
 ```
 
-`permissions.ts` is part of `packages/types/index.ts`'s barrel, which gets bundled straight into the browser (see architecture doc §10) — don't import anything Node-only (`node:dns`, `fs`, etc.) into it or anything it re-exports, even transitively. If you need a server-only helper alongside your new permissions, give it its own entry/subpath instead, following `ssrf.ts`'s pattern.
+`permissions/index.ts` is part of `packages/lib/index.ts`'s barrel, which gets bundled straight into the browser (see architecture doc §10) — don't import anything Node-only (`node:dns`, `fs`, etc.) into it or anything it re-exports, even transitively. If you need a server-only helper alongside your new permissions, give it its own entry/subpath instead, following `packages/lib/ssrf.ts`'s pattern — and don't put it in `packages/types` either, that package is types/constants only now.
 
 ### Step 2 — Apply the guard to the controller
 
 If the controller is brand new, scaffold it the same way [`roles.controller.ts`](../apps/api/src/modules/rbac/roles.controller.ts) is built. If it already exists (e.g. `CompaniesController`), edit it in place:
 
 ```ts
-import { PERMISSIONS } from '@careerslk/types';
+import { PERMISSIONS } from '@careerslk/lib';
 import { RequirePermissions } from '@/common/decorators/rbac.decorator';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
 
@@ -125,7 +125,7 @@ components/         — table, dialogs, buttons
 Gate anything permission-sensitive with `<Can>`:
 
 ```tsx
-import { PERMISSIONS } from '@careerslk/types';
+import { PERMISSIONS } from '@careerslk/lib';
 import { Can } from '@dashboard-components/can';
 
 <Can permission={PERMISSIONS.COMPANIES_CREATE}>
@@ -136,7 +136,7 @@ import { Can } from '@dashboard-components/can';
 or, in a Server Component page, gate the whole page:
 
 ```tsx
-import { PERMISSIONS } from '@careerslk/types';
+import { PERMISSIONS } from '@careerslk/lib';
 import { requirePermission } from '@dashboard-lib/session';
 
 export default async function CompaniesPage() {

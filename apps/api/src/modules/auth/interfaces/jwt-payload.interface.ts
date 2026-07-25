@@ -1,4 +1,4 @@
-import { PermissionKey } from '@careerslk/types';
+import { PermissionKey } from '@careerslk/lib';
 
 export interface JwtPayload {
   sub: number;

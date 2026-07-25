@@ -1,5 +1,5 @@
-import type { PermissionKey } from "@careerslk/types";
-import { PERMISSIONS } from "@careerslk/types";
+import type { PermissionKey } from "@careerslk/lib";
+import { PERMISSIONS } from "@careerslk/lib";
 import {
   BarChart,
   Bell,

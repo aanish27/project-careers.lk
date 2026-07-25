@@ -1,4 +1,4 @@
-import { PERMISSIONS } from '@careerslk/types';
+import { PERMISSIONS } from '@careerslk/lib';
 import {
   Body,
   Controller,

@@ -1,4 +1,4 @@
-import { PermissionKey, SUPER_ADMIN_ROLE_SLUG } from '@careerslk/types';
+import { PermissionKey, SUPER_ADMIN_ROLE_SLUG } from '@careerslk/lib';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma.service';
 import { AuthenticatedPrincipal } from '@/modules/auth/interfaces/jwt-payload.interface';

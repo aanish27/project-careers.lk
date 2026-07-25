@@ -6,7 +6,7 @@ import { CursorPaginationDto } from '@/common/dto/pagination.dto';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
 import { AuditContext } from '@/modules/audit/audit.service';
 import type { AuthenticatedPrincipal } from '@/modules/auth/interfaces/jwt-payload.interface';
-import { PERMISSIONS } from '@careerslk/types';
+import { PERMISSIONS } from '@careerslk/lib';
 import {
   Body,
   Controller,

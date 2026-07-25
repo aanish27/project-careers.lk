@@ -1,4 +1,5 @@
-import type { PermissionKey, Role as SharedRole } from '@careerslk/types';
+import type { PermissionKey } from '@careerslk/lib';
+import type { Role as SharedRole } from '@careerslk/types';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   ArrayUnique,

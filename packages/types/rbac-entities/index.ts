@@ -1,4 +1,4 @@
-import type { PermissionKey } from './permissions';
+import type { PermissionKey } from '@careerslk/lib';
 
 export interface AdminUser {
   id: number;

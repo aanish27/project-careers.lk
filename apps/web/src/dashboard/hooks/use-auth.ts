@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext } from "react";
-import type { PermissionKey } from "@careerslk/types";
+import type { PermissionKey } from "@careerslk/lib";
 import type { AuthUser } from "@lib/api-client";
 import { AuthContext } from "@dashboard-components/auth-provider";
 import { can, canAll, canAny } from "@dashboard-utils/permissions";

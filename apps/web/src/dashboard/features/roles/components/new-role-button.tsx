@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PERMISSIONS } from "@careerslk/types";
+import { PERMISSIONS } from "@careerslk/lib";
 import { Button } from "@/components/ui/button";
 import { Can } from "@dashboard-components/can";
 import { RoleFormDialog } from "./role-form-dialog";

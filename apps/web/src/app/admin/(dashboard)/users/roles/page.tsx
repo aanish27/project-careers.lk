@@ -1,4 +1,4 @@
-import { PERMISSIONS } from "@careerslk/types";
+import { PERMISSIONS } from "@careerslk/lib";
 import { RolesTable } from "@/dashboard/features/roles/components/roles-table";
 import { requirePermission } from "@dashboard-lib/session";
 

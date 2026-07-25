@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PERMISSIONS } from "@careerslk/types";
+import { PERMISSIONS } from "@careerslk/lib";
 import { DataTable, useDataTable } from "@ui/data-table";
 import { Button } from "@/components/ui/button";
 import {

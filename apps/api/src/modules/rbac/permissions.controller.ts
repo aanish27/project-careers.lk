@@ -1,4 +1,5 @@
-import { PERMISSIONS, PermissionGroup } from '@careerslk/types';
+import { PERMISSIONS } from '@careerslk/lib';
+import { PermissionGroup } from '@careerslk/types';
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PrismaService } from '@/database/prisma.service';

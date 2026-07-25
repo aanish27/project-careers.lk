@@ -1,5 +1,5 @@
 import { PaginationType } from '@careerslk/types';
-import { assertNotSsrf } from '@careerslk/types/ssrf';
+import { assertNotSsrf } from '@careerslk/lib/ssrf';
 import { randomInt } from 'node:crypto';
 import { Browser, devices } from 'playwright';
 import { HashService } from './hash.service';

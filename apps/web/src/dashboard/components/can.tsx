@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import type { PermissionKey } from "@careerslk/types";
+import type { PermissionKey } from "@careerslk/lib";
 import { useAuth } from "@dashboard-hooks/use-auth";
 
 interface CanProps {

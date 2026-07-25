@@ -7,7 +7,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import type { PermissionKey } from '@careerslk/types';
+import type { PermissionKey } from '@careerslk/lib';
 
 export class LoginDto {
   @ApiProperty({

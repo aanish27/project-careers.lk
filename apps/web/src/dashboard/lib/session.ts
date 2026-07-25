@@ -1,4 +1,4 @@
-import type { PermissionKey } from "@careerslk/types";
+import type { PermissionKey } from "@careerslk/lib";
 import { can, canAny } from "@dashboard-utils/permissions";
 import {
   ACCESS_TOKEN_TTL_MS,

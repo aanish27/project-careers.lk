@@ -4,7 +4,7 @@ import {
   PERMISSION_DESCRIPTIONS,
   parsePermissionKey,
   type PermissionKey,
-} from '@careerslk/types';
+} from '@careerslk/lib';
 
 export async function seedPermissions(prisma: PrismaClient) {
   console.log('Syncing permissions...');

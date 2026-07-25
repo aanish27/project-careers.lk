@@ -1,6 +1,6 @@
 "use client";
 
-import { PERMISSIONS } from "@careerslk/types";
+import { PERMISSIONS } from "@careerslk/lib";
 import { Button } from "@/components/ui/button";
 import { Can } from "@dashboard-components/can";
 import { UserFormDialog } from "./user-form-dialog";

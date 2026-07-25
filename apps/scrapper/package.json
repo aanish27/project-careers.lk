@@ -21,6 +21,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.0",
     "@careerslk/database": "workspace:*",
+    "@careerslk/lib": "workspace:*",
     "@careerslk/types": "workspace:*",
     "@playwright/browser-chromium": "^1.60.0",
     "@prisma/adapter-pg": "^7.8.0",

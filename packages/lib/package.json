@@ -1,12 +1,13 @@
 {
-  "name": "@careerslk/types",
+  "name": "@careerslk/lib",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.cjs",
   "types": "./dist/index.d.cts",
   "type": "module",
   "exports": {
-    ".": "./dist/index.cjs"
+    ".": "./dist/index.cjs",
+    "./ssrf": "./dist/ssrf.cjs"
   },
   "keywords": [],
   "author": "",
@@ -15,9 +16,6 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch"
-  },
-  "dependencies": {
-    "@careerslk/lib": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",

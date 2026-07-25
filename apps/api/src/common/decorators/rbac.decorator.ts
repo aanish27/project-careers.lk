@@ -1,4 +1,4 @@
-import { PermissionKey } from '@careerslk/types';
+import { PermissionKey } from '@careerslk/lib';
 import {
   createParamDecorator,
   ExecutionContext,

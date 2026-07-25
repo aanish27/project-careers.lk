@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { SUPER_ADMIN_ROLE_SLUG, type Role } from "@careerslk/types";
+import { SUPER_ADMIN_ROLE_SLUG } from "@careerslk/lib";
+import type { Role } from "@careerslk/types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {

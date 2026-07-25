@@ -1,5 +1,5 @@
 import type { AuthUser } from "@lib/api-client";
-import type { PermissionKey } from "@careerslk/types";
+import type { PermissionKey } from "@careerslk/lib";
 
 type PermissionHolder = Pick<AuthUser, "permissions" | "isSuperAdmin">;
 

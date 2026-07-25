@@ -1,4 +1,4 @@
-import { SUPER_ADMIN_ROLE_SLUG } from '@careerslk/types';
+import { SUPER_ADMIN_ROLE_SLUG } from '@careerslk/lib';
 import { PrismaClient } from '@careerslk/database';
 import bcrypt from 'bcrypt';
 
