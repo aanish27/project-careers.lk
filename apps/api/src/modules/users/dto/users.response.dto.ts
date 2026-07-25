@@ -50,20 +50,6 @@ export class UserResponseDto {
   updatedAt: Date;
 }
 
-export class PaginatedUsersResponseDto {
-  @ApiProperty({ type: [UserResponseDto] })
-  items: UserResponseDto[];
-
-  @ApiProperty({ example: 1 })
-  page: number;
-
-  @ApiProperty({ example: 10 })
-  limit: number;
-
-  @ApiProperty({ example: 100 })
-  total: number;
-}
-
 export class CursorPaginatedUsersResponseDto {
   @ApiProperty({ type: [UserResponseDto] })
   items: UserResponseDto[];

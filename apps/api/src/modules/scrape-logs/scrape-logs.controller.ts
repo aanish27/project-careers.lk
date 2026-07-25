@@ -8,8 +8,7 @@ export class ScrapeLogsController {
 
   @Get()
   findAll(@Query() filters: FilterScrapeLogsDto) {
-    const { page, limit, ...rest } = filters;
-    return this.scrapeLogsService.findAll(rest, page, limit);
+    return this.scrapeLogsService.findAll(filters);
   }
 
   @Get(':id')

@@ -1,4 +1,3 @@
-import { PaginationDto } from '@/common/dto/pagination.dto';
 import {
   Body,
   Controller,
@@ -8,7 +7,6 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Query,
 } from '@nestjs/common';
 import { AssignJobKeywordDto } from './dto/assign-job-keyword.dto';
 import { CreateKeywordDto } from './dto/create-keyword.dto';
@@ -26,8 +24,8 @@ export class KeywordsController {
   }
 
   @Get()
-  findAll(@Query() pagination: PaginationDto) {
-    return this.keywordsService.findAll(pagination.page, pagination.limit);
+  findAll() {
+    return this.keywordsService.findAll();
   }
 
   @Get(':id')

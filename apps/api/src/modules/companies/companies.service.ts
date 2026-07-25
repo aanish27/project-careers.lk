@@ -33,17 +33,10 @@ export class CompaniesService {
     });
   }
 
-  async findAll(page: number, limit: number) {
-    const skip = (page - 1) * limit;
-    const [items, total] = await Promise.all([
-      this.prisma.company.findMany({
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-      }),
-      this.prisma.company.count(),
-    ]);
-    return { items, page, limit, total };
+  async findAll() {
+    return await this.prisma.company.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async findOne(id: number) {

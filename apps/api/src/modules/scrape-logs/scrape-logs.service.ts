@@ -14,8 +14,7 @@ interface ScrapeLogFilters {
 export class ScrapeLogsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(filters: ScrapeLogFilters, page: number, limit: number) {
-    const skip = (page - 1) * limit;
+  async findAll(filters: ScrapeLogFilters) {
     const where = {
       status: filters.status,
       triggeredBy: filters.triggeredBy,
@@ -29,18 +28,11 @@ export class ScrapeLogsService {
           : undefined,
     };
 
-    const [items, total] = await Promise.all([
-      this.prisma.scrapeLog.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-        include: { company: { select: { id: true, name: true } } },
-      }),
-      this.prisma.scrapeLog.count({ where }),
-    ]);
-
-    return { items, page, limit, total };
+    return await this.prisma.scrapeLog.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      include: { company: { select: { id: true, name: true } } },
+    });
   }
 
   async findOne(id: number) {

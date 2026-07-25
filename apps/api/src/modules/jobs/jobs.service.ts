@@ -12,22 +12,15 @@ interface JobFilters {
 export class JobsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(filters: JobFilters, page: number, limit: number) {
-    const skip = (page - 1) * limit;
+  async findAll(filters: JobFilters) {
     const where = {
       status: filters.status,
       company: filters.company ? { name: filters.company } : undefined,
     };
-    const [items, total] = await Promise.all([
-      this.prisma.job.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-      }),
-      this.prisma.job.count({ where }),
-    ]);
-    return { items, page, limit, total };
+    return await this.prisma.job.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async findOne(id: number) {

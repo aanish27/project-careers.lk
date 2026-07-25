@@ -26,10 +26,7 @@ import { Roles } from '@/common/decorators/roles.decorator';
 import { RolesGuard } from '@/common/guards/role.guard';
 import { UserRole } from '@careerslk/database';
 import { plainToInstance } from 'class-transformer';
-import {
-  CursorPaginationDto,
-  PaginationDto,
-} from '@/common/dto/pagination.dto';
+import { CursorPaginationDto } from '@/common/dto/pagination.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth('JWT-auth')
@@ -42,7 +39,7 @@ export class UsersController {
   @Roles(UserRole.ADMIN)
   @ApiOperation({
     summary: 'Get all users (Admin only)',
-    description: 'Returns a paginated list of all users. Requires ADMIN role.',
+    description: 'Returns the list of all users. Requires ADMIN role.',
   })
   @ApiResponse({
     status: 200,
@@ -50,8 +47,8 @@ export class UsersController {
   })
   @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
   @ApiForbiddenResponse({ description: 'User does not have ADMIN role' })
-  async findAll(@Query() pagination: PaginationDto) {
-    return await this.usersService.getAll(pagination.page, pagination.limit);
+  async findAll() {
+    return await this.usersService.getAll();
   }
 
   @Get('cursor')

@@ -5,7 +5,6 @@ import { plainToInstance } from 'class-transformer';
 import { PrismaService } from '@/database/prisma.service';
 import {
   CursorPaginatedUsersResponseDto,
-  PaginatedUsersResponseDto,
   UserResponseDto,
 } from './dto/users.response.dto';
 import { encodeCursor, decodeCursor } from '@/common/utils/cursor.util';
@@ -51,24 +50,12 @@ export class UsersService {
     return await this.prisma.user.create({ data: safeData });
   }
 
-  async getAll(
-    page: number,
-    limit: number,
-  ): Promise<PaginatedUsersResponseDto> {
-    const skip = (page - 1) * limit;
-    const [users, total] = await Promise.all([
-      this.prisma.user.findMany({ skip, take: limit }),
-      this.prisma.user.count(),
-    ]);
+  async getAll(): Promise<UserResponseDto[]> {
+    const users = await this.prisma.user.findMany();
 
-    return {
-      items: plainToInstance(UserResponseDto, users, {
-        excludeExtraneousValues: true,
-      }),
-      page,
-      limit,
-      total,
-    };
+    return plainToInstance(UserResponseDto, users, {
+      excludeExtraneousValues: true,
+    });
   }
 
   /**

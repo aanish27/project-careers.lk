@@ -1,4 +1,3 @@
-import { PaginationDto } from '@/common/dto/pagination.dto';
 import {
   Body,
   Controller,
@@ -8,7 +7,6 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Query,
 } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
@@ -24,8 +22,8 @@ export class CompaniesController {
   }
 
   @Get()
-  findAll(@Query() pagination: PaginationDto) {
-    return this.companiesService.findAll(pagination.page, pagination.limit);
+  findAll() {
+    return this.companiesService.findAll();
   }
 
   @Get(':id')

@@ -13,18 +13,11 @@ export class KeywordsService {
     return await this.prisma.keyword.create({ data: { name: dto.name } });
   }
 
-  async findAll(page: number, limit: number) {
-    const skip = (page - 1) * limit;
-    const [items, total] = await Promise.all([
-      this.prisma.keyword.findMany({
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-        select: { id: true, name: true, _count: { select: { jobs: true } } },
-      }),
-      this.prisma.keyword.count(),
-    ]);
-    return { items, page, limit, total };
+  async findAll() {
+    return await this.prisma.keyword.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, name: true, _count: { select: { jobs: true } } },
+    });
   }
 
   async findOne(id: number) {

@@ -1,9 +1,8 @@
-import { PaginationDto } from '@/common/dto/pagination.dto';
 import { ScrapeLogStatus, ScrapeLogTrigger } from '@careerslk/database';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
 
-export class FilterScrapeLogsDto extends PaginationDto {
+export class FilterScrapeLogsDto {
   @ApiPropertyOptional({
     description: 'Filter by scrape log status',
     enum: ScrapeLogStatus,

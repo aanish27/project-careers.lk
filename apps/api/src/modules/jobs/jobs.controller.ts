@@ -18,8 +18,7 @@ export class JobsController {
 
   @Get()
   findAll(@Query() filters: FilterJobsDto) {
-    const { page, limit, ...rest } = filters;
-    return this.jobsService.findAll(rest, page, limit);
+    return this.jobsService.findAll(filters);
   }
 
   @Get(':id')
