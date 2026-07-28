@@ -1,3 +1,4 @@
+import { AuditModule } from '@/modules/audit/audit.module';
 import { SCRAPER_COMPANY_QUEUE, SCRAPER_JOB_QUEUE } from '@careerslk/types';
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
@@ -9,6 +10,7 @@ import { ScraperService } from './scraper.service';
   controllers: [ScraperController],
   providers: [ScraperService, ScraperScheduler],
   imports: [
+    AuditModule,
     BullModule.registerQueue(
       {
         name: SCRAPER_COMPANY_QUEUE,

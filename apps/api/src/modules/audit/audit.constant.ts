@@ -9,6 +9,20 @@ export const AUDIT_ACTIONS = {
   USER_DEACTIVATED: 'user.deactivated',
   USER_PASSWORD_RESET: 'user.password.reset',
   USER_DELETED: 'user.deleted',
+
+  COMPANY_CREATED: 'company.created',
+  COMPANY_UPDATED: 'company.updated',
+  COMPANY_DELETED: 'company.deleted',
+
+  KEYWORD_CREATED: 'keyword.created',
+  KEYWORD_UPDATED: 'keyword.updated',
+  KEYWORD_DELETED: 'keyword.deleted',
+  JOB_KEYWORD_ASSIGNED: 'job.keyword.assigned',
+  JOB_KEYWORD_UPDATED: 'job.keyword.updated',
+  JOB_KEYWORD_REMOVED: 'job.keyword.removed',
+
+  SCRAPE_COMPANY_TRIGGERED: 'scrape.company.triggered',
+  SCRAPE_JOBS_TRIGGERED: 'scrape.jobs.triggered',
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];

@@ -1,12 +1,16 @@
 import { PrismaService } from '@/database/prisma.service';
+import { AUDIT_ACTIONS } from '@/modules/audit/audit.constant';
+import { AuditContext, AuditService } from '@/modules/audit/audit.service';
 import { assertNotSsrf } from '@careerslk/lib/ssrf';
+import { CreateCompanyInput, UpdateCompanyInput } from '@careerslk/types';
 import { Injectable } from '@nestjs/common';
-import { CreateCompanyDto } from './dto/create-company.dto';
-import { UpdateCompanyDto } from './dto/update-company.dto';
 
 @Injectable()
 export class CompaniesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditService,
+  ) {}
 
   private assertUrlsNotSsrf(...urls: (string | undefined)[]) {
     return Promise.all(
@@ -14,22 +18,37 @@ export class CompaniesService {
     );
   }
 
-  async create(dto: CreateCompanyDto) {
+  async create(dto: CreateCompanyInput, context: AuditContext) {
     await this.assertUrlsNotSsrf(dto.careerUrl, dto.websiteUrl, dto.logoUrl);
 
-    return await this.prisma.company.create({
-      data: {
-        name: dto.name,
-        websiteUrl: dto.websiteUrl,
-        logoUrl: dto.logoUrl,
-        careerUrl: dto.careerUrl,
-        atsPlatform: dto.atsPlatform,
-        htmlSelector: dto.htmlSelector,
-        htmlSelectorType: dto.htmlSelectorType,
-        status: dto.status,
-        paginationType: dto.paginationType,
-        paginationBtn: dto.paginationBtn,
-      },
+    return await this.prisma.$transaction(async (tx) => {
+      const company = await tx.company.create({
+        data: {
+          name: dto.name,
+          websiteUrl: dto.websiteUrl,
+          logoUrl: dto.logoUrl,
+          careerUrl: dto.careerUrl,
+          atsPlatform: dto.atsPlatform,
+          htmlSelector: dto.htmlSelector,
+          htmlSelectorType: dto.htmlSelectorType,
+          status: dto.status,
+          paginationType: dto.paginationType,
+          paginationBtn: dto.paginationBtn,
+        },
+      });
+
+      await this.audit.record(
+        context,
+        {
+          action: AUDIT_ACTIONS.COMPANY_CREATED,
+          entityType: 'company',
+          entityId: company.id,
+          newValue: { name: company.name, websiteUrl: company.websiteUrl },
+        },
+        tx,
+      );
+
+      return company;
     });
   }
 
@@ -46,30 +65,65 @@ export class CompaniesService {
     });
   }
 
-  async update(id: number, dto: UpdateCompanyDto) {
+  async update(id: number, dto: UpdateCompanyInput, context: AuditContext) {
     await this.assertUrlsNotSsrf(dto.careerUrl, dto.websiteUrl, dto.logoUrl);
 
-    return await this.prisma.company.update({
-      where: { id },
-      data: {
-        name: dto.name,
-        websiteUrl: dto.websiteUrl,
-        logoUrl: dto.logoUrl,
-        careerUrl: dto.careerUrl,
-        atsPlatform: dto.atsPlatform,
-        htmlSelector: dto.htmlSelector,
-        htmlSelectorType: dto.htmlSelectorType,
-        status: dto.status,
-        paginationType: dto.paginationType,
-        paginationBtn: dto.paginationBtn,
-      },
+    return await this.prisma.$transaction(async (tx) => {
+      const before = await tx.company.findFirstOrThrow({
+        where: { id, deletedAt: null },
+      });
+
+      const company = await tx.company.update({
+        where: { id },
+        data: {
+          name: dto.name,
+          websiteUrl: dto.websiteUrl,
+          logoUrl: dto.logoUrl,
+          careerUrl: dto.careerUrl,
+          atsPlatform: dto.atsPlatform,
+          htmlSelector: dto.htmlSelector,
+          htmlSelectorType: dto.htmlSelectorType,
+          status: dto.status,
+          paginationType: dto.paginationType,
+          paginationBtn: dto.paginationBtn,
+        },
+      });
+
+      await this.audit.record(
+        context,
+        {
+          action: AUDIT_ACTIONS.COMPANY_UPDATED,
+          entityType: 'company',
+          entityId: company.id,
+          oldValue: { name: before.name, status: before.status },
+          newValue: { name: company.name, status: company.status },
+        },
+        tx,
+      );
+
+      return company;
     });
   }
 
-  async softDelete(id: number) {
-    return await this.prisma.company.update({
-      where: { id },
-      data: { deletedAt: new Date() },
+  async softDelete(id: number, context: AuditContext) {
+    return await this.prisma.$transaction(async (tx) => {
+      const company = await tx.company.update({
+        where: { id },
+        data: { deletedAt: new Date() },
+      });
+
+      await this.audit.record(
+        context,
+        {
+          action: AUDIT_ACTIONS.COMPANY_DELETED,
+          entityType: 'company',
+          entityId: company.id,
+          oldValue: { name: company.name },
+        },
+        tx,
+      );
+
+      return company;
     });
   }
 }

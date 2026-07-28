@@ -1,5 +1,7 @@
 import type { CompanyStatus, PaginationType } from '../enums';
 
+export * from './schemas';
+
 export interface Company {
   id: number;
   name: string;

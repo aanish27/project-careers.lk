@@ -15,6 +15,20 @@ export const PERMISSION_DESCRIPTIONS = {
   'permissions.read': 'View the catalogue of available permissions',
 
   'jobs.read': 'View all the jobs',
+
+  'companies.read': 'View company records',
+  'companies.create': 'Add new companies to scrape',
+  'companies.update': 'Edit company details and scrape configuration',
+  'companies.delete': 'Remove companies',
+
+  'keywords.read': 'View the keyword catalogue and job-keyword assignments',
+  'keywords.create': 'Create new keywords',
+  'keywords.update': 'Rename existing keywords',
+  'keywords.delete': 'Delete keywords from the catalogue',
+  'keywords.assign': 'Assign, edit, or remove keywords on a job',
+
+  'scraper.company.trigger': 'Manually trigger a company profile scrape',
+  'scraper.jobs.trigger': 'Manually trigger a job listing scrape',
 } as const;
 
 export type PermissionKey = keyof typeof PERMISSION_DESCRIPTIONS;
@@ -36,6 +50,20 @@ export const PERMISSIONS = {
   PERMISSIONS_READ: 'permissions.read',
 
   JOBS_READ: 'jobs.read',
+
+  COMPANIES_READ: 'companies.read',
+  COMPANIES_CREATE: 'companies.create',
+  COMPANIES_UPDATE: 'companies.update',
+  COMPANIES_DELETE: 'companies.delete',
+
+  KEYWORDS_READ: 'keywords.read',
+  KEYWORDS_CREATE: 'keywords.create',
+  KEYWORDS_UPDATE: 'keywords.update',
+  KEYWORDS_DELETE: 'keywords.delete',
+  KEYWORDS_ASSIGN: 'keywords.assign',
+
+  SCRAPER_COMPANY_TRIGGER: 'scraper.company.trigger',
+  SCRAPER_JOBS_TRIGGER: 'scraper.jobs.trigger',
 } as const satisfies Record<string, PermissionKey>;
 
 // Compile error if a PERMISSION_DESCRIPTIONS key has no matching PERMISSIONS constant.
