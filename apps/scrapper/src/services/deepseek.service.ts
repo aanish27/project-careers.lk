@@ -129,7 +129,7 @@ export class DeepSeekService {
               },
             },
           },
-          claudeLogs: {
+          aiLogs: {
             create: {
               id: msg.id,
               status: 'succeeded',

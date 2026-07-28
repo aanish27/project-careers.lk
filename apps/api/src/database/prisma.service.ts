@@ -1,4 +1,3 @@
-import { createSoftDeleteExtension } from '@candoimage/prisma-extension-soft-delete';
 import { PrismaClient } from '@careerslk/database';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -20,21 +19,5 @@ export class PrismaService extends PrismaClient {
       log: ['info', 'warn', 'error'],
       omit: { adminUser: { password: true } },
     });
-    this.$extends(
-      createSoftDeleteExtension({
-        models: {
-          AdminUser: true,
-          Company: true,
-          Job: true,
-        },
-        defaultConfig: {
-          field: 'deletedAt',
-          createValue: (deleted) => {
-            if (deleted) return new Date();
-            return null;
-          },
-        },
-      }),
-    );
   }
 }

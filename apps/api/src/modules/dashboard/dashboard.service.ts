@@ -78,7 +78,7 @@ export class DashboardService {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const usageByModel = await this.prisma.claudeLog.groupBy({
+    const usageByModel = await this.prisma.aiLog.groupBy({
       by: ['model'],
       where: { createdAt: { gte: startOfMonth }, model: { not: null } },
       _sum: { inputTokens: true, outputTokens: true },

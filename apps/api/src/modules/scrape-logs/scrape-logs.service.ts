@@ -38,7 +38,7 @@ export class ScrapeLogsService {
   async findOne(id: number) {
     return await this.prisma.scrapeLog.findUniqueOrThrow({
       where: { id },
-      include: { company: true, claudeLogs: true },
+      include: { company: true, aiLogs: true },
     });
   }
 }

@@ -149,7 +149,7 @@ export class ClaudeService {
               },
             },
           },
-          claudeLogs: {
+          aiLogs: {
             create: {
               id: msg.id,
               status: 'succeeded',
@@ -221,7 +221,7 @@ export class ClaudeService {
         ],
       });
 
-      await prisma.claudeBatchLog.create({
+      await prisma.aiBatchLog.create({
         data: {
           id: msg.id,
           status: msg.processing_status,
@@ -258,7 +258,7 @@ export class ClaudeService {
       );
     }
 
-    await prisma.claudeBatchLog.update({
+    await prisma.aiBatchLog.update({
       where: { id: batchId },
       data: {
         status: messageBatch.processing_status,
@@ -352,7 +352,7 @@ export class ClaudeService {
                   },
                 },
               },
-              claudeLogs: {
+              aiLogs: {
                 create: {
                   id: result.result.message.id,
                   status: result.result.type,
@@ -385,7 +385,7 @@ export class ClaudeService {
                   },
                 },
               },
-              claudeLogs: {
+              aiLogs: {
                 create: {
                   id: result.result.error.request_id!,
                   status: result.result.type,
@@ -420,7 +420,7 @@ export class ClaudeService {
                   },
                 },
               },
-              claudeLogs: {
+              aiLogs: {
                 create: {
                   id: result.custom_id,
                   status: result.result.type,

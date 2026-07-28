@@ -143,8 +143,8 @@ model Company {
 
   jobs            Job[]
   scrapeLogs      ScrapeLog[]
-  claudeLogs      ClaudeLog[]
-  claudeBatchLogs ClaudeBatchLog[]
+  aiLogs          AiLog[]
+  aiBatchLogs     AiBatchLog[]
 }
 
 model Job {
@@ -171,7 +171,7 @@ model Job {
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   batchId        String?
-  batch          ClaudeBatchLog? @relation(fields: [batchId], references: [id])
+  batch          AiBatchLog?     @relation(fields: [batchId], references: [id])
 
   skills   JobSkill[]
   keywords JobKeyword[]
@@ -251,20 +251,20 @@ model ScrapeLog {
   deletedAt    DateTime?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
-  claudeLogs   ClaudeLog[]
+  aiLogs       AiLog[]
 
   @@index([companyId])
   @@index([createdAt])
 }
 
-model ClaudeLog {
-  id           String          @id
+model AiLog {
+  id           String      @id
   companyId    Int
-  company      Company         @relation(fields: [companyId], references: [id])
+  company      Company     @relation(fields: [companyId], references: [id])
   scrapeLogId  Int
-  scrapeLog    ScrapeLog       @relation(fields: [scrapeLogId], references: [id])
+  scrapeLog    ScrapeLog   @relation(fields: [scrapeLogId], references: [id])
   batchId      String?
-  batchLog     ClaudeBatchLog? @relation(fields: [batchId], references: [id])
+  batchLog     AiBatchLog? @relation(fields: [batchId], references: [id])
   status       String
   stopReason   String?
   model        String?
@@ -279,14 +279,14 @@ model ClaudeLog {
   @@index([createdAt])
 }
 
-model ClaudeBatchLog {
-  id         String      @id
-  status     String
-  response   Json
-  type       String
-  claudeLogs ClaudeLog[]
-  jobs       Job[]
-  companies  Company[]
+model AiBatchLog {
+  id        String    @id
+  status    String
+  response  Json
+  type      String
+  aiLogs    AiLog[]
+  jobs      Job[]
+  companies Company[]
 
   deletedAt DateTime?
   createdAt DateTime  @default(now())

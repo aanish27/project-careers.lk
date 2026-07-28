@@ -16,6 +16,7 @@ export class JobsService {
     const where = {
       status: filters.status,
       company: filters.company ? { name: filters.company } : undefined,
+      deletedAt: null,
     };
     return await this.prisma.job.findMany({
       where,
@@ -27,8 +28,8 @@ export class JobsService {
   }
 
   async findOne(id: number) {
-    return await this.prisma.job.findUniqueOrThrow({
-      where: { id },
+    return await this.prisma.job.findFirstOrThrow({
+      where: { id, deletedAt: null },
       include: { company: true, keywords: true },
     });
   }
@@ -38,6 +39,9 @@ export class JobsService {
   }
 
   async softDelete(id: number) {
-    return await this.prisma.job.delete({ where: { id } });
+    return await this.prisma.job.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
   }
 }

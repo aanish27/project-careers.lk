@@ -22,7 +22,7 @@ export async function seedScrapeLogs(
   console.log(`Seeding scrape logs for ${companies.length} companies...`);
 
   let scrapeLogCount = 0;
-  let claudeLogCount = 0;
+  let aiLogCount = 0;
 
   for (const company of companies) {
     const runs = faker.number.int({ min: 1, max: 6 });
@@ -64,9 +64,9 @@ export async function seedScrapeLogs(
       });
       scrapeLogCount++;
 
-      const claudeCallCount = faker.number.int({ min: 0, max: 2 });
-      for (let j = 0; j < claudeCallCount; j++) {
-        await prisma.claudeLog.create({
+      const aiCallCount = faker.number.int({ min: 0, max: 2 });
+      for (let j = 0; j < aiCallCount; j++) {
+        await prisma.aiLog.create({
           data: {
             id: randomUUID(),
             companyId: company.id,
@@ -83,12 +83,12 @@ export async function seedScrapeLogs(
             createdAt: scrapeLog.createdAt,
           },
         });
-        claudeLogCount++;
+        aiLogCount++;
       }
     }
   }
 
   console.log(
-    `  Seeded ${scrapeLogCount} scrape logs and ${claudeLogCount} claude logs`,
+    `  Seeded ${scrapeLogCount} scrape logs and ${aiLogCount} AI logs`,
   );
 }

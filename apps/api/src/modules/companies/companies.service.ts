@@ -35,12 +35,15 @@ export class CompaniesService {
 
   async findAll() {
     return await this.prisma.company.findMany({
+      where: { deletedAt: null },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async findOne(id: number) {
-    return await this.prisma.company.findUniqueOrThrow({ where: { id: id } });
+    return await this.prisma.company.findFirstOrThrow({
+      where: { id, deletedAt: null },
+    });
   }
 
   async update(id: number, dto: UpdateCompanyDto) {
@@ -64,6 +67,9 @@ export class CompaniesService {
   }
 
   async softDelete(id: number) {
-    return await this.prisma.company.delete({ where: { id } });
+    return await this.prisma.company.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
   }
 }
