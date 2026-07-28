@@ -24,7 +24,7 @@ import { ResetPasswordDialog } from "./reset-password-dialog";
 import { columns } from "./columns";
 import { useUsers } from "../hooks/use-users";
 import { NewUserButton } from "./new-user-button";
-import type { AdminUser } from "../types/user.types";
+import type { AdminUser } from "@careerslk/types";
 
 type ActiveDialog = "assignRoles" | "resetPassword" | "block" | "delete" | null;
 

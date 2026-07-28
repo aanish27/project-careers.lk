@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useDeleteUser } from "../hooks/use-users";
-import type { AdminUser } from "../types/user.types";
+import type { AdminUser } from "@careerslk/types";
 
 export function DeleteUserDialog({
   user,

@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useDeleteRole } from "../hooks/use-roles";
-import type { Role } from "../types/role.types";
+import type { Role } from "@careerslk/types";
 
 export function DeleteRoleDialog({
   role,

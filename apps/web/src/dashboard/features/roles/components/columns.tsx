@@ -1,6 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import type { Role } from "../types/role.types";
+import type { Role } from "@careerslk/types";
 
 export const columns: ColumnDef<Role>[] = [
   {

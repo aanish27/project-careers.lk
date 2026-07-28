@@ -1,7 +1,3 @@
-import type { AdminUser } from "@careerslk/types";
-
-export type { AdminUser };
-
 export interface CreateUserInput {
   email: string;
   password: string;

@@ -1,6 +1,6 @@
+import type { AdminUser } from "@careerslk/types";
 import { api } from "@dashboard-lib/axios";
 import type {
-  AdminUser,
   CreateUserInput,
   ResetPasswordInput,
   SetUserRolesInput,

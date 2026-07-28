@@ -20,7 +20,7 @@ import {
   type CreateRoleFormValues,
   type UpdateRoleFormValues,
 } from "../types/role-schemas";
-import type { Role } from "../types/role.types";
+import type { Role } from "@careerslk/types";
 
 export function RoleFormDialog({
   role,

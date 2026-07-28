@@ -22,7 +22,7 @@ import {
 import { api } from "@dashboard-lib/axios";
 import { useAuth } from "@dashboard-hooks/use-auth";
 import { useSetUserRoles } from "../hooks/use-users";
-import type { AdminUser } from "../types/user.types";
+import type { AdminUser } from "@careerslk/types";
 
 function AssignRolesBody({
   user,

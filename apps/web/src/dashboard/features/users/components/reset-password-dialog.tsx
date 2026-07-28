@@ -17,7 +17,7 @@ import {
   resetPasswordSchema,
   type ResetPasswordFormValues,
 } from "../types/user-schemas";
-import type { AdminUser } from "../types/user.types";
+import type { AdminUser } from "@careerslk/types";
 
 export function ResetPasswordDialog({
   user,

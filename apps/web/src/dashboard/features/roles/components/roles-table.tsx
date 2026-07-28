@@ -22,7 +22,7 @@ import { RolePermissionsDialog } from "./role-permissions-dialog";
 import { columns } from "./columns";
 import { NewRoleButton } from "./new-role-button";
 import { useRoles } from "../hooks/use-roles";
-import type { Role } from "../types/role.types";
+import type { Role } from "@careerslk/types";
 
 type ActiveDialog = "edit" | "permissions" | "delete" | null;
 

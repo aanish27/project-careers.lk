@@ -1,7 +1,7 @@
+import type { Role } from "@careerslk/types";
 import { api } from "@dashboard-lib/axios";
 import type {
   CreateRoleInput,
-  Role,
   SetRolePermissionsInput,
   UpdateRoleInput,
 } from "../types/role.types";

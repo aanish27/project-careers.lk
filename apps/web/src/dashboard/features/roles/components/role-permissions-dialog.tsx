@@ -13,7 +13,7 @@ import {
 import { usePermissions } from "@dashboard-hooks/use-permissions";
 import { useSetRolePermissions } from "../hooks/use-roles";
 import { PermissionPicker } from "./permission-picker";
-import type { Role } from "../types/role.types";
+import type { Role } from "@careerslk/types";
 
 function RolePermissionsBody({
   role,

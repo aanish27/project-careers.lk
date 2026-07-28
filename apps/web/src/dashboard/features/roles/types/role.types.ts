@@ -1,7 +1,3 @@
-import type { Role } from "@careerslk/types";
-
-export type { Role };
-
 export interface CreateRoleInput {
   slug: string;
   name: string;
