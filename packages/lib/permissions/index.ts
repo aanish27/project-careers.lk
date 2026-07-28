@@ -39,6 +39,8 @@ export const PERMISSION_DESCRIPTIONS = {
   'queue-logs.read': 'View live scraper queue state',
 
   'notifications.read': 'View and mark your own notifications as read',
+
+  'dashboard.read': 'View the platform overview dashboard',
 } as const;
 
 export type PermissionKey = keyof typeof PERMISSION_DESCRIPTIONS;
@@ -84,6 +86,8 @@ export const PERMISSIONS = {
   QUEUE_LOGS_READ: 'queue-logs.read',
 
   NOTIFICATIONS_READ: 'notifications.read',
+
+  DASHBOARD_READ: 'dashboard.read',
 } as const satisfies Record<string, PermissionKey>;
 
 // Compile error if a PERMISSION_DESCRIPTIONS key has no matching PERMISSIONS constant.
