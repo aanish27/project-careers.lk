@@ -8,13 +8,29 @@ import type {
 
 export const companyApi = {
   list: () =>
-    api.get<CompanyListResponse>("/companies").then((res) => res.data),
+    api.get<CompanyListResponse>("/admin/companies").then((res) => res.data),
   get: (id: number) =>
-    api.get<Company>(`/companies/${id}`).then((res) => res.data),
+    api.get<Company>(`/admin/companies/${id}`).then((res) => res.data),
   create: (body: CreateCompanyInput) =>
-    api.post<Company>("/companies", body).then((res) => res.data),
+    api.post<Company>("/admin/companies", body).then((res) => res.data),
   update: (id: number, body: UpdateCompanyInput) =>
-    api.patch<Company>(`/companies/${id}`, body).then((res) => res.data),
+    api.patch<Company>(`/admin/companies/${id}`, body).then((res) => res.data),
   remove: (id: number) =>
-    api.delete<Company>(`/companies/${id}`).then((res) => res.data),
+    api.delete<Company>(`/admin/companies/${id}`).then((res) => res.data),
+};
+
+interface ScrapeQueuedResponse {
+  queued: boolean;
+  message: string;
+}
+
+export const scraperApi = {
+  scrapeJob: (id: number) =>
+    api
+      .post<ScrapeQueuedResponse>(`/admin/scraper/jobs/${id}`)
+      .then((res) => res.data),
+  scrapeCompany: (id: number) =>
+    api
+      .post<ScrapeQueuedResponse>(`/admin/scraper/companies/${id}`)
+      .then((res) => res.data),
 };

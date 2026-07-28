@@ -20,6 +20,9 @@ export class JobsService {
     return await this.prisma.job.findMany({
       where,
       orderBy: { createdAt: 'desc' },
+      include: {
+        company: { select: { id: true, name: true, logoUrl: true } },
+      },
     });
   }
 

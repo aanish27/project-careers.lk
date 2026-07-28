@@ -1,6 +1,10 @@
 import type { PermissionKey } from "@careerslk/lib";
 import { PERMISSIONS } from "@careerslk/lib";
-import { IconBuildingSkyscraper, IconUsersGroup } from "@tabler/icons-react";
+import {
+  IconBriefcase,
+  IconBuildingSkyscraper,
+  IconUsersGroup,
+} from "@tabler/icons-react";
 
 export interface IconSidebarSection {
   label: string;
@@ -21,6 +25,18 @@ export const sections: IconSidebarSection[] = [
     icon: IconUsersGroup,
     href: "admin/users",
     permission: PERMISSIONS.USERS_READ,
+  },
+  {
+    label: "jobs",
+    icon: IconBriefcase,
+    href: "admin/jobs",
+    permission: PERMISSIONS.JOBS_READ,
+  },
+  {
+    label: "Audit Logs",
+    icon: IconBriefcase,
+    href: "admin/audit-logs",
+    // permission: PERMISSIONS.JOBS_READ,
   },
   // {
   //   label: 'Dashboard',

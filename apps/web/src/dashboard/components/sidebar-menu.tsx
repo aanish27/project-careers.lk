@@ -74,6 +74,7 @@ export function SidebarMenu({
                       <Button
                         variant="ghost"
                         key={href}
+                        nativeButton={false}
                         className={cn(
                           "flex justify-start gap-2 rounded-md text-xs font-medium transition-all",
                           activeItem === label
@@ -86,7 +87,7 @@ export function SidebarMenu({
                             <span className="capitalize">{label}</span>
                           </Link>
                         }
-                      ></Button>
+                      />
                     ))}
                   </AccordionContent>
                 </AccordionItem>

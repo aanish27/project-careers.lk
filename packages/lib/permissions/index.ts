@@ -13,6 +13,8 @@ export const PERMISSION_DESCRIPTIONS = {
   'roles.permissions.assign': 'Change which permissions a role grants',
 
   'permissions.read': 'View the catalogue of available permissions',
+
+  'jobs.read': 'View all the jobs',
 } as const;
 
 export type PermissionKey = keyof typeof PERMISSION_DESCRIPTIONS;
@@ -32,6 +34,8 @@ export const PERMISSIONS = {
   ROLES_PERMISSIONS_ASSIGN: 'roles.permissions.assign',
 
   PERMISSIONS_READ: 'permissions.read',
+
+  JOBS_READ: 'jobs.read',
 } as const satisfies Record<string, PermissionKey>;
 
 // Compile error if a PERMISSION_DESCRIPTIONS key has no matching PERMISSIONS constant.
