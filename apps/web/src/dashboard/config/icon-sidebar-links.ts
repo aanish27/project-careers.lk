@@ -3,6 +3,7 @@ import { PERMISSIONS } from "@careerslk/lib";
 import {
   IconBriefcase,
   IconBuildingSkyscraper,
+  IconListDetails,
   IconUsersGroup,
 } from "@tabler/icons-react";
 
@@ -34,10 +35,9 @@ export const sections: IconSidebarSection[] = [
     permission: PERMISSIONS.JOBS_READ,
   },
   {
-    label: "Audit Logs",
-    icon: IconBriefcase,
-    href: "admin/audit-logs",
-    // permission: PERMISSIONS.JOBS_READ,
+    label: "Logs",
+    icon: IconListDetails,
+    href: "admin/logs",
   },
   // {
   //   label: 'Dashboard',

@@ -1,4 +1,5 @@
 import type { Company } from '../company';
+import type { AiLog } from '../logs';
 
 export interface ScrapeLog {
   id: number;
@@ -16,4 +17,9 @@ export interface ScrapeLog {
 
 export interface ScrapeLogWithCompany extends ScrapeLog {
   company: Pick<Company, 'id' | 'name'>;
+}
+
+export interface ScrapeLogDetail extends ScrapeLog {
+  company: Company;
+  aiLogs: AiLog[];
 }

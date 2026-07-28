@@ -1,80 +1,27 @@
-import { JobWithCompany } from "@careerslk/types";
+import type { AuditLogWithActor } from "@careerslk/types";
 import type { ColumnDef } from "@tanstack/react-table";
 
-export const columns: ColumnDef<JobWithCompany>[] = [
+export const columns: ColumnDef<AuditLogWithActor>[] = [
   {
-    accessorKey: "company",
-    header: "Company",
-    accessorFn: (row) => `${row.company.name}`,
+    accessorKey: "createdAt",
+    header: "Date",
+    cell: ({ getValue }) => new Date(getValue<string>()).toLocaleString(),
   },
   {
-    accessorKey: "title",
-    header: "Title",
+    accessorKey: "action",
+    header: "Action",
   },
   {
-    accessorKey: "location",
-    header: "Location",
+    accessorKey: "entityType",
+    header: "Entity",
   },
   {
-    accessorKey: "workMode",
-    header: "Work Mode",
+    accessorKey: "entityId",
+    header: "Entity ID",
   },
   {
-    accessorKey: "employmentType",
-    header: "Type",
-  },
-  {
-    accessorKey: "roleCategory",
-    header: "Category",
-  },
-
-  {
-    accessorKey: "department",
-    header: "Department",
-  },
-  {
-    accessorKey: "salaryMin",
-    header: "Salary Min",
-  },
-  {
-    accessorKey: "salaryMax",
-    header: "Salary Max",
-  },
-  {
-    accessorKey: "salaryCurrency",
-    header: "Salary Currency",
-  },
-  {
-    accessorKey: "description",
-    header: "Description",
-  },
-  {
-    accessorKey: "deadline",
-    header: "Deadline",
-  },
-  {
-    accessorKey: "applyUrl",
-    header: "Apply Url",
-  },
-  {
-    accessorKey: "salaryRaw",
-    header: "Salary",
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    // cell: ({ getValue }) => (
-    //   <Badge variant={getValue<boolean>() ? "default" : "destructive"}>
-    //     {getValue<boolean>() ? "Active" : "Blocked"}
-    //   </Badge>
-    // ),
-  },
-  {
-    accessorKey: "lastSeenAt",
-    header: "Last Seen",
-    cell: ({ getValue }) => {
-      const value = getValue<string | null>();
-      return value ? new Date(value).toLocaleString() : "Never";
-    },
+    id: "actor",
+    header: "Actor",
+    accessorFn: (row) => row.actor?.email ?? row.actorEmail ?? "System",
   },
 ];
