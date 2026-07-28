@@ -1,6 +1,8 @@
+import type { UpdateCompanyInput } from "@careerslk/types";
+import { toMessage } from "@dashboard/utils/to-message";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { companyApi } from "../api/api";
-import type { UpdateCompanyInput } from "../types/company.types";
 import { companyKeys } from "./query-keys";
 
 export function useUpdateCompany() {
@@ -14,6 +16,9 @@ export function useUpdateCompany() {
       queryClient.invalidateQueries({
         queryKey: companyKeys.detail(variables.id),
       });
+      toast.success("Company updated");
     },
+    onError: (error) =>
+      toast.error(toMessage(error, "Failed to update company")),
   });
 }

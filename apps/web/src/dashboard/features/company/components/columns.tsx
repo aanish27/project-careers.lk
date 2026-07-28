@@ -1,5 +1,5 @@
+import type { Company } from "@careerslk/types";
 import type { ColumnDef } from "@tanstack/react-table";
-import type { Company } from "../types/company.types";
 
 export const columns: ColumnDef<Company>[] = [
   {

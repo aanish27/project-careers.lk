@@ -1,14 +1,12 @@
-import { api } from "@dashboard-lib/axios";
 import type {
   Company,
-  CompanyListResponse,
   CreateCompanyInput,
   UpdateCompanyInput,
-} from "../types/company.types";
+} from "@careerslk/types";
+import { api } from "@dashboard-lib/axios";
 
 export const companyApi = {
-  list: () =>
-    api.get<CompanyListResponse>("/admin/companies").then((res) => res.data),
+  list: () => api.get<Company[]>("/admin/companies").then((res) => res.data),
   get: (id: number) =>
     api.get<Company>(`/admin/companies/${id}`).then((res) => res.data),
   create: (body: CreateCompanyInput) =>
@@ -32,5 +30,13 @@ export const scraperApi = {
   scrapeCompany: (id: number) =>
     api
       .post<ScrapeQueuedResponse>(`/admin/scraper/companies/${id}`)
+      .then((res) => res.data),
+  scrapeJobs: (ids: number[]) =>
+    api
+      .post<ScrapeQueuedResponse>("/admin/scraper/jobs", { ids })
+      .then((res) => res.data),
+  scrapeCompanies: (ids: number[]) =>
+    api
+      .post<ScrapeQueuedResponse>("/admin/scraper/companies", { ids })
       .then((res) => res.data),
 };

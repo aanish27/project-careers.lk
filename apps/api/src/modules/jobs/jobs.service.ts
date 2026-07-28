@@ -5,6 +5,7 @@ import { UpdateJobDto } from './dto/update-job.dto';
 
 interface JobFilters {
   company?: string;
+  companyId?: number;
   status?: JobStatus;
 }
 
@@ -15,6 +16,7 @@ export class JobsService {
   async findAll(filters: JobFilters) {
     const where = {
       status: filters.status,
+      companyId: filters.companyId,
       company: filters.company ? { name: filters.company } : undefined,
       deletedAt: null,
     };

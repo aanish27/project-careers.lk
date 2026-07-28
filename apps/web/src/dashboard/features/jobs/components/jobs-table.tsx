@@ -88,8 +88,8 @@ import { columns } from "./columns";
 //   );
 // }
 
-export function JobsTable() {
-  const { data } = useJobs();
+export function JobsTable({ companyId }: { companyId?: number } = {}) {
+  const { data } = useJobs(companyId ? { companyId } : undefined);
 
   const table = useDataTable({
     columns,

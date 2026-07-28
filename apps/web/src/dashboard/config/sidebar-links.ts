@@ -4,6 +4,7 @@ import {
   BarChart,
   Bell,
   Box,
+  Building2,
   CreditCard,
   FileText,
   FolderOpen,
@@ -38,6 +39,28 @@ interface SidebarLinks {
 }
 
 export const sidebarLinks: SidebarLinks[] = [
+  {
+    moduleName: "company",
+    sections: [
+      {
+        title: "Manage",
+        items: [
+          {
+            label: "Companies",
+            icon: Building2,
+            href: "/admin/company",
+            permission: PERMISSIONS.COMPANIES_READ,
+          },
+          {
+            label: "Overview",
+            icon: LayoutDashboard,
+            href: "/admin/company/overview",
+            permission: PERMISSIONS.COMPANIES_READ,
+          },
+        ],
+      },
+    ],
+  },
   {
     moduleName: "search",
     sections: [

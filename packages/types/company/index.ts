@@ -10,6 +10,8 @@ export interface Company {
   careerUrl: string;
   atsPlatform: string | null;
   status: CompanyStatus;
+  scrapeStatus: string;
+  lastScrapedAt: string | null;
   htmlSelector: string | null;
   htmlSelectorType: string | null;
   paginationType: PaginationType | null;

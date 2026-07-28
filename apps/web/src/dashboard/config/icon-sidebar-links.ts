@@ -19,6 +19,7 @@ export const sections: IconSidebarSection[] = [
     label: "company",
     icon: IconBuildingSkyscraper,
     href: "admin/company",
+    permission: PERMISSIONS.COMPANIES_READ,
   },
   {
     label: "users",

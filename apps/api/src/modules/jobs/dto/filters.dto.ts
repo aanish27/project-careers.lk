@@ -1,6 +1,7 @@
 import { JobStatus } from '@careerslk/types';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 
 export class FilterJobsDto {
   @ApiPropertyOptional({
@@ -10,6 +11,12 @@ export class FilterJobsDto {
   @IsOptional()
   @IsString()
   company?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by company id' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  companyId?: number;
 
   @ApiPropertyOptional({
     description: 'Filter by job status',

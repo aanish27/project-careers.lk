@@ -2,7 +2,10 @@ import { JobWithCompany } from "@careerslk/types";
 import { api } from "@dashboard-lib/axios";
 
 export const jobsApi = {
-  list: () => api.get<JobWithCompany[]>("/admin/jobs").then((res) => res.data),
+  list: (filters?: { companyId?: number }) =>
+    api
+      .get<JobWithCompany[]>("/admin/jobs", { params: filters })
+      .then((res) => res.data),
   get: (id: number) =>
     api.get<JobWithCompany>(`/admin/jobs/${id}`).then((res) => res.data),
   // create: (body: CreateUserInput) =>
