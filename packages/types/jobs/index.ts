@@ -1,9 +1,13 @@
 import type { Company } from '../company';
 import type { JobStatus } from '../enums';
+import type { Keyword } from '../keywords';
+
+export * from './schemas';
 
 export interface Job {
   id: number;
   companyId: number;
+  batchId: string | null;
   title: string;
   location: string | null;
   workMode: string | null;
@@ -25,4 +29,14 @@ export interface Job {
 
 export interface JobWithCompany extends Job {
   company: Pick<Company, 'id' | 'name' | 'logoUrl'>;
+}
+
+export interface JobKeywordWithName {
+  keywordId: number;
+  editedByAdmin: boolean;
+  keyword: Pick<Keyword, 'id' | 'name'>;
+}
+
+export interface JobDetail extends JobWithCompany {
+  keywords: JobKeywordWithName[];
 }

@@ -23,6 +23,9 @@ export const AUDIT_ACTIONS = {
 
   SCRAPE_COMPANY_TRIGGERED: 'scrape.company.triggered',
   SCRAPE_JOBS_TRIGGERED: 'scrape.jobs.triggered',
+
+  JOB_UPDATED: 'job.updated',
+  JOB_DELETED: 'job.deleted',
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];

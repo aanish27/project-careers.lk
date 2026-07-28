@@ -8,3 +8,11 @@ export function useJobs(filters?: { companyId?: number }) {
     queryFn: () => jobsApi.list(filters),
   });
 }
+
+export function useJob(id: number) {
+  return useQuery({
+    queryKey: jobsKeys.detail(id),
+    queryFn: () => jobsApi.get(id),
+    enabled: Number.isFinite(id),
+  });
+}

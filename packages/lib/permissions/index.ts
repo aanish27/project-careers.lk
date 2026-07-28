@@ -15,6 +15,8 @@ export const PERMISSION_DESCRIPTIONS = {
   'permissions.read': 'View the catalogue of available permissions',
 
   'jobs.read': 'View all the jobs',
+  'jobs.update': 'Edit job listing details',
+  'jobs.delete': 'Remove job listings',
 
   'companies.read': 'View company records',
   'companies.create': 'Add new companies to scrape',
@@ -56,6 +58,8 @@ export const PERMISSIONS = {
   PERMISSIONS_READ: 'permissions.read',
 
   JOBS_READ: 'jobs.read',
+  JOBS_UPDATE: 'jobs.update',
+  JOBS_DELETE: 'jobs.delete',
 
   COMPANIES_READ: 'companies.read',
   COMPANIES_CREATE: 'companies.create',

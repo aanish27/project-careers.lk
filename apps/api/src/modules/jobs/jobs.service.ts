@@ -1,7 +1,8 @@
 import { PrismaService } from '@/database/prisma.service';
-import { JobStatus } from '@careerslk/types';
+import { AUDIT_ACTIONS } from '@/modules/audit/audit.constant';
+import { AuditContext, AuditService } from '@/modules/audit/audit.service';
+import { JobStatus, UpdateJobInput } from '@careerslk/types';
 import { Injectable } from '@nestjs/common';
-import { UpdateJobDto } from './dto/update-job.dto';
 
 interface JobFilters {
   company?: string;
@@ -11,7 +12,10 @@ interface JobFilters {
 
 @Injectable()
 export class JobsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditService,
+  ) {}
 
   async findAll(filters: JobFilters) {
     const where = {
@@ -32,18 +36,62 @@ export class JobsService {
   async findOne(id: number) {
     return await this.prisma.job.findFirstOrThrow({
       where: { id, deletedAt: null },
-      include: { company: true, keywords: true },
+      include: {
+        company: true,
+        keywords: {
+          select: {
+            keywordId: true,
+            editedByAdmin: true,
+            keyword: { select: { id: true, name: true } },
+          },
+        },
+      },
     });
   }
 
-  async update(id: number, dto: UpdateJobDto) {
-    return await this.prisma.job.update({ where: { id }, data: { ...dto } });
+  async update(id: number, dto: UpdateJobInput, context: AuditContext) {
+    return await this.prisma.$transaction(async (tx) => {
+      const before = await tx.job.findFirstOrThrow({
+        where: { id, deletedAt: null },
+      });
+
+      const job = await tx.job.update({ where: { id }, data: { ...dto } });
+
+      await this.audit.record(
+        context,
+        {
+          action: AUDIT_ACTIONS.JOB_UPDATED,
+          entityType: 'job',
+          entityId: job.id,
+          oldValue: { title: before.title, status: before.status },
+          newValue: { title: job.title, status: job.status },
+        },
+        tx,
+      );
+
+      return job;
+    });
   }
 
-  async softDelete(id: number) {
-    return await this.prisma.job.update({
-      where: { id },
-      data: { deletedAt: new Date() },
+  async softDelete(id: number, context: AuditContext) {
+    return await this.prisma.$transaction(async (tx) => {
+      const job = await tx.job.update({
+        where: { id },
+        data: { deletedAt: new Date() },
+      });
+
+      await this.audit.record(
+        context,
+        {
+          action: AUDIT_ACTIONS.JOB_DELETED,
+          entityType: 'job',
+          entityId: job.id,
+          oldValue: { title: job.title },
+        },
+        tx,
+      );
+
+      return job;
     });
   }
 }

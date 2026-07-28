@@ -4,6 +4,7 @@ import {
   BarChart,
   Bell,
   Box,
+  Briefcase,
   Building2,
   CreditCard,
   FileText,
@@ -14,6 +15,7 @@ import {
   Settings,
   Shield,
   ShoppingCart,
+  Tag,
   Truck,
   Users,
   Zap,
@@ -39,6 +41,34 @@ interface SidebarLinks {
 }
 
 export const sidebarLinks: SidebarLinks[] = [
+  {
+    moduleName: "jobs",
+    sections: [
+      {
+        title: "Manage",
+        items: [
+          {
+            label: "All Jobs",
+            icon: Briefcase,
+            href: "/admin/jobs",
+            permission: PERMISSIONS.JOBS_READ,
+          },
+          {
+            label: "Keywords",
+            icon: Tag,
+            href: "/admin/jobs/keywords",
+            permission: PERMISSIONS.KEYWORDS_READ,
+          },
+          {
+            label: "Overview",
+            icon: LayoutDashboard,
+            href: "/admin/jobs/overview",
+            permission: PERMISSIONS.JOBS_READ,
+          },
+        ],
+      },
+    ],
+  },
   {
     moduleName: "company",
     sections: [
