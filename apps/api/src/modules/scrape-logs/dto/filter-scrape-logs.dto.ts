@@ -1,6 +1,13 @@
 import { ScrapeLogStatus, ScrapeLogTrigger } from '@careerslk/database';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsDateString,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class FilterScrapeLogsDto {
   @ApiPropertyOptional({
@@ -19,6 +26,12 @@ export class FilterScrapeLogsDto {
   @IsOptional()
   @IsString()
   company?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by company id' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  companyId?: number;
 
   @ApiPropertyOptional({
     description: 'Filter by what triggered the scrape',

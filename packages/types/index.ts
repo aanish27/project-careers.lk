@@ -4,5 +4,6 @@ export * from './company';
 export * from './enums';
 export * from './jobs';
 export * from './keywords';
+export * from './logs';
 export * from './rbac-entities';
 export * from './scraper-types';

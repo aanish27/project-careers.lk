@@ -14,10 +14,14 @@ import IORedis from 'ioredis';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { AiBatchLogsModule } from './modules/ai-batch-logs/ai-batch-logs.module';
+import { AiLogsModule } from './modules/ai-logs/ai-logs.module';
+import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
 import { CompaniesModule } from './modules/companies/companies.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { KeywordsModule } from './modules/keywords/keywords.module';
+import { QueueLogsModule } from './modules/queue-logs/queue-logs.module';
 import { ScrapeLogsModule } from './modules/scrape-logs/scrape-logs.module';
 import { StorageModule } from './shared/storage/storage.module';
 
@@ -79,6 +83,30 @@ import { StorageModule } from './shared/storage/storage.module';
             path: '',
             module: ScrapeLogsModule,
           },
+          {
+            path: '',
+            module: AuditLogsModule,
+          },
+          {
+            path: '',
+            module: AiLogsModule,
+          },
+          {
+            path: '',
+            module: AiBatchLogsModule,
+          },
+          {
+            path: '',
+            module: QueueLogsModule,
+          },
+          {
+            path: '',
+            module: KeywordsModule,
+          },
+          {
+            path: '',
+            module: DashboardModule,
+          },
         ],
       },
     ]),
@@ -89,6 +117,10 @@ import { StorageModule } from './shared/storage/storage.module';
     JobsModule,
     KeywordsModule,
     ScrapeLogsModule,
+    AuditLogsModule,
+    AiLogsModule,
+    AiBatchLogsModule,
+    QueueLogsModule,
     DashboardModule,
   ],
   controllers: [AppController],

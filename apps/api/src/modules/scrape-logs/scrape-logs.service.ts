@@ -5,6 +5,7 @@ import { Injectable } from '@nestjs/common';
 interface ScrapeLogFilters {
   status?: ScrapeLogStatus;
   company?: string;
+  companyId?: number;
   triggeredBy?: ScrapeLogTrigger;
   dateFrom?: string;
   dateTo?: string;
@@ -18,6 +19,7 @@ export class ScrapeLogsService {
     const where = {
       status: filters.status,
       triggeredBy: filters.triggeredBy,
+      companyId: filters.companyId,
       company: filters.company ? { name: filters.company } : undefined,
       createdAt:
         filters.dateFrom || filters.dateTo
