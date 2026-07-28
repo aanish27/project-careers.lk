@@ -37,6 +37,8 @@ export const PERMISSION_DESCRIPTIONS = {
   'ai-logs.read': 'View individual AI model call logs',
   'ai-batch-logs.read': 'View AI batch job logs',
   'queue-logs.read': 'View live scraper queue state',
+
+  'notifications.read': 'View and mark your own notifications as read',
 } as const;
 
 export type PermissionKey = keyof typeof PERMISSION_DESCRIPTIONS;
@@ -80,6 +82,8 @@ export const PERMISSIONS = {
   AI_LOGS_READ: 'ai-logs.read',
   AI_BATCH_LOGS_READ: 'ai-batch-logs.read',
   QUEUE_LOGS_READ: 'queue-logs.read',
+
+  NOTIFICATIONS_READ: 'notifications.read',
 } as const satisfies Record<string, PermissionKey>;
 
 // Compile error if a PERMISSION_DESCRIPTIONS key has no matching PERMISSIONS constant.

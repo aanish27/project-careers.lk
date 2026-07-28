@@ -1,6 +1,5 @@
 "use client";
 import { Avatar, AvatarFallback } from "@ui/avatar";
-import { Badge } from "@ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,9 +9,12 @@ import {
   BreadcrumbSeparator,
 } from "@ui/breadcrumb";
 
+import { PERMISSIONS } from "@careerslk/lib";
 import { useSidebarContext } from "@dashboard-hooks/use-sidebar-context";
 import { useAuth } from "@dashboard-hooks/use-auth";
 import { logout } from "@dashboard-features/auth/api/auth.actions";
+import { Can } from "@dashboard-components/can";
+import { NotificationBell } from "@dashboard-features/notifications/components/notification-bell";
 import { Button } from "@ui/button";
 import {
   DropdownMenu,
@@ -22,7 +24,6 @@ import {
   DropdownMenuTrigger,
 } from "@ui/dropdown-menu";
 import {
-  Bell,
   ChevronLeft,
   CircleQuestionMark,
   DotIcon,
@@ -73,15 +74,9 @@ export function Topbar() {
 
       <div className="flex items-center gap-3">
         <div className="bg-background rounded-full px-2 shadow-lg">
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell />
-            <Badge
-              variant="destructive"
-              className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center p-0 text-xs"
-            >
-              2
-            </Badge>
-          </Button>
+          <Can permission={PERMISSIONS.NOTIFICATIONS_READ}>
+            <NotificationBell />
+          </Can>
           <Button variant="ghost" size="icon">
             <CircleQuestionMark />
           </Button>

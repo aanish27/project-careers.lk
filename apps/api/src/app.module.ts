@@ -21,6 +21,7 @@ import { CompaniesModule } from './modules/companies/companies.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { KeywordsModule } from './modules/keywords/keywords.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { QueueLogsModule } from './modules/queue-logs/queue-logs.module';
 import { ScrapeLogsModule } from './modules/scrape-logs/scrape-logs.module';
 import { StorageModule } from './shared/storage/storage.module';
@@ -107,6 +108,10 @@ import { StorageModule } from './shared/storage/storage.module';
             path: '',
             module: DashboardModule,
           },
+          {
+            path: '',
+            module: NotificationsModule,
+          },
         ],
       },
     ]),
@@ -122,6 +127,7 @@ import { StorageModule } from './shared/storage/storage.module';
     AiBatchLogsModule,
     QueueLogsModule,
     DashboardModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [

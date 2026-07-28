@@ -1,6 +1,7 @@
 import {
   CompanyStatus,
   JobStatus,
+  Prisma,
   ScrapeLogTrigger,
   ScrapeStatus,
 } from '@careerslk/database';
@@ -120,14 +121,54 @@ const batchPollWorker = new Worker<BatchPollJobData>(
 );
 
 for (const worker of [companyWorker, jobsWorker, batchPollWorker]) {
-  worker.on('completed', (job) =>
-    console.log(`✅ [${worker.name}] queue job ${job.id} completed`),
-  );
-  worker.on('failed', (job, err) =>
+  worker.on('completed', (job) => {
+    console.log(`✅ [${worker.name}] queue job ${job.id} completed`);
+
+    prisma.notification
+      .create({
+        data: {
+          type: 'SCRAPE_COMPLETED',
+          title: 'Scrape completed',
+          message: `${job.name} finished successfully`,
+          metadata: {
+            queue: worker.name,
+            jobId: job.id,
+            data: job.data,
+          } as unknown as Prisma.InputJsonValue,
+        },
+      })
+      .catch((err: unknown) =>
+        console.error('Failed to write scrape-completed notification', err),
+      );
+  });
+  worker.on('failed', (job, err) => {
     console.error(
       `❌ [${worker.name}] queue job ${job?.id} failed (attempt ${job?.attemptsMade}): ${err.message}`,
-    ),
-  );
+    );
+
+    // BullMQ fires 'failed' on every attempt, not just the last one — only
+    // notify once retries are exhausted, so a single failing job doesn't
+    // spam the bell with one notification per retry.
+    const maxAttempts = job?.opts.attempts ?? 1;
+    if (!job || job.attemptsMade < maxAttempts) return;
+
+    prisma.notification
+      .create({
+        data: {
+          type: 'SCRAPE_FAILED',
+          title: 'Scrape failed',
+          message: `${job.name} failed: ${err.message}`,
+          metadata: {
+            queue: worker.name,
+            jobId: job.id,
+            data: job.data,
+          } as unknown as Prisma.InputJsonValue,
+        },
+      })
+      .catch((notifyErr: unknown) =>
+        console.error('Failed to write scrape-failed notification', notifyErr),
+      );
+  });
 }
 
 console.log(
