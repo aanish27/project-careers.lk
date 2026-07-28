@@ -52,4 +52,11 @@ export const envValidationSchema = Joi.object({
     is: 's3',
     then: Joi.required(),
   }),
+
+  // AI cost/usage widgets — all optional, unset means "not configured" (no
+  // startup failure). Admin key is distinct from the scraper's regular key.
+  CLAUDE_ADMIN_API_KEY: Joi.string().optional(),
+  CLAUDE_BASE_URL: Joi.string().default('https://api.anthropic.com'),
+  DEEPSEEK_API_KEY: Joi.string().optional(),
+  DEEPSEEK_BASE_URL: Joi.string().default('https://api.deepseek.com'),
 });

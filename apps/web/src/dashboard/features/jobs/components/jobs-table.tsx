@@ -19,7 +19,7 @@ function RowActions({ job }: { job: JobWithCompany }) {
       <TooltipTrigger
         render={
           <Button
-            variant="ghost"
+            variant="info"
             size="icon-xs"
             aria-label="View detail"
             render={<Link href={`/admin/jobs/${job.id}`}></Link>}

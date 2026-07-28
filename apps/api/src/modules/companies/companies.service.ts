@@ -2,8 +2,22 @@ import { PrismaService } from '@/database/prisma.service';
 import { AUDIT_ACTIONS } from '@/modules/audit/audit.constant';
 import { AuditContext, AuditService } from '@/modules/audit/audit.service';
 import { assertNotSsrf } from '@careerslk/lib/ssrf';
-import { CreateCompanyInput, UpdateCompanyInput } from '@careerslk/types';
+import {
+  CompanyScrapeSummary,
+  CreateCompanyInput,
+  UpdateCompanyInput,
+} from '@careerslk/types';
 import { Injectable } from '@nestjs/common';
+
+interface LatestScrapeLogRow {
+  companyId: number;
+  id: number;
+  status: string;
+  jobsFound: number;
+  errorMessage: string | null;
+  durationMs: number;
+  createdAt: Date;
+}
 
 @Injectable()
 export class CompaniesService {
@@ -11,6 +25,83 @@ export class CompaniesService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
   ) {}
+
+  async getScrapeSummaries(
+    companyIds?: number[],
+  ): Promise<CompanyScrapeSummary[]> {
+    const companyWhere = {
+      deletedAt: null,
+      ...(companyIds ? { id: { in: companyIds } } : {}),
+    };
+
+    const companies = await this.prisma.company.findMany({
+      where: companyWhere,
+      select: { id: true, name: true },
+    });
+    if (companies.length === 0) return [];
+
+    const ids = companies.map((c) => c.id);
+
+    const [jobCounts, latestScrapeLogs] = await Promise.all([
+      this.prisma.job.groupBy({
+        by: ['companyId', 'status'],
+        where: { companyId: { in: ids }, deletedAt: null },
+        _count: { _all: true },
+      }),
+      // Prisma's groupBy can't return sibling columns for a per-group max
+      // row, so DISTINCT ON is the correct tool for "latest scrape per company".
+      this.prisma.$queryRaw<LatestScrapeLogRow[]>`
+        SELECT DISTINCT ON ("companyId")
+          "companyId", "id", "status", "jobsFound", "errorMessage", "durationMs", "createdAt"
+        FROM "ScrapeLog"
+        WHERE "companyId" = ANY(${ids})
+        ORDER BY "companyId", "createdAt" DESC
+      `,
+    ]);
+
+    const jobCountsByCompany = new Map<
+      number,
+      { active: number; expired: number }
+    >();
+    for (const row of jobCounts) {
+      const entry = jobCountsByCompany.get(row.companyId) ?? {
+        active: 0,
+        expired: 0,
+      };
+      if (row.status === 'ACTIVE') entry.active += row._count._all;
+      if (row.status === 'EXPIRED') entry.expired += row._count._all;
+      jobCountsByCompany.set(row.companyId, entry);
+    }
+
+    const latestScrapeByCompany = new Map(
+      latestScrapeLogs.map((row) => [row.companyId, row]),
+    );
+
+    return companies.map((company) => {
+      const counts = jobCountsByCompany.get(company.id) ?? {
+        active: 0,
+        expired: 0,
+      };
+      const latest = latestScrapeByCompany.get(company.id) ?? null;
+
+      return {
+        companyId: company.id,
+        companyName: company.name,
+        activeJobs: counts.active,
+        expiredJobs: counts.expired,
+        lastScrape: latest
+          ? {
+              id: latest.id,
+              status: latest.status,
+              jobsFound: latest.jobsFound,
+              errorMessage: latest.errorMessage,
+              durationMs: latest.durationMs,
+              createdAt: latest.createdAt.toISOString(),
+            }
+          : null,
+      };
+    });
+  }
 
   private assertUrlsNotSsrf(...urls: (string | undefined)[]) {
     return Promise.all(
@@ -60,9 +151,12 @@ export class CompaniesService {
   }
 
   async findOne(id: number) {
-    return await this.prisma.company.findFirstOrThrow({
+    const company = await this.prisma.company.findFirstOrThrow({
       where: { id, deletedAt: null },
     });
+    const [scrapeSummary] = await this.getScrapeSummaries([id]);
+
+    return { ...company, scrapeSummary: scrapeSummary ?? null };
   }
 
   async update(id: number, dto: UpdateCompanyInput, context: AuditContext) {

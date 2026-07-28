@@ -19,7 +19,7 @@ function RowActions({ log }: { log: ScrapeLogWithCompany }) {
       <TooltipTrigger
         render={
           <Button
-            variant="ghost"
+            variant="info"
             size="icon-xs"
             aria-label="View detail"
             render={<Link href={`/admin/logs/scrapes/${log.id}`}></Link>}

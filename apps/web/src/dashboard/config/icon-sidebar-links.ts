@@ -3,6 +3,7 @@ import { PERMISSIONS } from "@careerslk/lib";
 import {
   IconBriefcase,
   IconBuildingSkyscraper,
+  IconLayoutDashboard,
   IconListDetails,
   IconUsersGroup,
 } from "@tabler/icons-react";
@@ -16,6 +17,12 @@ export interface IconSidebarSection {
 }
 
 export const sections: IconSidebarSection[] = [
+  {
+    label: "Dashboards",
+    icon: IconLayoutDashboard,
+    href: "admin",
+    permission: PERMISSIONS.DASHBOARD_READ,
+  },
   {
     label: "company",
     icon: IconBuildingSkyscraper,
@@ -39,19 +46,4 @@ export const sections: IconSidebarSection[] = [
     icon: IconListDetails,
     href: "admin/logs",
   },
-  // {
-  //   label: 'Dashboard',
-  //   icon: LayoutDashboard,
-  //   href: 'dashboard',
-  // },
-  // {
-  //   label: 'Vendors',
-  //   icon: UserRoundCog,
-  //   href: 'vendors',
-  // },
-  // {
-  //   label: 'Shops',
-  //   icon: Store,
-  //   href: 'shops',
-  // },
 ];

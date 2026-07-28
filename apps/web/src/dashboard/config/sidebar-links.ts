@@ -1,28 +1,18 @@
 import type { PermissionKey } from "@careerslk/lib";
 import { PERMISSIONS } from "@careerslk/lib";
 import {
-  BarChart,
-  Bell,
   Bot,
-  Box,
   Briefcase,
   Building2,
-  CreditCard,
   FileText,
-  FolderOpen,
   History,
   Key,
   Layers,
   LayoutDashboard,
   ListOrdered,
-  Package,
-  Settings,
   Shield,
-  ShoppingCart,
   Tag,
-  Truck,
   Users,
-  Zap,
   type LucideIcon,
 } from "lucide-react";
 
@@ -45,6 +35,39 @@ interface SidebarLinks {
 }
 
 export const sidebarLinks: SidebarLinks[] = [
+  {
+    moduleName: "admin",
+    sections: [
+      {
+        title: "Dashboards",
+        items: [
+          {
+            label: "dashboard",
+            icon: LayoutDashboard,
+            href: "/admin",
+            permission: PERMISSIONS.DASHBOARD_READ,
+          },
+          {
+            label: "Company Overview",
+            icon: Building2,
+            href: "/admin/company/overview",
+            permission: PERMISSIONS.COMPANIES_READ,
+          },
+          {
+            label: "Jobs Overview",
+            icon: Briefcase,
+            href: "/admin/jobs/overview",
+            permission: PERMISSIONS.JOBS_READ,
+          },
+          {
+            label: "Logs Overview",
+            icon: History,
+            href: "/admin/logs",
+          },
+        ],
+      },
+    ],
+  },
   {
     moduleName: "jobs",
     sections: [
@@ -141,70 +164,6 @@ export const sidebarLinks: SidebarLinks[] = [
     ],
   },
   {
-    moduleName: "search",
-    sections: [
-      {
-        title: "example",
-        items: [
-          {
-            label: "example",
-            icon: LayoutDashboard,
-            href: "/example",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    moduleName: "vendors",
-    sections: [
-      {
-        title: "overview",
-        items: [
-          {
-            label: "dashboard",
-            icon: LayoutDashboard,
-            href: "/vendors",
-          },
-          { label: "products", icon: Box, href: "/vendors/products" },
-        ],
-      },
-      {
-        title: "manage",
-        items: [
-          { label: "Projects", icon: FolderOpen, href: "/vendors/projects" },
-          {
-            label: "Notifications",
-            icon: Bell,
-            href: "/vendors/notifications",
-          },
-          { label: "Integrations", icon: Zap, href: "/vendors/integrations" },
-        ],
-      },
-    ],
-  },
-  {
-    moduleName: "shops",
-    sections: [
-      {
-        title: "manage",
-        items: [
-          { label: "Overview", icon: LayoutDashboard, href: "/shops/overview" },
-          { label: "Products", icon: Package, href: "/shops/products" },
-          { label: "Orders", icon: ShoppingCart, href: "/shops/orders" },
-        ],
-      },
-      {
-        title: "settings",
-        items: [
-          { label: "Payments", icon: CreditCard, href: "/shops/payments" },
-          { label: "Shipping", icon: Truck, href: "/shops/shipping" },
-          { label: "Integrations", icon: Zap, href: "/shops/integrations" },
-        ],
-      },
-    ],
-  },
-  {
     moduleName: "users",
     sections: [
       {
@@ -239,30 +198,6 @@ export const sidebarLinks: SidebarLinks[] = [
       //     { label: 'Notifications', icon: Bell, href: '/admin/users/notifications' },
       //   ],
       // },
-    ],
-  },
-  {
-    moduleName: "dashboard",
-    sections: [
-      {
-        title: "Overview",
-        items: [
-          { label: "Home", icon: LayoutDashboard, href: "/dashboard" },
-          { label: "Analytics", icon: BarChart, href: "/dashboard/analytics" },
-          { label: "Reports", icon: FileText, href: "/dashboard/reports" },
-        ],
-      },
-      {
-        title: "System",
-        items: [
-          { label: "Settings", icon: Settings, href: "/dashboard/settings" },
-          {
-            label: "Notifications",
-            icon: Bell,
-            href: "/dashboard/notifications",
-          },
-        ],
-      },
     ],
   },
 ];

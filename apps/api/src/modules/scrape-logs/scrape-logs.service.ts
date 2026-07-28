@@ -1,3 +1,7 @@
+import {
+  computeCostUsd,
+  getProviderForModel,
+} from '@/common/utils/ai-pricing.util';
 import { PrismaService } from '@/database/prisma.service';
 import { ScrapeLogStatus, ScrapeLogTrigger } from '@careerslk/database';
 import { Injectable } from '@nestjs/common';
@@ -38,9 +42,30 @@ export class ScrapeLogsService {
   }
 
   async findOne(id: number) {
-    return await this.prisma.scrapeLog.findUniqueOrThrow({
+    const scrapeLog = await this.prisma.scrapeLog.findUniqueOrThrow({
       where: { id },
       include: { company: true, aiLogs: true },
     });
+
+    let totalCostUsd = 0;
+    let hasPricedRow = false;
+    const aiLogs = scrapeLog.aiLogs.map((log) => {
+      const costUsd = computeCostUsd(
+        log.model,
+        log.inputTokens,
+        log.outputTokens,
+      );
+      if (costUsd !== null) {
+        hasPricedRow = true;
+        totalCostUsd += costUsd;
+      }
+      return { ...log, provider: getProviderForModel(log.model), costUsd };
+    });
+
+    return {
+      ...scrapeLog,
+      aiLogs,
+      totalCostUsd: hasPricedRow ? Math.round(totalCostUsd * 1e6) / 1e6 : null,
+    };
   }
 }

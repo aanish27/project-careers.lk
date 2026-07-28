@@ -18,9 +18,16 @@ export interface DashboardStats {
     totalUsd: number;
     byModel: {
       model: string;
+      provider: string;
       inputTokens: number;
       outputTokens: number;
       estimatedUsd: number | null;
+    }[];
+    byProvider: {
+      provider: string;
+      totalUsd: number;
+      inputTokens: number;
+      outputTokens: number;
     }[];
   };
 }

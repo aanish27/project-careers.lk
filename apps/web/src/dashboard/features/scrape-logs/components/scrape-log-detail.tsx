@@ -60,6 +60,14 @@ export function ScrapeLogDetail({ scrapeLogId }: { scrapeLogId: number }) {
             <div>{log.htmlLength ?? "—"}</div>
           </div>
           <div>
+            <div className="text-muted-foreground">AI cost</div>
+            <div>
+              {log.totalCostUsd !== null
+                ? `$${log.totalCostUsd.toFixed(4)}`
+                : "unpriced"}
+            </div>
+          </div>
+          <div>
             <div className="text-muted-foreground">Date</div>
             <div>{new Date(log.createdAt).toLocaleString()}</div>
           </div>
@@ -85,6 +93,7 @@ export function ScrapeLogDetail({ scrapeLogId }: { scrapeLogId: number }) {
                 <TableHead>Model</TableHead>
                 <TableHead>Input tokens</TableHead>
                 <TableHead>Output tokens</TableHead>
+                <TableHead>Cost</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -98,12 +107,17 @@ export function ScrapeLogDetail({ scrapeLogId }: { scrapeLogId: number }) {
                     <TableCell>{aiLog.model ?? "—"}</TableCell>
                     <TableCell>{aiLog.inputTokens ?? "—"}</TableCell>
                     <TableCell>{aiLog.outputTokens ?? "—"}</TableCell>
+                    <TableCell>
+                      {aiLog.costUsd !== null
+                        ? `$${aiLog.costUsd.toFixed(4)}`
+                        : "unpriced"}
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={5}
+                    colSpan={6}
                     className="text-center text-muted-foreground"
                   >
                     No AI calls for this run

@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -10,6 +9,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { StatusPill } from "@dashboard-components/status-pill";
+import {
+  companyStatusMeta,
+  aiLogStatusMeta,
+  scrapeLogStatusMeta,
+} from "@dashboard/utils/status-variant";
+import {
+  IconBuildingSkyscraper,
+  IconClipboardList,
+  IconHistory,
+  IconRefresh,
+  IconRobot,
+} from "@tabler/icons-react";
 import { useCompany } from "../hooks/use-company";
 import {
   useCompanyAiLogs,
@@ -34,12 +46,12 @@ export function CompanyDetail({ companyId }: { companyId: number }) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
+            <IconBuildingSkyscraper className="text-primary size-4" />
             {company.name}
-            <Badge
-              variant={company.status === "ACTIVE" ? "default" : "secondary"}
-            >
-              {company.status}
-            </Badge>
+            <StatusPill
+              meta={companyStatusMeta(company.status)}
+              label={company.status}
+            />
           </CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4 text-sm">
@@ -78,7 +90,66 @@ export function CompanyDetail({ companyId }: { companyId: number }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Scrape logs</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <IconRefresh className="text-muted-foreground size-4" />
+            Scrape summary
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <div className="text-muted-foreground">Active jobs</div>
+            <div className="text-2xl font-semibold">
+              {company.scrapeSummary?.activeJobs ?? 0}
+            </div>
+          </div>
+          <div>
+            <div className="text-muted-foreground">Expired jobs</div>
+            <div className="text-2xl font-semibold">
+              {company.scrapeSummary?.expiredJobs ?? 0}
+            </div>
+          </div>
+          <div>
+            <div className="text-muted-foreground">Last scrape status</div>
+            {company.scrapeSummary?.lastScrape ? (
+              <StatusPill
+                meta={scrapeLogStatusMeta(
+                  company.scrapeSummary.lastScrape.status,
+                )}
+                label={company.scrapeSummary.lastScrape.status}
+              />
+            ) : (
+              <div>Never scraped</div>
+            )}
+          </div>
+          <div>
+            <div className="text-muted-foreground">Jobs found</div>
+            <div>{company.scrapeSummary?.lastScrape?.jobsFound ?? "—"}</div>
+          </div>
+          <div>
+            <div className="text-muted-foreground">Last scraped</div>
+            <div>
+              {company.scrapeSummary?.lastScrape
+                ? formatDate(company.scrapeSummary.lastScrape.createdAt)
+                : "—"}
+            </div>
+          </div>
+          {company.scrapeSummary?.lastScrape?.errorMessage && (
+            <div className="col-span-2">
+              <div className="text-muted-foreground">Error</div>
+              <div className="text-destructive">
+                {company.scrapeSummary.lastScrape.errorMessage}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <IconHistory className="text-muted-foreground size-4" />
+            Scrape logs
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -97,7 +168,12 @@ export function CompanyDetail({ companyId }: { companyId: number }) {
                   <TableRow key={log.id}>
                     <TableCell>{formatDate(log.createdAt)}</TableCell>
                     <TableCell>{log.type}</TableCell>
-                    <TableCell>{log.status}</TableCell>
+                    <TableCell>
+                      <StatusPill
+                        meta={scrapeLogStatusMeta(log.status)}
+                        label={log.status}
+                      />
+                    </TableCell>
                     <TableCell>{log.jobsFound}</TableCell>
                     <TableCell>{log.durationMs}ms</TableCell>
                   </TableRow>
@@ -119,7 +195,10 @@ export function CompanyDetail({ companyId }: { companyId: number }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>AI logs</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <IconRobot className="text-muted-foreground size-4" />
+            AI logs
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -137,7 +216,12 @@ export function CompanyDetail({ companyId }: { companyId: number }) {
                 aiLogs.map((log) => (
                   <TableRow key={log.id}>
                     <TableCell>{formatDate(log.createdAt)}</TableCell>
-                    <TableCell>{log.status}</TableCell>
+                    <TableCell>
+                      <StatusPill
+                        meta={aiLogStatusMeta(log.status)}
+                        label={log.status}
+                      />
+                    </TableCell>
                     <TableCell>{log.model ?? "—"}</TableCell>
                     <TableCell>{log.inputTokens ?? "—"}</TableCell>
                     <TableCell>{log.outputTokens ?? "—"}</TableCell>
@@ -160,7 +244,10 @@ export function CompanyDetail({ companyId }: { companyId: number }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Audit logs</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <IconClipboardList className="text-muted-foreground size-4" />
+            Audit logs
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>

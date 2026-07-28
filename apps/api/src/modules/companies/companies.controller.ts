@@ -61,6 +61,14 @@ export class CompaniesController {
     return this.companiesService.findAll();
   }
 
+  // Must be registered before ':id' — otherwise ':id' + ParseIntPipe swallows
+  // this literal path since Nest/Express match routes in registration order.
+  @Get('scrape-summary')
+  @RequirePermissions(PERMISSIONS.COMPANIES_READ)
+  getScrapeSummaries() {
+    return this.companiesService.getScrapeSummaries();
+  }
+
   @Get(':id')
   @RequirePermissions(PERMISSIONS.COMPANIES_READ)
   findOne(@Param('id', ParseIntPipe) id: number) {

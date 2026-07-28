@@ -19,3 +19,22 @@ export interface Company {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface CompanyScrapeSummary {
+  companyId: number;
+  companyName: string;
+  activeJobs: number;
+  expiredJobs: number;
+  lastScrape: {
+    id: number;
+    status: string;
+    jobsFound: number;
+    errorMessage: string | null;
+    durationMs: number;
+    createdAt: string;
+  } | null;
+}
+
+export interface CompanyWithScrapeSummary extends Company {
+  scrapeSummary: CompanyScrapeSummary | null;
+}

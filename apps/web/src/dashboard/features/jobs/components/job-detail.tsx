@@ -14,6 +14,20 @@ import {
   useCompanyAiLogs,
   useCompanyScrapeLogs,
 } from "@dashboard-features/company/hooks/use-company-logs";
+import { StatusPill } from "@dashboard-components/status-pill";
+import {
+  aiBatchStatusMeta,
+  aiLogStatusMeta,
+  jobStatusMeta,
+  scrapeLogStatusMeta,
+} from "@dashboard/utils/status-variant";
+import {
+  IconBriefcase,
+  IconClipboardList,
+  IconHistory,
+  IconRobot,
+  IconTag,
+} from "@tabler/icons-react";
 import Link from "next/link";
 import { useJob } from "../hooks/use-jobs";
 import { useJobAiBatch, useJobAuditLogs } from "../hooks/use-job-logs";
@@ -36,10 +50,9 @@ export function JobDetail({ jobId }: { jobId: number }) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
+            <IconBriefcase className="text-primary size-4" />
             {job.title}
-            <Badge variant={job.status === "ACTIVE" ? "default" : "secondary"}>
-              {job.status}
-            </Badge>
+            <StatusPill meta={jobStatusMeta(job.status)} label={job.status} />
           </CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4 text-sm">
@@ -109,7 +122,10 @@ export function JobDetail({ jobId }: { jobId: number }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Keywords</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <IconTag className="text-muted-foreground size-4" />
+            Keywords
+          </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           {job.keywords.length ? (
@@ -129,7 +145,10 @@ export function JobDetail({ jobId }: { jobId: number }) {
       {job.batchId && (
         <Card>
           <CardHeader>
-            <CardTitle>AI batch</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <IconRobot className="text-muted-foreground size-4" />
+              AI batch
+            </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4 text-sm">
             <div>
@@ -138,7 +157,14 @@ export function JobDetail({ jobId }: { jobId: number }) {
             </div>
             <div>
               <div className="text-muted-foreground">Status</div>
-              <div>{aiBatch?.status ?? "—"}</div>
+              {aiBatch ? (
+                <StatusPill
+                  meta={aiBatchStatusMeta(aiBatch.status)}
+                  label={aiBatch.status}
+                />
+              ) : (
+                "—"
+              )}
             </div>
             <div>
               <div className="text-muted-foreground">Type</div>
@@ -154,7 +180,10 @@ export function JobDetail({ jobId }: { jobId: number }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Company scrape activity</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <IconHistory className="text-muted-foreground size-4" />
+            Company scrape activity
+          </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <Table>
@@ -172,7 +201,12 @@ export function JobDetail({ jobId }: { jobId: number }) {
                   <TableRow key={log.id}>
                     <TableCell>{formatDate(log.createdAt)}</TableCell>
                     <TableCell>{log.type}</TableCell>
-                    <TableCell>{log.status}</TableCell>
+                    <TableCell>
+                      <StatusPill
+                        meta={scrapeLogStatusMeta(log.status)}
+                        label={log.status}
+                      />
+                    </TableCell>
                     <TableCell>{log.jobsFound}</TableCell>
                   </TableRow>
                 ))
@@ -201,7 +235,12 @@ export function JobDetail({ jobId }: { jobId: number }) {
                 aiLogs.map((log) => (
                   <TableRow key={log.id}>
                     <TableCell>{formatDate(log.createdAt)}</TableCell>
-                    <TableCell>{log.status}</TableCell>
+                    <TableCell>
+                      <StatusPill
+                        meta={aiLogStatusMeta(log.status)}
+                        label={log.status}
+                      />
+                    </TableCell>
                     <TableCell>{log.model ?? "—"}</TableCell>
                   </TableRow>
                 ))
@@ -222,7 +261,10 @@ export function JobDetail({ jobId }: { jobId: number }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Audit logs</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <IconClipboardList className="text-muted-foreground size-4" />
+            Audit logs
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>

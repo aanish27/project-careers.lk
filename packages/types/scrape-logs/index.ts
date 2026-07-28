@@ -19,7 +19,13 @@ export interface ScrapeLogWithCompany extends ScrapeLog {
   company: Pick<Company, 'id' | 'name'>;
 }
 
+export interface AiLogWithCost extends AiLog {
+  provider: string;
+  costUsd: number | null;
+}
+
 export interface ScrapeLogDetail extends ScrapeLog {
   company: Company;
-  aiLogs: AiLog[];
+  aiLogs: AiLogWithCost[];
+  totalCostUsd: number | null;
 }

@@ -15,6 +15,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { AiBatchLogsModule } from './modules/ai-batch-logs/ai-batch-logs.module';
+import { AiCostModule } from './modules/ai-cost/ai-cost.module';
 import { AiLogsModule } from './modules/ai-logs/ai-logs.module';
 import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
 import { CompaniesModule } from './modules/companies/companies.module';
@@ -112,6 +113,10 @@ import { StorageModule } from './shared/storage/storage.module';
             path: '',
             module: NotificationsModule,
           },
+          {
+            path: '',
+            module: AiCostModule,
+          },
         ],
       },
     ]),
@@ -128,6 +133,7 @@ import { StorageModule } from './shared/storage/storage.module';
     QueueLogsModule,
     DashboardModule,
     NotificationsModule,
+    AiCostModule,
   ],
   controllers: [AppController],
   providers: [

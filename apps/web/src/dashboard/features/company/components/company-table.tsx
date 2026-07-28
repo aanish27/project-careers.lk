@@ -16,7 +16,13 @@ import {
 import type { Company } from "@careerslk/types";
 import { PERMISSIONS } from "@careerslk/lib";
 import { Can } from "@dashboard-components/can";
-import { IconBriefcase, IconDots, IconEye } from "@tabler/icons-react";
+import {
+  IconBriefcase,
+  IconDots,
+  IconEye,
+  IconPencil,
+  IconTrash,
+} from "@tabler/icons-react";
 import { DataTable, useDataTable } from "@ui/data-table";
 import Link from "next/link";
 import { useCompanies } from "../hooks/use-companies";
@@ -44,7 +50,7 @@ function RowActions({ company }: { company: Company }) {
         <TooltipTrigger
           render={
             <Button
-              variant="ghost"
+              variant="info"
               size="icon-xs"
               aria-label="View detail"
               render={<Link href={`/admin/company/${company.id}`}></Link>}
@@ -59,7 +65,7 @@ function RowActions({ company }: { company: Company }) {
         <TooltipTrigger
           render={
             <Button
-              variant="ghost"
+              variant="info"
               size="icon-xs"
               aria-label="View jobs"
               render={<Link href={`/admin/company/${company.id}/jobs`}></Link>}
@@ -76,7 +82,11 @@ function RowActions({ company }: { company: Company }) {
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
-              <Button variant="ghost" size="icon-xs" aria-label="More actions">
+              <Button
+                variant="outline"
+                size="icon-xs"
+                aria-label="More actions"
+              >
                 <IconDots />
               </Button>
             }
@@ -84,6 +94,7 @@ function RowActions({ company }: { company: Company }) {
           <DropdownMenuContent align="end">
             <Can permission={PERMISSIONS.COMPANIES_UPDATE}>
               <DropdownMenuItem onClick={() => setActiveDialog("edit")}>
+                <IconPencil className="text-warning mr-2 size-3.5" />
                 Edit
               </DropdownMenuItem>
             </Can>
@@ -92,6 +103,7 @@ function RowActions({ company }: { company: Company }) {
                 variant="destructive"
                 onClick={() => setActiveDialog("delete")}
               >
+                <IconTrash className="mr-2 size-3.5" />
                 Delete
               </DropdownMenuItem>
             </Can>

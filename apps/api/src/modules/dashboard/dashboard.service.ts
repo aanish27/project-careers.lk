@@ -1,24 +1,12 @@
+import {
+  computeCostUsd,
+  getProviderForModel,
+} from '@/common/utils/ai-pricing.util';
 import { PrismaService } from '@/database/prisma.service';
 import { SCRAPER_COMPANY_QUEUE, SCRAPER_JOB_QUEUE } from '@careerslk/types';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bullmq';
-
-// USD per 1M tokens. Only the model actually in use by the scraper needs an entry;
-// usage from unrecognized models is reported with a null cost instead of guessed.
-const MODEL_PRICING_PER_MILLION_TOKENS: Record<
-  string,
-  { input: number; output: number }
-> = {
-  'claude-haiku-4-5': { input: 1.0, output: 5.0 },
-};
-
-function getModelPricing(model: string) {
-  const key = Object.keys(MODEL_PRICING_PER_MILLION_TOKENS).find((prefix) =>
-    model.startsWith(prefix),
-  );
-  return key ? MODEL_PRICING_PER_MILLION_TOKENS[key] : undefined;
-}
 
 @Injectable()
 export class DashboardService {
@@ -89,17 +77,47 @@ export class DashboardService {
       const model = row.model as string;
       const inputTokens = row._sum.inputTokens ?? 0;
       const outputTokens = row._sum.outputTokens ?? 0;
-      const pricing = getModelPricing(model);
-      const estimatedUsd = pricing
-        ? (inputTokens / 1_000_000) * pricing.input +
-          (outputTokens / 1_000_000) * pricing.output
-        : null;
+      const estimatedUsd = computeCostUsd(model, inputTokens, outputTokens);
+      const provider = getProviderForModel(model);
 
       if (estimatedUsd !== null) totalUsd += estimatedUsd;
 
-      return { model, inputTokens, outputTokens, estimatedUsd };
+      return { model, provider, inputTokens, outputTokens, estimatedUsd };
     });
 
-    return { totalUsd: Math.round(totalUsd * 1e6) / 1e6, byModel };
+    const byProvider = Object.values(
+      byModel.reduce<
+        Record<
+          string,
+          {
+            provider: string;
+            totalUsd: number;
+            inputTokens: number;
+            outputTokens: number;
+          }
+        >
+      >((acc, row) => {
+        const existing = acc[row.provider] ?? {
+          provider: row.provider,
+          totalUsd: 0,
+          inputTokens: 0,
+          outputTokens: 0,
+        };
+        existing.totalUsd += row.estimatedUsd ?? 0;
+        existing.inputTokens += row.inputTokens;
+        existing.outputTokens += row.outputTokens;
+        acc[row.provider] = existing;
+        return acc;
+      }, {}),
+    ).map((row) => ({
+      ...row,
+      totalUsd: Math.round(row.totalUsd * 1e6) / 1e6,
+    }));
+
+    return {
+      totalUsd: Math.round(totalUsd * 1e6) / 1e6,
+      byModel,
+      byProvider,
+    };
   }
 }
