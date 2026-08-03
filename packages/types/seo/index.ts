@@ -4,6 +4,7 @@ export * from './schemas';
 
 /** SRS 12.11.3 — minimum active job count for a page to be indexable. */
 export const SEO_PAGE_THRESHOLDS: Record<SeoPageType, number> = {
+  SECTOR: 15,
   ROLE: 10,
   LOCATION: 15,
   ROLE_LOCATION: 5,
@@ -24,6 +25,7 @@ export const SEO_RETIREMENT_DAYS = 90;
 /** SRS 12.11.4 — aggregated stats used to fill in template content. */
 export interface SeoInputObject {
   pageType: SeoPageType;
+  sector?: string;
   role?: string;
   location?: string;
   company?: string;

@@ -15,99 +15,11 @@ import {
 import LandingGradient from "@web-app-components/landing-gradient";
 import { PrimaryNavbar } from "@web-app-components/primary-navbar";
 import CategoryCard from "@web-app-features/jobs/components/category/category-card";
-import JobCard, { Job } from "@web-app-features/jobs/components/job-card";
+import JobCard from "@web-app-features/jobs/components/job-card";
 import JobsNavbar from "@web-app-features/jobs/components/jobs-navbar";
+import { jobsApi } from "@web-app-features/jobs/api/api";
 
-const RECENT_JOBS: Job[] = [
-  {
-    id: "1",
-    title: "Senior Frontend Engineer",
-    company: "Flexoft",
-    location: "Colombo, Remote",
-    description:
-      "Build and ship high-impact features across our design system and core product surfaces.",
-    jobType: "Full-time",
-    level: "Senior",
-    sector: "IT & Software",
-  },
-  {
-    id: "2",
-    title: "Product Designer",
-    company: "Moonset",
-    location: "Colombo",
-    description:
-      "Own end-to-end design for our marketplace, from research to polished, production-ready UI.",
-    jobType: "Full-time",
-    level: "Mid",
-    sector: "IT & Software",
-  },
-  {
-    id: "3",
-    title: "Backend Engineer",
-    company: "Corvex",
-    location: "Remote",
-    description:
-      "Design and scale our services layer handling millions of requests across job aggregation.",
-    jobType: "Full-time",
-    level: "Mid",
-    sector: "IT & Software",
-  },
-  {
-    id: "4",
-    title: "Growth Marketing Lead",
-    company: "Anchorly",
-    location: "Colombo, Hybrid",
-    description:
-      "Drive acquisition and retention strategy across paid, lifecycle, and organic channels.",
-    jobType: "Full-time",
-    level: "Senior",
-    sector: "Sales & Marketing",
-  },
-  {
-    id: "5",
-    title: "Data Analyst",
-    company: "Flexoft",
-    location: "Remote",
-    description:
-      "Turn raw hiring data into insights that shape product and business decisions.",
-    jobType: "Full-time",
-    level: "Junior",
-    sector: "IT & Software",
-  },
-  {
-    id: "6",
-    title: "Customer Success Manager",
-    company: "Moonset",
-    location: "Colombo",
-    description:
-      "Be the primary point of contact for employers, ensuring they get the most from our platform.",
-    jobType: "Part-time",
-    level: "Mid",
-    sector: "Customer Service & Support",
-  },
-  {
-    id: "7",
-    title: "DevOps Engineer",
-    company: "Corvex",
-    location: "Remote",
-    description:
-      "Own our CI/CD pipelines and infrastructure, keeping deploys fast and reliable.",
-    jobType: "Full-time",
-    level: "Senior",
-    sector: "IT & Software",
-  },
-  {
-    id: "8",
-    title: "Content Strategist",
-    company: "Anchorly",
-    location: "Colombo, Remote",
-    description:
-      "Craft the voice behind our brand across blog, social, and employer-facing content.",
-    jobType: "Contract",
-    level: "Mid",
-    sector: "Media, Communications & Creative",
-  },
-];
+const RECENT_JOBS_LIMIT = 8;
 
 const CATEGORIES = [
   { label: "Engineering", icon: IconCode, count: 312 },
@@ -122,7 +34,11 @@ const CATEGORIES = [
   { label: "Analytics", icon: IconChartBar, count: 124 },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const { items: recentJobs } = await jobsApi.list({
+    limit: RECENT_JOBS_LIMIT,
+  });
+
   return (
     <div className="relative flex min-h-screen flex-col ">
       <LandingGradient />
@@ -183,7 +99,7 @@ export default function HomePage() {
           </p>
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {RECENT_JOBS.map((job, index) => (
+          {recentJobs.map((job, index) => (
             <JobCard key={job.id} job={job} index={index} />
           ))}
         </div>

@@ -12,9 +12,10 @@ import {
   IconBuildingSkyscraper,
   IconMapPin,
 } from "@tabler/icons-react";
+import SalaryRangeFilter from "./salary-range-filter";
+import SkillsFilter from "./skills-filter";
 
 type JobFilterBarProps = {
-  title: string;
   resultCount: number;
   location: string;
   onLocationChange: (value: string) => void;
@@ -22,10 +23,14 @@ type JobFilterBarProps = {
   onWorkModeChange: (value: string) => void;
   employmentType: string;
   onEmploymentTypeChange: (value: string) => void;
+  salaryMin?: number;
+  salaryMax?: number;
+  onSalaryChange: (min: number | undefined, max: number | undefined) => void;
+  skills: string[];
+  onSkillsChange: (skills: string[]) => void;
 };
 
 const JobFilterBar = ({
-  title,
   resultCount,
   location,
   onLocationChange,
@@ -33,17 +38,22 @@ const JobFilterBar = ({
   onWorkModeChange,
   employmentType,
   onEmploymentTypeChange,
+  salaryMin,
+  salaryMax,
+  onSalaryChange,
+  skills,
+  onSkillsChange,
 }: JobFilterBarProps) => {
   return (
     <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
       <h2 className="text-xl font-bold text-foreground">
-        {title}{" "}
+        Jobs{" "}
         <span className="text-xs font-normal text-muted-foreground">
           ({resultCount})
         </span>
       </h2>
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2 rounded-full border border-border bg-white px-4 py-2">
           <IconMapPin className="size-4 shrink-0 text-muted-foreground" />
           <input
@@ -65,9 +75,9 @@ const JobFilterBar = ({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Work Modes</SelectItem>
-            <SelectItem value="On-Site">On-Site</SelectItem>
-            <SelectItem value="Remote">Remote</SelectItem>
-            <SelectItem value="Hybrid">Hybrid</SelectItem>
+            <SelectItem value="onsite">On-Site</SelectItem>
+            <SelectItem value="remote">Remote</SelectItem>
+            <SelectItem value="hybrid">Hybrid</SelectItem>
           </SelectContent>
         </Select>
 
@@ -81,12 +91,21 @@ const JobFilterBar = ({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="full-time">Full-Time</SelectItem>
-            <SelectItem value="part-time">Part-Time</SelectItem>
+            <SelectItem value="full_time">Full-Time</SelectItem>
+            <SelectItem value="part_time">Part-Time</SelectItem>
             <SelectItem value="contract">Contract</SelectItem>
             <SelectItem value="internship">Internship</SelectItem>
+            <SelectItem value="freelance">Freelance</SelectItem>
           </SelectContent>
         </Select>
+
+        <SalaryRangeFilter
+          salaryMin={salaryMin}
+          salaryMax={salaryMax}
+          onChange={onSalaryChange}
+        />
+
+        <SkillsFilter skills={skills} onChange={onSkillsChange} />
       </div>
     </div>
   );

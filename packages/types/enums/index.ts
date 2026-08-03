@@ -46,6 +46,7 @@ export enum PackageType {
 // values — themselves a plain string-literal union in the generated client —
 // are directly assignable here without a cast, in either direction.
 export const SeoPageType = {
+  SECTOR: 'SECTOR',
   ROLE: 'ROLE',
   LOCATION: 'LOCATION',
   ROLE_LOCATION: 'ROLE_LOCATION',

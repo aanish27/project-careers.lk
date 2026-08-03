@@ -10,6 +10,7 @@ interface NamedEntity {
 
 export interface BuildSeoInputParams {
   pageType: SeoPageType;
+  sector?: string;
   role?: NamedEntity;
   location?: NamedEntity;
   company?: NamedEntity;
@@ -25,6 +26,7 @@ export class SeoInputService {
   async build(params: BuildSeoInputParams): Promise<SeoInputObject> {
     const where = buildJobWhereForPage({
       pageType: params.pageType,
+      sector: params.sector,
       roleId: params.role?.id,
       locationId: params.location?.id,
       companyId: params.company?.id,
@@ -65,6 +67,7 @@ export class SeoInputService {
 
     return {
       pageType: params.pageType,
+      sector: params.sector,
       role: params.role?.name,
       location: params.location?.name,
       company: params.company?.name,

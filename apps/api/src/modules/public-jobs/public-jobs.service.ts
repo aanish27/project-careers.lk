@@ -40,6 +40,7 @@ export class PublicJobsService {
         location: { contains: filters.location, mode: 'insensitive' },
       });
     }
+    if (filters.sector) and.push({ sector: filters.sector });
     if (filters.workMode?.length) {
       and.push({ workMode: { in: filters.workMode, mode: 'insensitive' } });
     }

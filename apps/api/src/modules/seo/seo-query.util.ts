@@ -3,6 +3,7 @@ import { JobStatus, SeoPageType } from '@careerslk/types';
 
 export interface SeoPageDimensions {
   pageType: SeoPageType;
+  sector?: string | null;
   roleId?: number | null;
   locationId?: number | null;
   companyId?: number | null;
@@ -17,6 +18,7 @@ export interface SeoPageDimensions {
 export function buildJobWhereForPage(dims: SeoPageDimensions): JobWhereInput {
   const where: JobWhereInput = { status: JobStatus.ACTIVE, deletedAt: null };
 
+  if (dims.sector) where.sector = dims.sector;
   if (dims.roleId) where.seoRoleId = dims.roleId;
   if (dims.locationId) where.seoLocationId = dims.locationId;
   if (dims.companyId) where.companyId = dims.companyId;

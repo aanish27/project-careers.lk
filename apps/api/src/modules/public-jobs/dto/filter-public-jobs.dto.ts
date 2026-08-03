@@ -29,6 +29,11 @@ export class FilterPublicJobsDto {
   @IsString()
   location?: string;
 
+  @ApiPropertyOptional({ description: 'Sector, e.g. "IT & Software"' })
+  @IsOptional()
+  @IsString()
+  sector?: string;
+
   @ApiPropertyOptional({
     description: 'Work mode(s), e.g. remote,hybrid,onsite',
     type: [String],

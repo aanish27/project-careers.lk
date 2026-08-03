@@ -1,5 +1,5 @@
 import { PrismaService } from '@/database/prisma.service';
-import { SeoPageType } from '@careerslk/types';
+import { getSectorForCategory, SeoPageType } from '@careerslk/types';
 import { Injectable } from '@nestjs/common';
 import type { BuildSeoInputParams } from './seo-input.service';
 
@@ -17,21 +17,23 @@ export class SeoLinksService {
   async buildRelatedLinks(
     params: Pick<
       BuildSeoInputParams,
-      'pageType' | 'role' | 'location' | 'skill'
+      'pageType' | 'sector' | 'role' | 'location' | 'skill'
     >,
   ): Promise<string[]> {
     switch (params.pageType) {
+      case SeoPageType.SECTOR:
+        return this.sectorLinks(params.sector!);
       case SeoPageType.ROLE_LOCATION:
         return this.roleLocationLinks(params.role!.id, params.location!.id);
       case SeoPageType.ROLE:
-        return this.roleLinks(params.role!.id);
+        return this.roleLinks(params.role!.id, params.role!.name);
       case SeoPageType.LOCATION:
         return this.locationLinks(params.location!.id);
       case SeoPageType.SKILL:
         return this.skillLinks(params.skill!.id);
       case SeoPageType.REMOTE:
         return params.role
-          ? this.roleLinks(params.role.id, true)
+          ? this.roleLinks(params.role.id, params.role.name, true)
           : this.topRoleLinks();
       case SeoPageType.INTERNSHIP:
         return this.topRoleLinks();
@@ -40,6 +42,19 @@ export class SeoLinksService {
       default:
         return [];
     }
+  }
+
+  private async sectorLinks(sector: string) {
+    const rolePages = await this.prisma.seoPage.findMany({
+      where: { pageType: SeoPageType.ROLE, isIndexable: true },
+      include: { role: { select: { name: true } } },
+      take: MAX_LINKS_PER_GROUP * 3,
+    });
+
+    return rolePages
+      .filter((page) => getSectorForCategory(page.role?.name) === sector)
+      .slice(0, MAX_LINKS_PER_GROUP)
+      .map((page) => page.slug);
   }
 
   private async roleLocationLinks(roleId: number, locationId: number) {
@@ -77,8 +92,14 @@ export class SeoLinksService {
     ];
   }
 
-  private async roleLinks(roleId: number, excludeSelf = false) {
-    const [roleLocationPages, remoteVariant] = await Promise.all([
+  private async roleLinks(
+    roleId: number,
+    roleName: string,
+    excludeSelf = false,
+  ) {
+    const sector = getSectorForCategory(roleName);
+
+    const [roleLocationPages, remoteVariant, sectorPage] = await Promise.all([
       this.prisma.seoPage.findMany({
         where: {
           pageType: SeoPageType.ROLE_LOCATION,
@@ -94,11 +115,22 @@ export class SeoLinksService {
             select: { slug: true },
           })
         : null,
+      sector
+        ? this.prisma.seoPage.findFirst({
+            where: {
+              pageType: SeoPageType.SECTOR,
+              sector,
+              isIndexable: true,
+            },
+            select: { slug: true },
+          })
+        : null,
     ]);
 
     return [
       ...roleLocationPages.map((p) => p.slug),
       ...(remoteVariant ? [remoteVariant.slug] : []),
+      ...(sectorPage ? [sectorPage.slug] : []),
     ];
   }
 

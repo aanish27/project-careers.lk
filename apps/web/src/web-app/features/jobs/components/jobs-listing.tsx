@@ -3,9 +3,10 @@
 import Poster from "@web-app-components/poster";
 import { PrimaryNavbar } from "@web-app-components/primary-navbar";
 import CategorySidebar from "@web-app-features/jobs/components/category-sidebar";
-import JobCard, { type Job } from "@web-app-features/jobs/components/job-card";
+import JobCard from "@web-app-features/jobs/components/job-card";
 import JobFilterBar from "@web-app-features/jobs/components/job-filter-bar";
 import JobsNavbar from "@web-app-features/jobs/components/jobs-navbar";
+import type { PublicJob } from "@web-app-features/jobs/types";
 import { debounce } from "lodash";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -20,19 +21,26 @@ import {
 const LOCATION_DEBOUNCE_MS = 400;
 
 type JobsListingProps = {
-  jobs: Job[];
+  jobs: PublicJob[];
   activeCategory: string;
   location: string;
   workMode: string;
   employmentType: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  skills: string[];
 };
 
-type FilterUpdate = Partial<{
-  sector: string;
+interface NavigateParams {
   location: string;
   workMode: string;
   employmentType: string;
-}>;
+  salaryMin: number | undefined;
+  salaryMax: number | undefined;
+  skills: string[];
+}
+
+type FilterUpdate = Partial<NavigateParams>;
 
 const JobsListing = ({
   jobs,
@@ -40,6 +48,9 @@ const JobsListing = ({
   location,
   workMode,
   employmentType,
+  salaryMin,
+  salaryMax,
+  skills,
 }: JobsListingProps) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -68,14 +79,18 @@ const JobsListing = ({
   }, []);
 
   const navigate = useCallback(
-    (merged: Required<FilterUpdate>) => {
+    (merged: NavigateParams) => {
       const params = new URLSearchParams();
-      if (merged.sector !== "All Jobs") params.set("sector", merged.sector);
       if (merged.location.trim())
         params.set("location", merged.location.trim());
       if (merged.workMode !== "all") params.set("workMode", merged.workMode);
       if (merged.employmentType !== "all")
         params.set("employmentType", merged.employmentType);
+      if (merged.salaryMin !== undefined)
+        params.set("salaryMin", String(merged.salaryMin));
+      if (merged.salaryMax !== undefined)
+        params.set("salaryMax", String(merged.salaryMax));
+      if (merged.skills.length) params.set("skills", merged.skills.join(","));
 
       const query = params.toString();
       router.replace(query ? `${pathname}?${query}` : pathname, {
@@ -88,13 +103,23 @@ const JobsListing = ({
   const updateFilters = useCallback(
     (update: FilterUpdate) => {
       navigate({
-        sector: update.sector ?? activeCategory,
         location: update.location ?? location,
         workMode: update.workMode ?? workMode,
         employmentType: update.employmentType ?? employmentType,
+        salaryMin: "salaryMin" in update ? update.salaryMin : salaryMin,
+        salaryMax: "salaryMax" in update ? update.salaryMax : salaryMax,
+        skills: update.skills ?? skills,
       });
     },
-    [activeCategory, location, workMode, employmentType, navigate],
+    [
+      location,
+      workMode,
+      employmentType,
+      salaryMin,
+      salaryMax,
+      skills,
+      navigate,
+    ],
   );
 
   const debouncedLocationUpdate = useMemo(
@@ -125,12 +150,10 @@ const JobsListing = ({
       <div className="flex flex-1 gap-8 py-8">
         <CategorySidebar
           activeCategory={activeCategory}
-          onCategoryChange={(sector) => updateFilters({ sector })}
           headerHeight={headerHeight}
         />
         <div className="flex flex-1 flex-col">
           <JobFilterBar
-            title="Java Developer"
             resultCount={jobs.length}
             location={locationInput}
             onLocationChange={handleLocationChange}
@@ -140,6 +163,13 @@ const JobsListing = ({
             onEmploymentTypeChange={(value) =>
               updateFilters({ employmentType: value })
             }
+            salaryMin={salaryMin}
+            salaryMax={salaryMax}
+            onSalaryChange={(min, max) =>
+              updateFilters({ salaryMin: min, salaryMax: max })
+            }
+            skills={skills}
+            onSkillsChange={(next) => updateFilters({ skills: next })}
           />
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">

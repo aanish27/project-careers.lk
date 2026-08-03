@@ -1,6 +1,7 @@
 import { PrismaService } from '@/database/prisma.service';
 import type { SeoPageUncheckedCreateInput } from '@careerslk/database';
-import { SEO_PAGE_THRESHOLDS, SeoPageType } from '@careerslk/types';
+import { slugify } from '@careerslk/lib/slugify';
+import { SECTORS, SEO_PAGE_THRESHOLDS, SeoPageType } from '@careerslk/types';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SeoInputService } from './seo-input.service';
@@ -17,6 +18,7 @@ interface NamedSlugEntity {
 interface GenerateOneParams {
   pageType: SeoPageType;
   slug: string;
+  sector?: string;
   role?: NamedSlugEntity;
   location?: NamedSlugEntity;
   company?: NamedSlugEntity;
@@ -78,6 +80,17 @@ export class SeoGenerationService {
 
     const roleById = new Map(roles.map((r) => [r.id, r]));
     const locationById = new Map(locations.map((l) => [l.id, l]));
+
+    for (const sector of SECTORS) {
+      await this.generateOne(
+        {
+          pageType: SeoPageType.SECTOR,
+          sector,
+          slug: `jobs/sector/${slugify(sector)}`,
+        },
+        summary,
+      );
+    }
 
     for (const role of roles) {
       await this.generateOne(
@@ -215,6 +228,7 @@ export class SeoGenerationService {
       {
         pageType: page.pageType,
         slug: page.slug,
+        sector: page.sector ?? undefined,
         role: role ?? undefined,
         location: location ?? undefined,
         company: company ?? undefined,
@@ -276,6 +290,7 @@ export class SeoGenerationService {
     const data: Omit<SeoPageUncheckedCreateInput, 'contentVersion'> = {
       pageType: params.pageType,
       slug: params.slug,
+      sector: params.sector,
       roleId: params.role?.id,
       locationId: params.location?.id,
       companyId: params.company?.id,

@@ -1,16 +1,13 @@
 import { jobsApi } from "@web-app-features/jobs/api/api";
 import JobsListing from "@web-app-features/jobs/components/jobs-listing";
+import { resolveSectorFromSlug } from "@web-app-features/jobs/utils/sector";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Browse Jobs in Sri Lanka | Jobswala",
-  description:
-    "Explore the latest job openings across IT, engineering, sales, and more sectors in Sri Lanka. Filter by location, work mode, employment type, skills, and salary to find your next role.",
-};
-
-type JobsPageProps = {
+type SectorPageProps = {
+  params: Promise<{ sector: string }>;
   searchParams: Promise<{
     location?: string;
     workMode?: string;
@@ -21,7 +18,28 @@ type JobsPageProps = {
   }>;
 };
 
-export default async function JobsPage({ searchParams }: JobsPageProps) {
+export async function generateMetadata({
+  params,
+}: SectorPageProps): Promise<Metadata> {
+  const { sector: sectorSlug } = await params;
+  const sector = resolveSectorFromSlug(sectorSlug);
+  if (!sector) return {};
+
+  return {
+    title: `${sector} Jobs in Sri Lanka | Jobswala`,
+    description: `Browse the latest ${sector} job openings in Sri Lanka from top employers.`,
+    alternates: { canonical: `/jobs/sector/${sectorSlug}` },
+  };
+}
+
+export default async function SectorPage({
+  params,
+  searchParams,
+}: SectorPageProps) {
+  const { sector: sectorSlug } = await params;
+  const sector = resolveSectorFromSlug(sectorSlug);
+  if (!sector) notFound();
+
   const {
     location = "",
     workMode = "all",
@@ -39,6 +57,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
     : [];
 
   const { items: jobs } = await jobsApi.list({
+    sector,
     location: location.trim() || undefined,
     workMode: workMode !== "all" ? [workMode] : undefined,
     employmentType: employmentType !== "all" ? [employmentType] : undefined,
@@ -50,7 +69,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
   return (
     <JobsListing
       jobs={jobs}
-      activeCategory="All Jobs"
+      activeCategory={sector}
       location={location}
       workMode={workMode}
       employmentType={employmentType}

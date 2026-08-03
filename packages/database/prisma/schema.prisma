@@ -401,6 +401,7 @@ model Advertiser {
 }
 
 enum SeoPageType {
+  SECTOR
   ROLE
   LOCATION
   ROLE_LOCATION
@@ -415,6 +416,10 @@ model SeoPage {
   id               Int          @id @default(autoincrement())
   pageType         SeoPageType
   slug             String       @unique
+  // Sector is a fixed, code-defined taxonomy key (SECTOR_TAXONOMY in
+  // @careerslk/types), not noisy scraped free text like location/skill —
+  // so unlike those, it's stored directly rather than via a lookup-table FK.
+  sector           String?
   roleId           Int?
   role             SeoRole?     @relation(fields: [roleId], references: [id])
   locationId       Int?
@@ -449,13 +454,14 @@ model SeoPage {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([pageType, roleId, locationId, companyId, skillId])
+  @@unique([pageType, roleId, locationId, companyId, skillId, sector])
   @@index([pageType])
   @@index([slug])
   @@index([roleId])
   @@index([locationId])
   @@index([companyId])
   @@index([skillId])
+  @@index([sector])
 }
 
 model SeoRole {

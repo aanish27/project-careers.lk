@@ -63,6 +63,34 @@ function roleTemplates(input: SeoInputObject): SeoTemplateOutput[] {
   ];
 }
 
+function sectorTemplates(input: SeoInputObject): SeoTemplateOutput[] {
+  const sector = input.sector!;
+  const jobTypes = joinList(input.jobTypes);
+  return [
+    {
+      title: `${sector} Jobs in Sri Lanka`,
+      metaDescription: `Browse ${sector} job openings in Sri Lanka across ${input.companyCount} companies. Updated daily.`,
+      h1: `${sector} Jobs`,
+      introText: `Browse ${input.jobCount} ${sector} jobs in Sri Lanka across ${input.companyCount} companies, spanning ${jobTypes} opportunities.`,
+      bottomText: `The ${sector} sector in Sri Lanka spans a wide range of roles and employers, with common skills including ${joinList(input.topSkills)} and work modes such as ${joinList(input.workModes)}.`,
+    },
+    {
+      title: `${sector} Careers — Sri Lanka`,
+      metaDescription: `Explore ${sector} career opportunities from employers hiring across Sri Lanka.`,
+      h1: `${sector} Careers`,
+      introText: `Explore ${input.jobCount} ${sector} career opportunities from ${input.companyCount} employers hiring across Sri Lanka.`,
+      bottomText: `Candidates interested in ${sector} can explore roles spanning ${jobTypes} arrangements, most commonly requiring ${joinList(input.topSkills)}.`,
+    },
+    {
+      title: `Find ${sector} Jobs in Sri Lanka`,
+      metaDescription: `Discover ${sector} job openings across multiple companies and locations in Sri Lanka.`,
+      h1: `${sector} Openings`,
+      introText: `Discover ${input.jobCount} ${sector} job openings across multiple companies and locations in Sri Lanka.`,
+      bottomText: `${sector} openings in Sri Lanka span ${joinList(input.workModes)} work modes, with employers commonly seeking ${joinList(input.topSkills)}.`,
+    },
+  ];
+}
+
 function locationTemplates(input: SeoInputObject): SeoTemplateOutput[] {
   const location = input.location!;
   const jobTypes = joinList(input.jobTypes);
@@ -261,6 +289,7 @@ const TEMPLATES_BY_PAGE_TYPE: Record<
   SeoPageType,
   (input: SeoInputObject) => SeoTemplateOutput[]
 > = {
+  [SeoPageType.SECTOR]: sectorTemplates,
   [SeoPageType.ROLE]: roleTemplates,
   [SeoPageType.LOCATION]: locationTemplates,
   [SeoPageType.ROLE_LOCATION]: roleLocationTemplates,

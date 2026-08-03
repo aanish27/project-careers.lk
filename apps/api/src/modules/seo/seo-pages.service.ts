@@ -23,6 +23,7 @@ export class SeoPagesService {
       this.prisma.job.findMany({
         where: buildJobWhereForPage({
           pageType: page.pageType,
+          sector: page.sector,
           roleId: page.roleId,
           locationId: page.locationId,
           companyId: page.companyId,
