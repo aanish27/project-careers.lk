@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useActionState } from 'react';
-import { Button } from '@ui/button';
-import { Field, FieldError, FieldGroup, FieldLabel } from '@ui/field';
-import { Input } from '@ui/input';
-import { login } from '@dashboard-features/auth/api/auth.actions';
+import { useActionState } from "react";
+import { Button } from "@ui/button";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@ui/field";
+import { Input } from "@ui/input";
+import { login } from "@dashboard-features/auth/api/auth.actions";
 
 export function LoginForm({ from }: { from?: string }) {
   const [state, formAction, pending] = useActionState(login, undefined);
@@ -39,7 +39,7 @@ export function LoginForm({ from }: { from?: string }) {
         {state?.error && <FieldError>{state.error}</FieldError>}
         <Field>
           <Button type="submit" disabled={pending}>
-            {pending ? 'Signing in…' : 'Login'}
+            {pending ? "Signing in…" : "Login"}
           </Button>
         </Field>
       </FieldGroup>

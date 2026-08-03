@@ -3,8 +3,8 @@ import {
   type Dispatch,
   type ReactNode,
   type SetStateAction,
-} from 'react';
-import { SidebarContext } from './sidebar-context';
+} from "react";
+import { SidebarContext } from "./sidebar-context";
 
 export interface ISidebarContextValue {
   isSidebarOpen: boolean;

@@ -1,5 +1,5 @@
-import { Search } from 'lucide-react';
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@ui/input-group';
+import { Search } from "lucide-react";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@ui/input-group";
 
 export const SidebarSearch = () => {
   return (

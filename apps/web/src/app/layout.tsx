@@ -6,6 +6,8 @@ import "./globals.css";
 
 const interHeading = Inter({ subsets: ["latin"], variable: "--font-heading" });
 
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const geistSans = Geist({
@@ -39,6 +41,7 @@ export default function RootLayout({
         "font-sans",
         geist.variable,
         interHeading.variable,
+        inter.variable,
       )}
     >
       <body className="min-h-full flex flex-col">

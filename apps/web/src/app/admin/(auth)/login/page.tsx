@@ -4,8 +4,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@ui/card';
-import { LoginForm } from '@dashboard-features/auth/components/login-form';
+} from "@ui/card";
+import { LoginForm } from "@dashboard-features/auth/components/login-form";
 
 export default async function LoginPage({
   searchParams,
