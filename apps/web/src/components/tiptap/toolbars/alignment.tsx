@@ -102,7 +102,7 @@ export const AlignmentTooolbar = () => {
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu loopFocus>
       <Tooltip>
         <TooltipTrigger
           render={
@@ -126,12 +126,7 @@ export const AlignmentTooolbar = () => {
         </TooltipTrigger>
         <TooltipContent>Text Alignment</TooltipContent>
       </Tooltip>
-      <DropdownMenuContent
-        loop
-        onCloseAutoFocus={(e) => {
-          e.preventDefault();
-        }}
-      >
+      <DropdownMenuContent finalFocus={false}>
         <DropdownMenuGroup className=" w-40">
           {alignmentOptions.map((option, index) => (
             <DropdownMenuItem

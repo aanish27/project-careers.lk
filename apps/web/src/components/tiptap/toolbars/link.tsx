@@ -1,7 +1,4 @@
 "use client";
-/* eslint-disable */
-// @ts-nocheck
-import { PopoverClose } from "@radix-ui/react-popover";
 import { Trash2, X } from "lucide-react";
 
 import React, { type FormEvent } from "react";
@@ -18,6 +15,7 @@ import { cn } from "@/lib/utils";
 
 import {
   Popover,
+  PopoverClose,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
@@ -73,9 +71,7 @@ const LinkToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
         </Tooltip>
 
         <PopoverContent
-          onCloseAutoFocus={(e) => {
-            e.preventDefault();
-          }}
+          finalFocus={false}
           className="relative px-3 py-2.5"
           render={<div className="relative" />}
         >

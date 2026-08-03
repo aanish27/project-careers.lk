@@ -92,11 +92,11 @@ export function SearchAndReplaceToolbar() {
 
       <PopoverContent
         align="end"
-        onCloseAutoFocus={(e) => {
-          e.preventDefault();
-        }}
-        onEscapeKeyDown={() => {
-          setOpen(false);
+        finalFocus={false}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") {
+            setOpen(false);
+          }
         }}
         className="relative flex w-[400px] px-3 py-2.5"
       >
