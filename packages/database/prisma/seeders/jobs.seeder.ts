@@ -1,5 +1,10 @@
 import { JobStatus, PrismaClient, SkillType } from '@careerslk/database';
 import type { Company } from '@careerslk/database';
+import {
+  normalizeLocationName,
+  normalizeSkillName,
+} from '@careerslk/lib/normalizers';
+import { slugify } from '@careerslk/lib/slugify';
 import { ALL_CATEGORIES, getSectorForCategory } from '@careerslk/types';
 import { faker } from '@faker-js/faker';
 import { createHash } from 'node:crypto';
@@ -10,6 +15,26 @@ import {
   SALARY_CURRENCY,
   SRI_LANKAN_CITIES,
 } from './data.ts';
+
+interface SeoLookupMaps {
+  roleIdBySlug: Map<string, number>;
+  locationIdBySlug: Map<string, number>;
+  skillIdBySlug: Map<string, number>;
+}
+
+async function loadSeoLookupMaps(prisma: PrismaClient): Promise<SeoLookupMaps> {
+  const [roles, locations, skills] = await Promise.all([
+    prisma.seoRole.findMany({ select: { id: true, slug: true } }),
+    prisma.seoLocation.findMany({ select: { id: true, slug: true } }),
+    prisma.seoSkill.findMany({ select: { id: true, slug: true } }),
+  ]);
+
+  return {
+    roleIdBySlug: new Map(roles.map((r) => [r.slug, r.id])),
+    locationIdBySlug: new Map(locations.map((l) => [l.slug, l.id])),
+    skillIdBySlug: new Map(skills.map((s) => [s.slug, s.id])),
+  };
+}
 
 const EMPLOYMENT_TYPES = [
   'full_time',
@@ -45,6 +70,7 @@ async function seedJobForCompany(
   prisma: PrismaClient,
   company: Company,
   keywordIds: Map<string, number>,
+  seoLookups: SeoLookupMaps,
 ) {
   const title = faker.person.jobTitle();
   const applyUrl = `${company.careerUrl}/${faker.helpers.slugify(title).toLowerCase()}-${faker.string.numeric(6)}`;
@@ -57,21 +83,34 @@ async function seedJobForCompany(
     ? faker.number.int({ min: 50_000, max: 200_000 })
     : null;
   const roleCategory = faker.helpers.arrayElement(ALL_CATEGORIES);
+  const location = faker.datatype.boolean({ probability: 0.85 })
+    ? `${faker.helpers.arrayElement(SRI_LANKAN_CITIES)}, Sri Lanka`
+    : null;
+
+  const normalizedLocation = normalizeLocationName(location);
+  const seoRoleId = seoLookups.roleIdBySlug.get(slugify(roleCategory));
+  const seoLocationId = normalizedLocation
+    ? seoLookups.locationIdBySlug.get(slugify(normalizedLocation))
+    : undefined;
+
+  const jobFingerprint = fingerprint(company.id, title, applyUrl);
 
   const job = await prisma.job.upsert({
-    where: { fingerprint: fingerprint(company.id, title, applyUrl) },
+    where: { fingerprint: jobFingerprint },
     update: {},
     create: {
       companyId: company.id,
-      fingerprint: fingerprint(company.id, title, applyUrl),
+      fingerprint: jobFingerprint,
       title,
-      location: faker.datatype.boolean({ probability: 0.85 })
-        ? `${faker.helpers.arrayElement(SRI_LANKAN_CITIES)}, Sri Lanka`
-        : null,
+      // Real slug depends on the autoincrement id, patched in below.
+      slug: `pending-${jobFingerprint}`,
+      location,
       workMode: faker.helpers.arrayElement(WORK_MODES),
       employmentType: faker.helpers.arrayElement(EMPLOYMENT_TYPES),
       roleCategory,
       sector: getSectorForCategory(roleCategory),
+      seoRoleId,
+      seoLocationId,
       department: faker.helpers.arrayElement(DEPARTMENTS),
       salaryMin,
       salaryMax: hasSalary
@@ -95,6 +134,15 @@ async function seedJobForCompany(
     },
   });
 
+  if (job.slug.startsWith('pending-')) {
+    const finalSlug = `${slugify(title)}-${slugify(company.name)}-${job.id}`;
+    await prisma.job.update({
+      where: { id: job.id },
+      data: { slug: finalSlug },
+    });
+    job.slug = finalSlug;
+  }
+
   await prisma.jobSkill.deleteMany({ where: { jobId: job.id } });
 
   const explicitSkills = faker.helpers.arrayElements(EXPLICIT_SKILLS, {
@@ -106,18 +154,22 @@ async function seedJobForCompany(
     max: 3,
   });
 
+  const buildSkillRow = (name: string, type: SkillType) => {
+    const normalized = normalizeSkillName(name);
+    return {
+      jobId: job.id,
+      name,
+      type,
+      seoSkillId: normalized
+        ? seoLookups.skillIdBySlug.get(slugify(normalized))
+        : undefined,
+    };
+  };
+
   await prisma.jobSkill.createMany({
     data: [
-      ...explicitSkills.map((name) => ({
-        jobId: job.id,
-        name,
-        type: SkillType.EXPLICIT,
-      })),
-      ...inferredSkills.map((name) => ({
-        jobId: job.id,
-        name,
-        type: SkillType.INFERRED,
-      })),
+      ...explicitSkills.map((name) => buildSkillRow(name, SkillType.EXPLICIT)),
+      ...inferredSkills.map((name) => buildSkillRow(name, SkillType.INFERRED)),
     ],
   });
 
@@ -146,12 +198,13 @@ export async function seedJobs(
   console.log(`Seeding jobs for ${companies.length} companies...`);
 
   const keywordIds = await seedKeywords(prisma);
+  const seoLookups = await loadSeoLookupMaps(prisma);
   let total = 0;
 
   for (const company of companies) {
     const count = faker.number.int(jobsPerCompany);
     for (let i = 0; i < count; i++) {
-      await seedJobForCompany(prisma, company, keywordIds);
+      await seedJobForCompany(prisma, company, keywordIds, seoLookups);
       total++;
     }
   }

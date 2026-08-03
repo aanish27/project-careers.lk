@@ -145,6 +145,9 @@ model Company {
   scrapeLogs  ScrapeLog[]
   aiLogs      AiLog[]
   aiBatchLogs AiBatchLog[]
+  seoPages    SeoPage[]
+
+  slug String @unique
 }
 
 model Job {
@@ -177,10 +180,19 @@ model Job {
   skills   JobSkill[]
   keywords JobKeyword[]
 
+  slug          String       @unique
+  seoRoleId     Int?
+  seoRole       SeoRole?     @relation(fields: [seoRoleId], references: [id])
+  seoLocationId Int?
+  seoLocation   SeoLocation? @relation(fields: [seoLocationId], references: [id])
+
   @@index([companyId])
   @@index([status])
   @@index([fingerprint])
   @@index([sector])
+  @@index([slug])
+  @@index([seoRoleId])
+  @@index([seoLocationId])
 }
 
 enum SkillType {
@@ -195,11 +207,15 @@ model JobSkill {
   name  String
   type  SkillType
 
+  seoSkillId Int?
+  seoSkill   SeoSkill? @relation(fields: [seoSkillId], references: [id])
+
   deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
   @@index([jobId])
+  @@index([seoSkillId])
 }
 
 model Keyword {
@@ -392,40 +408,63 @@ enum SeoPageType {
   SKILL
   REMOTE
   INTERNSHIP
+  ALL_JOBS
 }
 
 model SeoPage {
-  id               Int         @id @default(autoincrement())
+  id               Int          @id @default(autoincrement())
   pageType         SeoPageType
-  slug             String      @unique
-  roleId           String?
-  locationId       String?
-  companyId        String?
-  skillId          String?
+  slug             String       @unique
+  roleId           Int?
+  role             SeoRole?     @relation(fields: [roleId], references: [id])
+  locationId       Int?
+  location         SeoLocation? @relation(fields: [locationId], references: [id])
+  companyId        Int?
+  company          Company?     @relation(fields: [companyId], references: [id])
+  skillId          Int?
+  skill            SeoSkill?    @relation(fields: [skillId], references: [id])
   title            String
   metaDescription  String
   h1               String
   introText        String
   bottomText       String
+  faqJson          Json?
   canonicalUrl     String
   relatedLinksJson Json
   isIndexable      Boolean
-  contentVersion   Int         @default(1)
+  contentVersion   Int          @default(1)
   lastGeneratedAt  DateTime
   lastReviewedAt   DateTime?
-  manualOverride   Boolean     @default(false)
+  manualOverride   Boolean      @default(false)
   lastmod          DateTime
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
 
+  jobCount              Int       @default(0)
+  companyCount          Int       @default(0)
+  firstBelowThresholdAt DateTime?
+  deactivatedAt         DateTime?
+  retiredAt             DateTime?
+  needsReview           Boolean   @default(false)
+  validationIssues      Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([pageType, roleId, locationId, companyId, skillId])
   @@index([pageType])
   @@index([slug])
+  @@index([roleId])
+  @@index([locationId])
+  @@index([companyId])
+  @@index([skillId])
 }
 
 model SeoRole {
   id   Int    @id @default(autoincrement())
   name String
   slug String @unique
+
+  jobs     Job[]
+  seoPages SeoPage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -437,6 +476,9 @@ model SeoLocation {
   slug    String @unique
   country String
 
+  jobs     Job[]
+  seoPages SeoPage[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -445,6 +487,9 @@ model SeoSkill {
   id   Int    @id @default(autoincrement())
   name String
   slug String @unique
+
+  jobSkills JobSkill[]
+  seoPages  SeoPage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

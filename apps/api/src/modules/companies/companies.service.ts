@@ -1,7 +1,9 @@
 import { PrismaService } from '@/database/prisma.service';
 import { AUDIT_ACTIONS } from '@/modules/audit/audit.constant';
 import { AuditContext, AuditService } from '@/modules/audit/audit.service';
+import { generateUniqueSlug } from '@careerslk/database';
 import { assertNotSsrf } from '@careerslk/lib/ssrf';
+import { slugify } from '@careerslk/lib/slugify';
 import {
   CompanyScrapeSummary,
   CreateCompanyInput,
@@ -113,9 +115,16 @@ export class CompaniesService {
     await this.assertUrlsNotSsrf(dto.careerUrl, dto.websiteUrl, dto.logoUrl);
 
     return await this.prisma.$transaction(async (tx) => {
+      const slug = await generateUniqueSlug(slugify(dto.name), (candidate) =>
+        tx.company
+          .findUnique({ where: { slug: candidate } })
+          .then((existing) => existing !== null),
+      );
+
       const company = await tx.company.create({
         data: {
           name: dto.name,
+          slug,
           websiteUrl: dto.websiteUrl,
           logoUrl: dto.logoUrl,
           careerUrl: dto.careerUrl,

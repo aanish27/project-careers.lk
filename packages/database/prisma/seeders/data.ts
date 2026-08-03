@@ -24,24 +24,6 @@ export const ATS_PLATFORMS = [
   null,
 ];
 
-// Used only by seo.seeder.ts for SeoRole slugs. Job.roleCategory itself is
-// now seeded from ALL_CATEGORIES in @careerslk/types (see jobs.seeder.ts),
-// which is decoupled from this older, flatter list.
-export const ROLE_CATEGORIES = [
-  'Engineering',
-  'Design',
-  'Product',
-  'Marketing',
-  'Sales',
-  'Human Resources',
-  'Finance',
-  'Operations',
-  'Customer Support',
-  'Data & Analytics',
-  'Legal',
-  'Business Analyst',
-];
-
 export const DEPARTMENTS = [
   'Engineering',
   'Product',

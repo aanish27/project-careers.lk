@@ -6,7 +6,7 @@ import { seedAdvertisers } from './seeders/advertisers.seeder.ts';
 import { seedCompanies } from './seeders/companies.seeder.ts';
 import { seedJobs } from './seeders/jobs.seeder.ts';
 import { seedScrapeLogs } from './seeders/scrape-logs.seeder.ts';
-import { seedSeoPages } from './seeders/seo.seeder.ts';
+import { seedSeoLookups } from './seeders/seo.seeder.ts';
 import { seedPermissions } from './seeders/permissions.seeder.ts';
 import { seedSuperAdmin } from './seeders/rbac.seeder.ts';
 import { seedAdminUsers } from './seeders/admin-users.seeder.ts';
@@ -40,11 +40,12 @@ async function main() {
   });
   await seedAdminUsers(prisma);
 
+  await seedSeoLookups(prisma);
+
   const companies = await seedCompanies(prisma, companyCount);
   await seedJobs(prisma, companies, jobsPerCompany);
   await seedScrapeLogs(prisma, companies);
   await seedAdvertisers(prisma, advertiserCount);
-  await seedSeoPages(prisma);
 
   console.log('Seeding complete.');
 

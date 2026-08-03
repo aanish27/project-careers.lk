@@ -1,4 +1,10 @@
-import { CompanyStatus, PrismaClient, ScrapeStatus } from '@careerslk/database';
+import {
+  CompanyStatus,
+  generateUniqueSlug,
+  PrismaClient,
+  ScrapeStatus,
+} from '@careerslk/database';
+import { slugify } from '@careerslk/lib/slugify';
 import { faker } from '@faker-js/faker';
 import { ATS_PLATFORMS, COMPANY_NAME_PARTS } from './data.ts';
 
@@ -36,12 +42,18 @@ export async function seedCompanies(prisma: PrismaClient, count: number) {
       { value: ScrapeStatus.SKIPPED, weight: 1 },
     ]);
     const hasSelector = scrapeStatus === ScrapeStatus.ACTIVE;
+    const slug = await generateUniqueSlug(slugify(name), (candidate) =>
+      prisma.company
+        .findUnique({ where: { slug: candidate } })
+        .then((existing) => existing !== null),
+    );
 
     const company = await prisma.company.upsert({
       where: { websiteUrl },
       update: {},
       create: {
         name,
+        slug,
         logoUrl: faker.datatype.boolean({ probability: 0.7 })
           ? `https://logo.clearbit.com/${domain}`
           : null,

@@ -1,4 +1,5 @@
-import { PrismaClient } from '@careerslk/database';
+import { generateUniqueSlug, PrismaClient } from '@careerslk/database';
+import { slugify } from '@careerslk/lib/slugify';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
@@ -63,7 +64,12 @@ const companies = [
 
 async function main() {
   for (const data of companies) {
-    const company = await prisma.company.create({ data });
+    const slug = await generateUniqueSlug(slugify(data.name), (candidate) =>
+      prisma.company
+        .findUnique({ where: { slug: candidate } })
+        .then((existing) => existing !== null),
+    );
+    const company = await prisma.company.create({ data: { ...data, slug } });
     console.log(
       `Inserted: ${company.name} - ${company.careerUrl} (${company.id})`,
     );
