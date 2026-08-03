@@ -1,3 +1,4 @@
+import { getSectorForCategory } from '@careerslk/types';
 import { prisma } from '../utils/prisma';
 import { AiJob } from '../utils/types';
 import { HashService } from './hash.service';
@@ -24,6 +25,7 @@ export async function upsertJobs(
           description: job.description,
           department: job.department,
           roleCategory: job.role_category,
+          sector: getSectorForCategory(job.role_category),
           workMode: job.work_mode,
           location: job.location,
           employmentType: job.employment_type,

@@ -1,3 +1,12 @@
+import { ALL_CATEGORIES } from '@careerslk/types';
+
+const ROLE_CATEGORY_SCHEMA_LINE = `"role_category": ${ALL_CATEGORIES.map((c) => `"${c}"`).join(' | ')} | null,`;
+
+const ROLE_CATEGORY_FIELD_RULES = `role_category
+- Classify the job into exactly one of the category values listed in the OUTPUT SCHEMA above (~${ALL_CATEGORIES.length} specific categories grouped by industry, e.g. "Software Engineering", "Civil Engineering", "Nursing", "Teaching").
+- Choose the single most specific category that matches the job title and description — never guess a broader one when a specific one applies.
+- null only if the job content is too ambiguous to classify at all.`;
+
 export const USER_PROMPT_COMPANY = (
   html: string,
   careerUrl?: string,
@@ -150,7 +159,7 @@ OUTPUT SCHEMA:
       "location": string | null,
       "work_mode": "hybrid" | "remote" | "onsite",
       "employment_type": "Full-time" | "Part-time" | "Contract" | "Internship" | "Freelance" | null,
-      "role_category": "Engineering" | "Design" | "Marketing" | "Sales" | "Finance" | "Operations" | "Human Resources" | "Legal" | "Customer Support" | "Data & Analytics" | "Product" | "Research" | "Education" | "Healthcare" | "Other" | null,
+      ${ROLE_CATEGORY_SCHEMA_LINE}
       "department": string | null,
       "description": string | null,
       "apply_url": string,
@@ -254,14 +263,7 @@ employment_type
 - Examples: "Permanent" → "Full-time", "Freelance contract" → "Freelance", "Graduate program" → "Internship"
 - null if completely absent or ambiguous.
 
-role_category
-- Classify the job into exactly one of the following fixed categories:
-  Engineering, Design, Marketing, Sales, Finance, Operations, Human Resources,
-  Legal, Customer Support, Data & Analytics, Product, Research, Education,
-  Healthcare, Other
-- Base the classification on the job title and description.
-- Use "Other" only when no category genuinely fits.
-- null only if the job content is too ambiguous to classify at all.
+${ROLE_CATEGORY_FIELD_RULES}
 
 department
 - Extract the department name only if explicitly stated in the posting.
@@ -317,7 +319,7 @@ OUTPUT SCHEMA — each object in the array must follow this exact structure:
   "location": string | null,
   "work_mode": "hybrid" | "remote" | "onsite",
   "employment_type": "Full-time" | "Part-time" | "Contract" | "Internship" | "Freelance" | null,
-  "role_category": "Engineering" | "Design" | "Marketing" | "Sales" | "Finance" | "Operations" | "Human Resources" | "Legal" | "Customer Support" | "Data & Analytics" | "Product" | "Research" | "Education" | "Healthcare" | "Other" | null,
+  ${ROLE_CATEGORY_SCHEMA_LINE}
   "department": string | null,
   "description": string | null,
   "apply_url": string,
@@ -348,14 +350,7 @@ employment_type
 - Examples: "Permanent" → "Full-time", "Freelance contract" → "Freelance", "Graduate program" → "Internship"
 - null if completely absent or ambiguous.
 
-role_category
-- Classify the job into exactly one of the following fixed categories:
-  Engineering, Design, Marketing, Sales, Finance, Operations, Human Resources,
-  Legal, Customer Support, Data & Analytics, Product, Research, Education,
-  Healthcare, Other
-- Base the classification on the job title and description.
-- Use "Other" only when no category genuinely fits.
-- null only if the job content is too ambiguous to classify at all.
+${ROLE_CATEGORY_FIELD_RULES}
 
 department
 - Extract the department name only if explicitly stated in the posting.

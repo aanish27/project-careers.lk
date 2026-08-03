@@ -1,12 +1,12 @@
 import { JobStatus, PrismaClient, SkillType } from '@careerslk/database';
 import type { Company } from '@careerslk/database';
+import { ALL_CATEGORIES, getSectorForCategory } from '@careerslk/types';
 import { faker } from '@faker-js/faker';
 import { createHash } from 'node:crypto';
 import {
   DEPARTMENTS,
   EXPLICIT_SKILLS,
   KEYWORD_POOL,
-  ROLE_CATEGORIES,
   SALARY_CURRENCY,
   SRI_LANKAN_CITIES,
 } from './data.ts';
@@ -56,6 +56,7 @@ async function seedJobForCompany(
   const salaryMin = hasSalary
     ? faker.number.int({ min: 50_000, max: 200_000 })
     : null;
+  const roleCategory = faker.helpers.arrayElement(ALL_CATEGORIES);
 
   const job = await prisma.job.upsert({
     where: { fingerprint: fingerprint(company.id, title, applyUrl) },
@@ -69,7 +70,8 @@ async function seedJobForCompany(
         : null,
       workMode: faker.helpers.arrayElement(WORK_MODES),
       employmentType: faker.helpers.arrayElement(EMPLOYMENT_TYPES),
-      roleCategory: faker.helpers.arrayElement(ROLE_CATEGORIES),
+      roleCategory,
+      sector: getSectorForCategory(roleCategory),
       department: faker.helpers.arrayElement(DEPARTMENTS),
       salaryMin,
       salaryMax: hasSalary

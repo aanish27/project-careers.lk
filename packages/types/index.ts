@@ -3,6 +3,7 @@ export * from './ai-cost';
 export * from './audit-logs';
 export * from './company';
 export * from './enums';
+export * from './job-taxonomy';
 export * from './jobs';
 export * from './keywords';
 export * from './logs';

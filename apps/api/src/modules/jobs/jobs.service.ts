@@ -8,6 +8,7 @@ interface JobFilters {
   company?: string;
   companyId?: number;
   status?: JobStatus;
+  sector?: string;
 }
 
 @Injectable()
@@ -21,6 +22,7 @@ export class JobsService {
     const where = {
       status: filters.status,
       companyId: filters.companyId,
+      sector: filters.sector,
       company: filters.company ? { name: filters.company } : undefined,
       deletedAt: null,
     };

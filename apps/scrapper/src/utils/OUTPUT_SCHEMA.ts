@@ -1,3 +1,9 @@
+import { ALL_CATEGORIES } from '@careerslk/types';
+
+const ROLE_CATEGORY_PROPERTY = {
+  anyOf: [{ type: 'string', enum: [...ALL_CATEGORIES] }, { type: 'null' }],
+} as const;
+
 export const CLAUDE_SCHEMA_COMPANY = {
   format: {
     type: 'json_schema',
@@ -140,31 +146,7 @@ export const CLAUDE_SCHEMA_COMPANY_JOBS = {
                   { type: 'null' },
                 ],
               },
-              role_category: {
-                anyOf: [
-                  {
-                    type: 'string',
-                    enum: [
-                      'Engineering',
-                      'Design',
-                      'Marketing',
-                      'Sales',
-                      'Finance',
-                      'Operations',
-                      'Human Resources',
-                      'Legal',
-                      'Customer Support',
-                      'Data & Analytics',
-                      'Product',
-                      'Research',
-                      'Education',
-                      'Healthcare',
-                      'Other',
-                    ],
-                  },
-                  { type: 'null' },
-                ],
-              },
+              role_category: ROLE_CATEGORY_PROPERTY,
               department: { type: ['string', 'null'] },
               description: { type: ['string', 'null'] },
               apply_url: { type: 'string' },
@@ -226,31 +208,7 @@ export const CLAUDE_SCHEMA_JOBS = {
                   { type: 'null' },
                 ],
               },
-              role_category: {
-                anyOf: [
-                  {
-                    type: 'string',
-                    enum: [
-                      'Engineering',
-                      'Design',
-                      'Marketing',
-                      'Sales',
-                      'Finance',
-                      'Operations',
-                      'Human Resources',
-                      'Legal',
-                      'Customer Support',
-                      'Data & Analytics',
-                      'Product',
-                      'Research',
-                      'Education',
-                      'Healthcare',
-                      'Other',
-                    ],
-                  },
-                  { type: 'null' },
-                ],
-              },
+              role_category: ROLE_CATEGORY_PROPERTY,
               department: { type: ['string', 'null'] },
               description: { type: ['string', 'null'] },
               apply_url: { type: 'string' },

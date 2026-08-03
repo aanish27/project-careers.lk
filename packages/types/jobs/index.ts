@@ -12,6 +12,7 @@ export interface Job {
   location: string | null;
   workMode: string | null;
   employmentType: string | null;
+  sector: string | null;
   roleCategory: string | null;
   department: string | null;
   salaryMin: number | null;

@@ -26,4 +26,12 @@ export class FilterJobsDto {
   @IsOptional()
   @IsEnum(JobStatus)
   status?: JobStatus;
+
+  @ApiPropertyOptional({
+    description: 'Filter by sector',
+    example: 'IT & Software',
+  })
+  @IsOptional()
+  @IsString()
+  sector?: string;
 }

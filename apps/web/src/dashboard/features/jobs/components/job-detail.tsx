@@ -78,6 +78,10 @@ export function JobDetail({ jobId }: { jobId: number }) {
             <div>{job.employmentType ?? "—"}</div>
           </div>
           <div>
+            <div className="text-muted-foreground">Sector</div>
+            <div>{job.sector ?? "—"}</div>
+          </div>
+          <div>
             <div className="text-muted-foreground">Role category</div>
             <div>{job.roleCategory ?? "—"}</div>
           </div>

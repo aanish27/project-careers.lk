@@ -6,6 +6,7 @@ export const updateJobSchema = z.object({
   location: z.string().optional(),
   workMode: z.string().optional(),
   employmentType: z.enum(EmploymentType).optional(),
+  sector: z.string().optional(),
   roleCategory: z.string().optional(),
   department: z.string().optional(),
   salaryMin: z.number().int().optional(),

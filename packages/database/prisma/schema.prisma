@@ -141,21 +141,22 @@ model Company {
   createdAt              DateTime      @default(now())
   updatedAt              DateTime      @updatedAt
 
-  jobs            Job[]
-  scrapeLogs      ScrapeLog[]
-  aiLogs          AiLog[]
-  aiBatchLogs     AiBatchLog[]
+  jobs        Job[]
+  scrapeLogs  ScrapeLog[]
+  aiLogs      AiLog[]
+  aiBatchLogs AiBatchLog[]
 }
 
 model Job {
-  id             Int             @id @default(autoincrement())
+  id             Int         @id @default(autoincrement())
   companyId      Int
-  company        Company         @relation(fields: [companyId], references: [id])
-  fingerprint    String          @unique
+  company        Company     @relation(fields: [companyId], references: [id])
+  fingerprint    String      @unique
   title          String
   location       String?
   workMode       String?
   employmentType String?
+  sector         String?
   roleCategory   String?
   department     String?
   salaryMin      Int?
@@ -165,13 +166,13 @@ model Job {
   description    String?
   deadline       DateTime?
   applyUrl       String?
-  status         JobStatus       @default(ACTIVE)
+  status         JobStatus   @default(ACTIVE)
   lastSeenAt     DateTime
   deletedAt      DateTime?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
   batchId        String?
-  batch          AiBatchLog?     @relation(fields: [batchId], references: [id])
+  batch          AiBatchLog? @relation(fields: [batchId], references: [id])
 
   skills   JobSkill[]
   keywords JobKeyword[]
@@ -179,6 +180,7 @@ model Job {
   @@index([companyId])
   @@index([status])
   @@index([fingerprint])
+  @@index([sector])
 }
 
 enum SkillType {
