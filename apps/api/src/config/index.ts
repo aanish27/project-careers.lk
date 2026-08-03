@@ -12,6 +12,15 @@ export default () => ({
     refreshSecret: process.env.JWT_REFRESH_SECRET,
     refreshExpiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN || '7d',
   },
+  jwtWebUser: {
+    secret: process.env.JWT_WEB_USER_SECRET,
+    expiresIn: process.env.JWT_WEB_USER_ACCESS_TOKEN_EXPIRES_IN || '15m',
+    refreshSecret: process.env.JWT_WEB_USER_REFRESH_SECRET,
+    refreshExpiresIn: process.env.JWT_WEB_USER_REFRESH_TOKEN_EXPIRES_IN || '7d',
+  },
+  internal: {
+    apiKey: process.env.INTERNAL_API_KEY,
+  },
   storage: {
     provider: process.env.STORAGE_PROVIDER || 'local',
     maxFileSize:

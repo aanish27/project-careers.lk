@@ -1,6 +1,8 @@
 import { SESSION_COOKIE_NAME } from "@dashboard-config/constants";
 import { decryptSession } from "@dashboard-lib/session";
+import { WEB_USER_SESSION_COOKIE_NAME } from "@web-app-config/constants";
 import { jobsApi } from "@web-app-features/jobs/api/api";
+import { decryptWebUserSession } from "@web-app-lib/web-user-session";
 import { seoPagesApi } from "@web-app-features/seo/api/api";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -24,6 +26,19 @@ async function handleAdminAuth(request: NextRequest) {
 
   if (session && isLoginPath) {
     return NextResponse.redirect(new URL("/admin", request.url));
+  }
+
+  return NextResponse.next();
+}
+
+async function handleWebUserAuth(request: NextRequest) {
+  const cookie = request.cookies.get(WEB_USER_SESSION_COOKIE_NAME)?.value;
+  const session = cookie ? await decryptWebUserSession(cookie) : null;
+
+  if (!session) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("from", request.nextUrl.pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();
@@ -58,6 +73,9 @@ export async function proxy(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/admin")) {
     return handleAdminAuth(request);
   }
+  if (request.nextUrl.pathname.startsWith("/profile")) {
+    return handleWebUserAuth(request);
+  }
   return handleRetirementCheck(request);
 }
 
@@ -68,5 +86,6 @@ export const config = {
     "/companies/:path*",
     "/internships",
     "/remote-jobs",
+    "/profile/:path*",
   ],
 };

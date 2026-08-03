@@ -29,6 +29,8 @@ import { QueueLogsModule } from './modules/queue-logs/queue-logs.module';
 import { ScrapeLogsModule } from './modules/scrape-logs/scrape-logs.module';
 import { SeoAdminModule } from './modules/seo-admin/seo-admin.module';
 import { SeoModule } from './modules/seo/seo.module';
+import { WebUserAuthModule } from './modules/web-user-auth/web-user-auth.module';
+import { WebUsersModule } from './modules/web-users/web-users.module';
 import { StorageModule } from './shared/storage/storage.module';
 
 @Module({
@@ -146,6 +148,8 @@ import { StorageModule } from './shared/storage/storage.module';
     SeoModule,
     PublicJobsModule,
     PublicCompaniesModule,
+    WebUsersModule,
+    WebUserAuthModule,
   ],
   controllers: [AppController],
   providers: [

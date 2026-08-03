@@ -33,6 +33,19 @@ export const envValidationSchema = Joi.object({
   JWT_REFRESH_SECRET: Joi.string().min(32).required(),
   JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.string().default('7d'),
 
+  // JWT — web-user (job-seeker web accounts). Deliberately separate secrets
+  // from the admin JWT above: both AdminUser.id and WebUser.id are
+  // autoincrement starting at 1, so sharing a secret/strategy would let a
+  // web-user token be validated as an unrelated admin with the same numeric id.
+  JWT_WEB_USER_SECRET: Joi.string().min(32).required(),
+  JWT_WEB_USER_ACCESS_TOKEN_EXPIRES_IN: Joi.string().default('15m'),
+  JWT_WEB_USER_REFRESH_SECRET: Joi.string().min(32).required(),
+  JWT_WEB_USER_REFRESH_TOKEN_EXPIRES_IN: Joi.string().default('7d'),
+
+  // Shared secret the Next.js web server must present to call web-user-auth
+  // endpoints that trust a caller-supplied Google profile (see InternalOnlyGuard).
+  INTERNAL_API_KEY: Joi.string().min(32).required(),
+
   // Only read by the seed script (packages/database/prisma/seed.ts), not the app itself.
   SUPER_ADMIN_EMAIL: Joi.string().optional(),
   SUPER_ADMIN_PASSWORD: Joi.string().optional(),
