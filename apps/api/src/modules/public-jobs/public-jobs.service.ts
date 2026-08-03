@@ -1,6 +1,6 @@
 import { PrismaService } from '@/database/prisma.service';
 import type { JobWhereInput } from '@careerslk/database';
-import { JobStatus } from '@careerslk/types';
+import { JobStatus, SEO_RETIREMENT_DAYS } from '@careerslk/types';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { FilterPublicJobsDto } from './dto/filter-public-jobs.dto';
 
@@ -136,6 +136,31 @@ export class PublicJobsService {
         : null;
 
     return { items: jobs, nextCursor };
+  }
+
+  /** Bulk export for sitemap generation — not paginated, no filters. */
+  async sitemapEntries() {
+    return this.prisma.job.findMany({
+      where: { status: JobStatus.ACTIVE, deletedAt: null },
+      select: { slug: true, updatedAt: true },
+    });
+  }
+
+  /** SRS 12.9.3 — expired jobs retire (410) after 90 days rather than 404ing immediately. */
+  async isRetired(slug: string): Promise<boolean> {
+    const match = slug.match(/-(\d+)$/);
+    if (!match) return false;
+    const id = parseInt(match[1], 10);
+
+    const job = await this.prisma.job.findFirst({
+      where: { id, deletedAt: null },
+      select: { status: true, lastSeenAt: true },
+    });
+    if (!job || job.status !== 'EXPIRED') return false;
+
+    const daysSinceLastSeen =
+      (Date.now() - job.lastSeenAt.getTime()) / (1000 * 60 * 60 * 24);
+    return daysSinceLastSeen > SEO_RETIREMENT_DAYS;
   }
 
   async findBySlug(slug: string) {

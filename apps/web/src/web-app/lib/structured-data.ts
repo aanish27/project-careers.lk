@@ -82,3 +82,68 @@ export function buildBreadcrumbListSchema(
     })),
   };
 }
+
+export function buildCollectionPageSchema(params: {
+  name: string;
+  description: string;
+  url: string;
+  numberOfItems: number;
+}): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: params.name,
+    description: params.description,
+    url: params.url,
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: params.numberOfItems,
+    },
+  };
+}
+
+export interface OrganizationParams {
+  name: string;
+  url?: string;
+  logoUrl?: string | null;
+}
+
+export function buildOrganizationSchema(
+  params: OrganizationParams,
+): Record<string, unknown> {
+  const schema: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: params.name,
+  };
+
+  if (params.url) schema.url = params.url;
+  if (params.logoUrl) schema.logo = params.logoUrl;
+
+  return schema;
+}
+
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+/** SRS decision #10 — FAQ content is admin-authored only, never fabricated. */
+export function buildFaqPageSchema(
+  items: FaqItem[],
+): Record<string, unknown> | null {
+  if (items.length === 0) return null;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
+}

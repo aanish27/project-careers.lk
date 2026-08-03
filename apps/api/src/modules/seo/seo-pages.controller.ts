@@ -22,4 +22,11 @@ export class SeoPagesController {
     if (!result) throw new NotFoundException('SEO page not found');
     return result;
   }
+
+  // Lightweight check for the proxy (FR-SEO-10's 410) — avoids fetching the
+  // full page/jobs/relatedLinks payload just to check one boolean.
+  @Get('retirement-status')
+  async retirementStatus(@Query('slug') slug: string) {
+    return { retired: await this.seoPagesService.isRetired(slug) };
+  }
 }

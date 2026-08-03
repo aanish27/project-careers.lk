@@ -1,9 +1,8 @@
 "use client";
 
-import type { PublicJob } from "@web-app-features/jobs/types";
 import { Button } from "@/components/ui/button";
 import { IconBookmark, IconExternalLink, IconShare } from "@tabler/icons-react";
-import Image from "next/image";
+import type { PublicJob } from "@web-app-features/jobs/types";
 import Link from "next/link";
 import { useState } from "react";
 import { getJobCardColors } from "./job-card-palette";
@@ -58,28 +57,17 @@ const JobCard = ({ job, index }: { job: PublicJob; index: number }) => {
         </button>
       </div>
 
-      <Link href={`/jobs/${job.slug}`} className="block">
-        {job.company.logoUrl && (
-          <Image
-            src={job.company.logoUrl}
-            alt={`${job.company.name} logo`}
-            width={40}
-            height={40}
-            className="mb-3 h-10 w-10 rounded-lg object-contain bg-white"
-          />
-        )}
-
-        <h3 className="mb-1 text-xl font-bold text-neutral-900">{job.title}</h3>
-
+      <Link href={`/jobs/${job.slug}`} className="flex flex-col ">
+        <h3 className="mb-1 text-xl font-bold text-neutral-900 text-wrap">
+          {job.title}
+        </h3>
         <p className={`mb-2 font-semibold ${text}`}>{job.company.name}</p>
-
         {job.location && (
           <p className="mb-4 flex items-center gap-1 text-sm text-neutral-600">
             <LocationPinIcon className="h-4 w-4 shrink-0" />
             {job.location}
           </p>
         )}
-
         {job.description && (
           <p className="mb-5 line-clamp-2 text-sm text-neutral-700 leading-relaxed">
             {job.description}

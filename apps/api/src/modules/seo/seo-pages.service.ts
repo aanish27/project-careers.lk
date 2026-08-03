@@ -48,6 +48,14 @@ export class SeoPagesService {
     return { page, jobs, relatedLinks };
   }
 
+  async isRetired(slug: string): Promise<boolean> {
+    const page = await this.prisma.seoPage.findUnique({
+      where: { slug },
+      select: { retiredAt: true },
+    });
+    return page?.retiredAt !== null && page?.retiredAt !== undefined;
+  }
+
   async list(pageType?: SeoPageType) {
     return this.prisma.seoPage.findMany({
       where: {

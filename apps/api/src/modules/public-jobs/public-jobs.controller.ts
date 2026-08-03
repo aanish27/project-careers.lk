@@ -18,8 +18,22 @@ export class PublicJobsController {
     return this.publicJobsService.findAll(filters);
   }
 
+  // Must be declared before ':slug' — NestJS matches routes in declaration
+  // order, and 'sitemap-entries' would otherwise be captured as a slug.
+  @Get('sitemap-entries')
+  sitemapEntries() {
+    return this.publicJobsService.sitemapEntries();
+  }
+
   @Get(':slug')
   findBySlug(@Param('slug') slug: string) {
     return this.publicJobsService.findBySlug(slug);
+  }
+
+  // Lightweight check for the proxy (FR-SEO-10's 410) — avoids fetching the
+  // full job/related-jobs payload just to check one boolean.
+  @Get(':slug/retirement-status')
+  async retirementStatus(@Param('slug') slug: string) {
+    return { retired: await this.publicJobsService.isRetired(slug) };
   }
 }

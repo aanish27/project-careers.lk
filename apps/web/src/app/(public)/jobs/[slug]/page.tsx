@@ -2,6 +2,8 @@ import { ApiError } from "@/lib/api-client";
 import StructuredData from "@web-app-components/structured-data";
 import { jobsApi } from "@web-app-features/jobs/api/api";
 import type { PublicJobDetailResponse } from "@web-app-features/jobs/types";
+import PseoPageLayout from "@web-app-features/seo/components/pseo-page-layout";
+import { seoPagesApi } from "@web-app-features/seo/api/api";
 import {
   buildBreadcrumbListSchema,
   buildJobPostingSchema,
@@ -11,6 +13,17 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
+
+// This route resolves two distinct things under the same dynamic segment,
+// since Next.js requires one param name per directory level: individual job
+// detail pages (slug always ends in "-{id}", per decision #6) and the ROLE
+// pSEO landing pages (e.g. /jobs/software-engineering). Disambiguated
+// cheaply via regex before doing any data fetching.
+const JOB_SLUG_PATTERN = /-(\d+)$/;
+
+function isJobSlug(slug: string): boolean {
+  return JOB_SLUG_PATTERN.test(slug);
+}
 
 export const revalidate = 21600; // 6h — jobs may expire or update
 
@@ -24,7 +37,7 @@ const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
   freelance: "Freelance",
 };
 
-type JobDetailPageProps = {
+type SlugPageProps = {
   params: Promise<{ slug: string }>;
 };
 
@@ -44,10 +57,7 @@ function isRetired(job: PublicJobDetailResponse["job"]): boolean {
   return daysSinceLastSeen > EXPIRED_JOB_RETIREMENT_DAYS;
 }
 
-export async function generateMetadata({
-  params,
-}: JobDetailPageProps): Promise<Metadata> {
-  const { slug } = await params;
+async function generateJobMetadata(slug: string): Promise<Metadata> {
   const result = await loadJob(slug);
   if (!result || isRetired(result.job)) return {};
 
@@ -75,8 +85,49 @@ export async function generateMetadata({
   };
 }
 
-export default async function JobDetailPage({ params }: JobDetailPageProps) {
+async function generateRoleMetadata(slug: string): Promise<Metadata> {
+  const result = await seoPagesApi.getBySlug(`jobs/${slug}`);
+  if (!result || result.page.retiredAt) return {};
+
+  const { page } = result;
+  return {
+    title: page.title,
+    description: page.metaDescription,
+    alternates: { canonical: page.canonicalUrl },
+    robots: page.isIndexable ? undefined : { index: false, follow: true },
+  };
+}
+
+export async function generateMetadata({
+  params,
+}: SlugPageProps): Promise<Metadata> {
   const { slug } = await params;
+  return isJobSlug(slug)
+    ? generateJobMetadata(slug)
+    : generateRoleMetadata(slug);
+}
+
+async function RolePage({ slug }: { slug: string }) {
+  const result = await seoPagesApi.getBySlug(`jobs/${slug}`);
+  if (!result || result.page.retiredAt) notFound();
+
+  const { page, jobs, relatedLinks } = result;
+
+  return (
+    <PseoPageLayout
+      page={page}
+      jobs={jobs}
+      relatedLinks={relatedLinks}
+      breadcrumbs={[
+        { name: "Home", url: "/" },
+        { name: "Jobs", url: "/jobs" },
+        { name: page.h1, url: `/jobs/${slug}` },
+      ]}
+    />
+  );
+}
+
+async function JobDetailPage({ slug }: { slug: string }) {
   const result = await loadJob(slug);
   if (!result) notFound();
 
@@ -277,5 +328,14 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
         </section>
       )}
     </div>
+  );
+}
+
+export default async function JobsSlugPage({ params }: SlugPageProps) {
+  const { slug } = await params;
+  return isJobSlug(slug) ? (
+    <JobDetailPage slug={slug} />
+  ) : (
+    <RolePage slug={slug} />
   );
 }

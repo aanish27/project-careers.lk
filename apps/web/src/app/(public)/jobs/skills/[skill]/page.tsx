@@ -1,22 +1,19 @@
 import PseoPageLayout from "@web-app-features/seo/components/pseo-page-layout";
 import { seoPagesApi } from "@web-app-features/seo/api/api";
-import { resolveSectorFromSlug } from "@web-app-features/jobs/utils/sector";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-export const revalidate = 86400; // ISR — changes with scrape runs
+export const revalidate = 86400;
 
-type SectorPageProps = {
-  params: Promise<{ sector: string }>;
+type SkillPageProps = {
+  params: Promise<{ skill: string }>;
 };
 
 export async function generateMetadata({
   params,
-}: SectorPageProps): Promise<Metadata> {
-  const { sector: sectorSlug } = await params;
-  if (!resolveSectorFromSlug(sectorSlug)) return {};
-
-  const result = await seoPagesApi.getBySlug(`jobs/sector/${sectorSlug}`);
+}: SkillPageProps): Promise<Metadata> {
+  const { skill } = await params;
+  const result = await seoPagesApi.getBySlug(`jobs/skills/${skill}`);
   if (!result || result.page.retiredAt) return {};
 
   const { page } = result;
@@ -28,11 +25,9 @@ export async function generateMetadata({
   };
 }
 
-export default async function SectorPage({ params }: SectorPageProps) {
-  const { sector: sectorSlug } = await params;
-  if (!resolveSectorFromSlug(sectorSlug)) notFound();
-
-  const result = await seoPagesApi.getBySlug(`jobs/sector/${sectorSlug}`);
+export default async function SkillPage({ params }: SkillPageProps) {
+  const { skill } = await params;
+  const result = await seoPagesApi.getBySlug(`jobs/skills/${skill}`);
   if (!result || result.page.retiredAt) notFound();
 
   const { page, jobs, relatedLinks } = result;
@@ -45,7 +40,7 @@ export default async function SectorPage({ params }: SectorPageProps) {
       breadcrumbs={[
         { name: "Home", url: "/" },
         { name: "Jobs", url: "/jobs" },
-        { name: page.h1, url: `/jobs/sector/${sectorSlug}` },
+        { name: page.h1, url: `/jobs/skills/${skill}` },
       ]}
     />
   );

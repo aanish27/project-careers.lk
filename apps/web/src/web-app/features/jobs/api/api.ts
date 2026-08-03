@@ -56,4 +56,18 @@ export const jobsApi = {
     );
     return data;
   },
+
+  async sitemapEntries(): Promise<{ slug: string; updatedAt: string }[]> {
+    const { data } = await apiFetch<{ slug: string; updatedAt: string }[]>(
+      "/public/jobs/sitemap-entries",
+    );
+    return data;
+  },
+
+  async isRetired(slug: string): Promise<boolean> {
+    const { data } = await apiFetch<{ retired: boolean }>(
+      `/public/jobs/${slug}/retirement-status`,
+    );
+    return data.retired;
+  },
 };

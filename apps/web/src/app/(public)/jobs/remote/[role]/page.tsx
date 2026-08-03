@@ -1,22 +1,19 @@
 import PseoPageLayout from "@web-app-features/seo/components/pseo-page-layout";
 import { seoPagesApi } from "@web-app-features/seo/api/api";
-import { resolveSectorFromSlug } from "@web-app-features/jobs/utils/sector";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-export const revalidate = 86400; // ISR — changes with scrape runs
+export const revalidate = 86400;
 
-type SectorPageProps = {
-  params: Promise<{ sector: string }>;
+type RemoteRolePageProps = {
+  params: Promise<{ role: string }>;
 };
 
 export async function generateMetadata({
   params,
-}: SectorPageProps): Promise<Metadata> {
-  const { sector: sectorSlug } = await params;
-  if (!resolveSectorFromSlug(sectorSlug)) return {};
-
-  const result = await seoPagesApi.getBySlug(`jobs/sector/${sectorSlug}`);
+}: RemoteRolePageProps): Promise<Metadata> {
+  const { role } = await params;
+  const result = await seoPagesApi.getBySlug(`jobs/remote/${role}`);
   if (!result || result.page.retiredAt) return {};
 
   const { page } = result;
@@ -28,11 +25,9 @@ export async function generateMetadata({
   };
 }
 
-export default async function SectorPage({ params }: SectorPageProps) {
-  const { sector: sectorSlug } = await params;
-  if (!resolveSectorFromSlug(sectorSlug)) notFound();
-
-  const result = await seoPagesApi.getBySlug(`jobs/sector/${sectorSlug}`);
+export default async function RemoteRolePage({ params }: RemoteRolePageProps) {
+  const { role } = await params;
+  const result = await seoPagesApi.getBySlug(`jobs/remote/${role}`);
   if (!result || result.page.retiredAt) notFound();
 
   const { page, jobs, relatedLinks } = result;
@@ -44,8 +39,8 @@ export default async function SectorPage({ params }: SectorPageProps) {
       relatedLinks={relatedLinks}
       breadcrumbs={[
         { name: "Home", url: "/" },
-        { name: "Jobs", url: "/jobs" },
-        { name: page.h1, url: `/jobs/sector/${sectorSlug}` },
+        { name: "Remote Jobs", url: "/remote-jobs" },
+        { name: page.h1, url: `/jobs/remote/${role}` },
       ]}
     />
   );

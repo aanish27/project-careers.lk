@@ -1,9 +1,17 @@
 import { SESSION_COOKIE_NAME } from "@dashboard-config/constants";
 import { decryptSession } from "@dashboard-lib/session";
+import { jobsApi } from "@web-app-features/jobs/api/api";
+import { seoPagesApi } from "@web-app-features/seo/api/api";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-export async function proxy(request: NextRequest) {
+// FR-SEO-10: retired pages (job or pSEO) must return a real HTTP 410, not a
+// 404 or a rendered "noindex" page — Next's `notFound()` from a page
+// component can only ever produce a 404, so this has to happen here,
+// before the page renders.
+const JOB_SLUG_PATTERN = /-(\d+)$/;
+
+async function handleAdminAuth(request: NextRequest) {
   const cookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
   const session = cookie ? await decryptSession(cookie) : null;
   const isLoginPath = request.nextUrl.pathname === "/admin/login";
@@ -21,6 +29,44 @@ export async function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
+async function handleRetirementCheck(request: NextRequest) {
+  const path = request.nextUrl.pathname.replace(/^\/+/, "");
+  const segments = path.split("/");
+
+  try {
+    const isJobDetailPath =
+      segments[0] === "jobs" &&
+      segments.length === 2 &&
+      JOB_SLUG_PATTERN.test(segments[1]);
+
+    const retired = isJobDetailPath
+      ? await jobsApi.isRetired(segments[1])
+      : await seoPagesApi.isRetired(path);
+
+    if (retired) {
+      return new NextResponse(null, { status: 410 });
+    }
+  } catch {
+    // Fail open — if the retirement check itself errors, let the request
+    // through rather than blocking real traffic on a transient API issue.
+  }
+
+  return NextResponse.next();
+}
+
+export async function proxy(request: NextRequest) {
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    return handleAdminAuth(request);
+  }
+  return handleRetirementCheck(request);
+}
+
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: [
+    "/admin/:path*",
+    "/jobs/:path*",
+    "/companies/:path*",
+    "/internships",
+    "/remote-jobs",
+  ],
 };
