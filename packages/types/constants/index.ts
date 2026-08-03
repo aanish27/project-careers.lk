@@ -6,3 +6,7 @@ export const SCRAPE_BACKOFF_MS = [30_000, 120_000, 600_000]; // 30s, 2min, 10min
 
 export const BATCH_POLL_DELAY_MS = 1_800_000; // 30 min between each status check
 export const BATCH_POLL_MAX_ATTEMPTS = 30; // up to 15 hours of polling
+
+export const SEO_GENERATION_QUEUE = 'seo-generation-queue';
+export const SEO_EXPIRY_QUEUE = 'seo-expiry-queue';
+export const SEO_LIFECYCLE_QUEUE = 'seo-lifecycle-queue';

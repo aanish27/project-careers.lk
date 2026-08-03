@@ -23,8 +23,12 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { KeywordsModule } from './modules/keywords/keywords.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { PublicCompaniesModule } from './modules/public-companies/public-companies.module';
+import { PublicJobsModule } from './modules/public-jobs/public-jobs.module';
 import { QueueLogsModule } from './modules/queue-logs/queue-logs.module';
 import { ScrapeLogsModule } from './modules/scrape-logs/scrape-logs.module';
+import { SeoAdminModule } from './modules/seo-admin/seo-admin.module';
+import { SeoModule } from './modules/seo/seo.module';
 import { StorageModule } from './shared/storage/storage.module';
 
 @Module({
@@ -117,6 +121,10 @@ import { StorageModule } from './shared/storage/storage.module';
             path: '',
             module: AiCostModule,
           },
+          {
+            path: '',
+            module: SeoAdminModule,
+          },
         ],
       },
     ]),
@@ -134,6 +142,10 @@ import { StorageModule } from './shared/storage/storage.module';
     DashboardModule,
     NotificationsModule,
     AiCostModule,
+    SeoAdminModule,
+    SeoModule,
+    PublicJobsModule,
+    PublicCompaniesModule,
   ],
   controllers: [AppController],
   providers: [

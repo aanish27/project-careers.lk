@@ -20,6 +20,13 @@ export const envValidationSchema = Joi.object({
   SCRAPE_CRON: Joi.string().optional(),
   SCRAPE_TZ: Joi.string().optional(),
 
+  // SEO engine schedules (defaults in code — expiry/generation run daily,
+  // offset after the scraper; lifecycle evaluation runs weekly)
+  SEO_EXPIRY_CRON: Joi.string().optional(),
+  SEO_GENERATION_CRON: Joi.string().optional(),
+  SEO_LIFECYCLE_CRON: Joi.string().optional(),
+  SEO_TZ: Joi.string().optional(),
+
   // JWT
   JWT_SECRET: Joi.string().min(32).required(),
   JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.string().default('15m'),

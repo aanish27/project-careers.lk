@@ -26,6 +26,11 @@ export const AUDIT_ACTIONS = {
 
   JOB_UPDATED: 'job.updated',
   JOB_DELETED: 'job.deleted',
+
+  SEO_PAGE_UPDATED: 'seo.page.updated',
+  SEO_PAGE_REGENERATED: 'seo.page.regenerated',
+  SEO_PAGE_DEACTIVATED: 'seo.page.deactivated',
+  SEO_PAGE_REACTIVATED: 'seo.page.reactivated',
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];

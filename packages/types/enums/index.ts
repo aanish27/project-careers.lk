@@ -42,15 +42,21 @@ export enum PackageType {
   SPONSORED_CARD = 'sponsored_card',
 }
 
-export enum SeoPageType {
-  ROLE = 'role',
-  LOCATION = 'location',
-  ROLE_LOCATION = 'role_location',
-  COMPANY = 'company',
-  SKILL = 'skill',
-  REMOTE = 'remote',
-  INTERNSHIP = 'internship',
-}
+// Plain const+type (not a nominal `enum`) so Prisma-returned SeoPage.pageType
+// values — themselves a plain string-literal union in the generated client —
+// are directly assignable here without a cast, in either direction.
+export const SeoPageType = {
+  ROLE: 'ROLE',
+  LOCATION: 'LOCATION',
+  ROLE_LOCATION: 'ROLE_LOCATION',
+  COMPANY: 'COMPANY',
+  SKILL: 'SKILL',
+  REMOTE: 'REMOTE',
+  INTERNSHIP: 'INTERNSHIP',
+  ALL_JOBS: 'ALL_JOBS',
+} as const;
+
+export type SeoPageType = (typeof SeoPageType)[keyof typeof SeoPageType];
 
 export enum ScrapeTriggeredBy {
   SCHEDULED = 'scheduled',

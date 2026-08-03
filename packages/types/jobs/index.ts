@@ -9,6 +9,7 @@ export interface Job {
   companyId: number;
   batchId: string | null;
   title: string;
+  slug: string;
   location: string | null;
   workMode: string | null;
   employmentType: string | null;

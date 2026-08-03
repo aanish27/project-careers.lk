@@ -41,6 +41,10 @@ export const PERMISSION_DESCRIPTIONS = {
   'notifications.read': 'View and mark your own notifications as read',
 
   'dashboard.read': 'View the platform overview dashboard',
+
+  'seo.read': 'View generated SEO pages and their content',
+  'seo.update':
+    'Manually override SEO page content, indexability, and lifecycle',
 } as const;
 
 export type PermissionKey = keyof typeof PERMISSION_DESCRIPTIONS;
@@ -88,6 +92,9 @@ export const PERMISSIONS = {
   NOTIFICATIONS_READ: 'notifications.read',
 
   DASHBOARD_READ: 'dashboard.read',
+
+  SEO_READ: 'seo.read',
+  SEO_UPDATE: 'seo.update',
 } as const satisfies Record<string, PermissionKey>;
 
 // Compile error if a PERMISSION_DESCRIPTIONS key has no matching PERMISSIONS constant.

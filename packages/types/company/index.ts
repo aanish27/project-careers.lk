@@ -5,6 +5,7 @@ export * from './schemas';
 export interface Company {
   id: number;
   name: string;
+  slug: string;
   logoUrl: string | null;
   websiteUrl: string;
   careerUrl: string;

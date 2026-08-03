@@ -11,3 +11,4 @@ export * from './notifications';
 export * from './rbac-entities';
 export * from './scraper-types';
 export * from './scrape-logs';
+export * from './seo';
