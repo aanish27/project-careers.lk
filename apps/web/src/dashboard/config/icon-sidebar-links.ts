@@ -5,6 +5,7 @@ import {
   IconBuildingSkyscraper,
   IconLayoutDashboard,
   IconListDetails,
+  IconSearch,
   IconUsersGroup,
 } from "@tabler/icons-react";
 
@@ -40,6 +41,12 @@ export const sections: IconSidebarSection[] = [
     icon: IconBriefcase,
     href: "admin/jobs",
     permission: PERMISSIONS.JOBS_READ,
+  },
+  {
+    label: "SEO",
+    icon: IconSearch,
+    href: "admin/seo",
+    permission: PERMISSIONS.SEO_READ,
   },
   {
     label: "Logs",

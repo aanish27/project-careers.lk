@@ -72,22 +72,29 @@ const extensions = [
   Typography,
 ];
 
-export function RichTextEditorDemo({ className }: { className?: string }) {
+interface RichTextEditorProps {
+  className?: string;
+  /** Initial HTML content — only read on mount, not re-synced on change. */
+  value?: string;
+  onChange?: (html: string) => void;
+}
+
+export function RichTextEditor({
+  className,
+  value,
+  onChange,
+}: RichTextEditorProps) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: extensions as Extension[],
-    content,
+    content: value ?? content,
     editorProps: {
       attributes: {
         class: "max-w-full focus:outline-none",
       },
     },
     onUpdate: ({ editor }) => {
-      // do what you want to do with output
-      // Update stats
-      // saving as text/json/hmtml
-      // const text = editor.getHTML();
-      console.log(editor.getText());
+      onChange?.(editor.getHTML());
     },
   });
 
