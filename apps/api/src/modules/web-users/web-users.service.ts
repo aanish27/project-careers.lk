@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { WebUser } from '@careerslk/database';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '@/database/prisma.service';
+import { normalizeEmail } from '@/common/utils/email.util';
 
 export interface UpsertWebUserInput {
-  googleId: string;
+  googleId?: string;
   email: string;
   firstName?: string;
   lastName?: string;
@@ -23,7 +24,7 @@ export class WebUsersService {
 
   async findByEmail(email: string): Promise<WebUser | null> {
     return this.prisma.webUser.findFirst({
-      where: { email, deletedAt: null },
+      where: { email: normalizeEmail(email), deletedAt: null },
     });
   }
 
@@ -37,7 +38,7 @@ export class WebUsersService {
     return this.prisma.webUser.create({
       data: {
         googleId: data.googleId,
-        email: data.email,
+        email: normalizeEmail(data.email),
         firstName: data.firstName,
         lastName: data.lastName,
         avatarUrl: data.avatarUrl,
@@ -52,6 +53,25 @@ export class WebUsersService {
     return this.prisma.webUser.update({
       where: { id },
       data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        avatarUrl: data.avatarUrl,
+        lastLoginAt: new Date(),
+      },
+    });
+  }
+
+  // Attaches a Google identity to an existing email-only row (created via
+  // email-OTP sign-in) the first time that email signs in with Google.
+  async linkGoogleId(
+    id: number,
+    googleId: string,
+    data: Pick<UpsertWebUserInput, 'firstName' | 'lastName' | 'avatarUrl'>,
+  ): Promise<WebUser> {
+    return this.prisma.webUser.update({
+      where: { id },
+      data: {
+        googleId,
         firstName: data.firstName,
         lastName: data.lastName,
         avatarUrl: data.avatarUrl,

@@ -8,11 +8,13 @@ import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { WebUser } from '@careerslk/database';
 import * as bcrypt from 'bcrypt';
 import { WebUsersService } from '@/modules/web-users/web-users.service';
+import { normalizeEmail } from '@/common/utils/email.util';
 import {
   GoogleUpsertDto,
   WebUserAuthResponseDto,
 } from './dto/web-user-auth.dto';
 import { WebUserJwtPayload } from './interfaces/web-user-jwt-payload.interface';
+import { WebUserEmailOtpService } from './web-user-email-otp.service';
 
 interface TokenPair {
   accessToken: string;
@@ -33,6 +35,7 @@ function toUserData(user: WebUser): WebUserAuthResponseDto['user'] {
 export class WebUserAuthService {
   constructor(
     private readonly webUsers: WebUsersService,
+    private readonly emailOtp: WebUserEmailOtpService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
@@ -59,30 +62,61 @@ export class WebUserAuthService {
     return { accessToken, refreshToken };
   }
 
+  private async issueSession(
+    user: WebUser,
+  ): Promise<WebUserAuthResponseDto & TokenPair> {
+    const tokens = this.generateTokenPair(user);
+    await this.webUsers.setRefreshTokenHash(user.id, tokens.refreshToken);
+    return { ...tokens, user: toUserData(user) };
+  }
+
   // Trusts the caller (gated by InternalOnlyGuard at the controller) to have
-  // already verified this profile with Google. Looks up by googleId first —
-  // that's the stable identifier — and only falls back to email to detect a
-  // collision, never to silently merge accounts.
+  // already verified this profile with Google — but only for a profile Google
+  // itself marked as verified. Without that check, an attacker presenting a
+  // Google profile with an unverified `email` claim could hijack any
+  // email-only WebUser row that happens to share that address (both the
+  // linking branch below and the pre-existing 409-collision branch trust the
+  // email claim, so both need this gate).
   async upsertFromGoogleProfile(
     dto: GoogleUpsertDto,
   ): Promise<WebUserAuthResponseDto & TokenPair> {
+    if (dto.emailVerified !== true) {
+      throw new UnauthorizedException('Google account email is not verified');
+    }
+
+    const email = normalizeEmail(dto.email);
     let user = await this.webUsers.findByGoogleId(dto.googleId);
 
     if (!user) {
-      const existingByEmail = await this.webUsers.findByEmail(dto.email);
-      if (existingByEmail) {
+      const existingByEmail = await this.webUsers.findByEmail(email);
+
+      if (existingByEmail && existingByEmail.googleId === null) {
+        // Email-only account (created via email-OTP) signing in with Google
+        // for the first time — link rather than create a second account.
+        user = await this.webUsers.linkGoogleId(
+          existingByEmail.id,
+          dto.googleId,
+          {
+            firstName: dto.firstName,
+            lastName: dto.lastName,
+            avatarUrl: dto.avatarUrl,
+          },
+        );
+      } else if (existingByEmail) {
+        // This email is already linked to a *different* Google account —
+        // a genuine anomaly, not something to silently reassign.
         throw new ConflictException(
           'This email is already associated with a different Google account',
         );
+      } else {
+        user = await this.webUsers.create({
+          googleId: dto.googleId,
+          email,
+          firstName: dto.firstName,
+          lastName: dto.lastName,
+          avatarUrl: dto.avatarUrl,
+        });
       }
-
-      user = await this.webUsers.create({
-        googleId: dto.googleId,
-        email: dto.email,
-        firstName: dto.firstName,
-        lastName: dto.lastName,
-        avatarUrl: dto.avatarUrl,
-      });
     } else {
       if (!user.isActive) {
         throw new UnauthorizedException('Account is inactive');
@@ -94,10 +128,41 @@ export class WebUserAuthService {
       });
     }
 
-    const tokens = this.generateTokenPair(user);
-    await this.webUsers.setRefreshTokenHash(user.id, tokens.refreshToken);
+    return this.issueSession(user);
+  }
 
-    return { ...tokens, user: toUserData(user) };
+  async requestEmailOtp(email: string): Promise<void> {
+    await this.emailOtp.generate(normalizeEmail(email));
+  }
+
+  // OTP verification proves ownership of the mailbox directly (no external
+  // party's word to trust, unlike the Google flow) — so unlike Google upsert,
+  // this always finds-or-creates by email, regardless of whether the account
+  // already has a googleId. Email is the shared identifier across both
+  // sign-in methods.
+  async verifyEmailOtp(
+    rawEmail: string,
+    code: string,
+  ): Promise<WebUserAuthResponseDto & TokenPair> {
+    const email = normalizeEmail(rawEmail);
+    await this.emailOtp.verify(email, code);
+
+    let user = await this.webUsers.findByEmail(email);
+
+    if (!user) {
+      user = await this.webUsers.create({ email });
+    } else {
+      if (!user.isActive) {
+        throw new UnauthorizedException('Account is inactive');
+      }
+      user = await this.webUsers.touchLoginProfile(user.id, {
+        firstName: user.firstName ?? undefined,
+        lastName: user.lastName ?? undefined,
+        avatarUrl: user.avatarUrl ?? undefined,
+      });
+    }
+
+    return this.issueSession(user);
   }
 
   async refresh(refreshToken: string): Promise<TokenPair> {

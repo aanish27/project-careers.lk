@@ -21,6 +21,18 @@ export default () => ({
   internal: {
     apiKey: process.env.INTERNAL_API_KEY,
   },
+  otp: {
+    hashSecret: process.env.OTP_HASH_SECRET,
+  },
+  mail: {
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT || '587', 10),
+    secure: process.env.SMTP_SECURE === 'true',
+    user: process.env.SMTP_USER,
+    password: process.env.SMTP_PASSWORD,
+    fromEmail: process.env.SMTP_FROM_EMAIL,
+    fromName: process.env.SMTP_FROM_NAME || 'careers.lk',
+  },
   storage: {
     provider: process.env.STORAGE_PROVIDER || 'local',
     maxFileSize:

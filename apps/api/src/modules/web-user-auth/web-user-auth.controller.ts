@@ -15,6 +15,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { Request, Response } from 'express';
 import { Public } from '@/common/decorators/public.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
@@ -27,6 +28,9 @@ import {
 import { WebUserAuthService } from './web-user-auth.service';
 import {
   GoogleUpsertDto,
+  RequestEmailOtpDto,
+  RequestEmailOtpResponseDto,
+  VerifyEmailOtpDto,
   WebUserAuthResponseDto,
   WebUserLogoutResponseDto,
   WebUserRefreshResponseDto,
@@ -57,6 +61,54 @@ export class WebUserAuthController {
   ): Promise<WebUserAuthResponseDto> {
     const { user, accessToken, refreshToken } =
       await this.webUserAuthService.upsertFromGoogleProfile(dto);
+
+    res.cookie(WEB_USER_REFRESH_COOKIE, refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: COOKIE_PATHS.webUserAuthRefresh,
+      maxAge: REFRESH_TOKEN_MAX_AGE_MS,
+    });
+
+    return { user, accessToken };
+  }
+
+  // InternalOnlyGuard is defense-in-depth here (only the Next.js server
+  // should be able to reach this at all), but it does NOT provide the real
+  // anti-abuse property — the actual per-recipient-email rate gate and
+  // resend cooldown live inside WebUserEmailOtpService.generate(), since
+  // this endpoint is reached through the legitimate browser → Next.js
+  // Server Action → API path on every real user's request, using the same
+  // internal key every time. @Throttle's per-IP limiting is only a coarse
+  // second layer, not the actual defense.
+  @Public()
+  @UseGuards(InternalOnlyGuard)
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
+  @Post('email/otp/request')
+  @ApiOperation({ summary: 'Send a sign-in code to an email address' })
+  @ApiResponse({ status: 200, type: RequestEmailOtpResponseDto })
+  async requestEmailOtp(
+    @Body() dto: RequestEmailOtpDto,
+  ): Promise<RequestEmailOtpResponseDto> {
+    await this.webUserAuthService.requestEmailOtp(dto.email);
+    // Always a generic success — never reveals whether an account already
+    // exists for this email.
+    return { success: true };
+  }
+
+  @Public()
+  @UseGuards(InternalOnlyGuard)
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
+  @Post('email/otp/verify')
+  @ApiOperation({ summary: 'Verify a sign-in code and issue a session' })
+  @ApiResponse({ status: 200, type: WebUserAuthResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Invalid or expired code' })
+  async verifyEmailOtp(
+    @Body() dto: VerifyEmailOtpDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<WebUserAuthResponseDto> {
+    const { user, accessToken, refreshToken } =
+      await this.webUserAuthService.verifyEmailOtp(dto.email, dto.code);
 
     res.cookie(WEB_USER_REFRESH_COOKIE, refreshToken, {
       httpOnly: true,

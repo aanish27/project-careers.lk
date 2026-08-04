@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@ui/card";
+import { EmailOtpForm } from "@web-app-features/auth/components/email-otp-form";
 import { GoogleLoginButton } from "@web-app-features/auth/components/google-login-button";
 
 export default async function LoginPage({
@@ -29,6 +30,12 @@ export default async function LoginPage({
               </p>
             )}
             <GoogleLoginButton next={from} />
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="h-px flex-1 bg-border" />
+              or
+              <div className="h-px flex-1 bg-border" />
+            </div>
+            <EmailOtpForm next={from} />
           </CardContent>
         </Card>
       </div>

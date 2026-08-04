@@ -46,6 +46,23 @@ export const envValidationSchema = Joi.object({
   // endpoints that trust a caller-supplied Google profile (see InternalOnlyGuard).
   INTERNAL_API_KEY: Joi.string().min(32).required(),
 
+  // Keys the web-user email-OTP hash (HMAC-SHA256, not a slow hash — see
+  // WebUserEmailOtpService for why). Separate from INTERNAL_API_KEY/JWT
+  // secrets, same "never reuse a secret across purposes" pattern.
+  OTP_HASH_SECRET: Joi.string().min(32).required(),
+
+  // SMTP (email-OTP delivery) — optional like the AI keys below: unset means
+  // "not configured yet," not a startup failure, since a real provider isn't
+  // chosen until later. MailService throws a clear error if a send is
+  // attempted without these set, rather than crashing the whole API at boot.
+  SMTP_HOST: Joi.string().optional(),
+  SMTP_PORT: Joi.number().default(587),
+  SMTP_SECURE: Joi.boolean().default(false),
+  SMTP_USER: Joi.string().optional(),
+  SMTP_PASSWORD: Joi.string().optional(),
+  SMTP_FROM_EMAIL: Joi.string().optional(),
+  SMTP_FROM_NAME: Joi.string().default('careers.lk'),
+
   // Only read by the seed script (packages/database/prisma/seed.ts), not the app itself.
   SUPER_ADMIN_EMAIL: Joi.string().optional(),
   SUPER_ADMIN_PASSWORD: Joi.string().optional(),

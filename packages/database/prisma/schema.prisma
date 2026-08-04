@@ -57,7 +57,7 @@ model AdminUser {
 model WebUser {
   id               Int       @id @default(autoincrement())
   email            String    @unique
-  googleId         String    @unique
+  googleId         String?   @unique
   firstName        String?
   lastName         String?
   avatarUrl        String?
@@ -71,6 +71,20 @@ model WebUser {
   @@index([email])
   @@index([googleId])
   @@map("web_users")
+}
+
+model WebUserEmailOtp {
+  id            Int       @id @default(autoincrement())
+  email         String
+  codeHash      String
+  expiresAt     DateTime
+  attempts      Int       @default(0)
+  consumedAt    DateTime?
+  invalidatedAt DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([email])
+  @@map("web_user_email_otps")
 }
 
 model Role {

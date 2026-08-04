@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
   IsUrl,
+  Matches,
 } from 'class-validator';
 
 export class GoogleUpsertDto {
@@ -43,6 +44,23 @@ export class GoogleUpsertDto {
   avatarUrl?: string;
 }
 
+export class RequestEmailOtpDto {
+  @ApiProperty({ description: 'Address to send the sign-in code to' })
+  @IsEmail()
+  email: string;
+}
+
+export class VerifyEmailOtpDto {
+  @ApiProperty()
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({ description: '6-digit sign-in code' })
+  @IsString()
+  @Matches(/^\d{6}$/, { message: 'code must be exactly 6 digits' })
+  code: string;
+}
+
 export class WebUserDataDto {
   @ApiProperty()
   id: number;
@@ -74,6 +92,11 @@ export class WebUserRefreshResponseDto {
 }
 
 export class WebUserLogoutResponseDto {
+  @ApiProperty()
+  success: boolean;
+}
+
+export class RequestEmailOtpResponseDto {
   @ApiProperty()
   success: boolean;
 }

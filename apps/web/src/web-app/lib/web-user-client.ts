@@ -18,18 +18,24 @@ export interface GoogleProfile {
   avatarUrl?: string;
 }
 
-// Called only from the OAuth callback Route Handler after this server has
-// already exchanged the code with Google directly and confirmed the profile
-// — the API trusts this call via the shared INTERNAL_API_KEY header rather
-// than any credential of the web user's own (see InternalOnlyGuard on the API).
-export async function googleUpsertRequest(
-  profile: GoogleProfile,
-): Promise<{ user: WebUser; accessToken: string; refreshToken: string }> {
+// The shared secret proving these calls come from this server (see
+// InternalOnlyGuard on the API) — required on every web-user-auth endpoint
+// that either trusts an externally-verified profile (Google) or needs
+// per-recipient-email abuse protection the API can't get from the caller's
+// IP alone (email OTP), since the browser never calls the API directly.
+function getInternalKey(): string {
   const internalKey = process.env.INTERNAL_API_KEY;
   if (!internalKey) {
     throw new Error("INTERNAL_API_KEY is not configured");
   }
+  return internalKey;
+}
 
+// Called only from the OAuth callback Route Handler after this server has
+// already exchanged the code with Google directly and confirmed the profile.
+export async function googleUpsertRequest(
+  profile: GoogleProfile,
+): Promise<{ user: WebUser; accessToken: string; refreshToken: string }> {
   const { data, setCookies } = await apiFetch<{
     user: WebUser;
     accessToken: string;
@@ -38,7 +44,7 @@ export async function googleUpsertRequest(
     body: JSON.stringify(profile),
     headers: {
       "Content-Type": "application/json",
-      "x-internal-key": internalKey,
+      "x-internal-key": getInternalKey(),
     },
   });
 
@@ -48,6 +54,45 @@ export async function googleUpsertRequest(
       500,
       "MISSING_REFRESH_COOKIE",
       "Google upsert response did not include a refresh token",
+    );
+  }
+
+  return { user: data.user, accessToken: data.accessToken, refreshToken };
+}
+
+export async function requestEmailOtpRequest(email: string): Promise<void> {
+  await apiFetch("/web-users/auth/email/otp/request", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+    headers: {
+      "Content-Type": "application/json",
+      "x-internal-key": getInternalKey(),
+    },
+  });
+}
+
+export async function verifyEmailOtpRequest(
+  email: string,
+  code: string,
+): Promise<{ user: WebUser; accessToken: string; refreshToken: string }> {
+  const { data, setCookies } = await apiFetch<{
+    user: WebUser;
+    accessToken: string;
+  }>("/web-users/auth/email/otp/verify", {
+    method: "POST",
+    body: JSON.stringify({ email, code }),
+    headers: {
+      "Content-Type": "application/json",
+      "x-internal-key": getInternalKey(),
+    },
+  });
+
+  const refreshToken = extractCookieValue(setCookies, "webUserRefreshToken");
+  if (!refreshToken) {
+    throw new ApiError(
+      500,
+      "MISSING_REFRESH_COOKIE",
+      "OTP verify response did not include a refresh token",
     );
   }
 
