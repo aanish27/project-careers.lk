@@ -123,3 +123,42 @@ export const ClaimStatus = {
 } as const;
 
 export type ClaimStatus = (typeof ClaimStatus)[keyof typeof ClaimStatus];
+
+export const FreelanceApprovalStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+} as const;
+
+export type FreelanceApprovalStatus =
+  (typeof FreelanceApprovalStatus)[keyof typeof FreelanceApprovalStatus];
+
+export const AbuseReportEntityType = {
+  FREELANCE_PROFILE: 'FREELANCE_PROFILE',
+  GIG: 'GIG',
+  CHAT_MESSAGE: 'CHAT_MESSAGE',
+  CHAT_THREAD: 'CHAT_THREAD',
+} as const;
+
+export type AbuseReportEntityType =
+  (typeof AbuseReportEntityType)[keyof typeof AbuseReportEntityType];
+
+export const AbuseReportCategory = {
+  SPAM: 'SPAM',
+  SCAM_FRAUD: 'SCAM_FRAUD',
+  HARASSMENT: 'HARASSMENT',
+  INAPPROPRIATE_CONTENT: 'INAPPROPRIATE_CONTENT',
+  OTHER: 'OTHER',
+} as const;
+
+export type AbuseReportCategory =
+  (typeof AbuseReportCategory)[keyof typeof AbuseReportCategory];
+
+export const AbuseReportStatus = {
+  PENDING: 'PENDING',
+  REVIEWED: 'REVIEWED',
+  DISMISSED: 'DISMISSED',
+} as const;
+
+export type AbuseReportStatus =
+  (typeof AbuseReportStatus)[keyof typeof AbuseReportStatus];

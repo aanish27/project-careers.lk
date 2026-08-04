@@ -123,6 +123,65 @@ export function buildOrganizationSchema(
   return schema;
 }
 
+export interface FreelancerProfileSchemaParams {
+  name: string;
+  url: string;
+  bio?: string | null;
+  skills?: string[];
+}
+
+// Only populates fields backed by real profile data — same rule as
+// buildJobPostingSchema.
+export function buildFreelancerProfileSchema(
+  params: FreelancerProfileSchemaParams,
+): Record<string, unknown> {
+  const schema: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: params.name,
+    url: params.url,
+  };
+
+  if (params.bio) schema.description = params.bio;
+  if (params.skills?.length) schema.knowsAbout = params.skills;
+
+  return schema;
+}
+
+export interface GigPostingSchemaParams {
+  title: string;
+  description?: string | null;
+  url: string;
+  category?: string | null;
+  budgetMin?: number | null;
+  budgetMax?: number | null;
+  budgetCurrency?: string | null;
+}
+
+export function buildGigPostingSchema(
+  params: GigPostingSchemaParams,
+): Record<string, unknown> {
+  const schema: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: params.title,
+    url: params.url,
+  };
+
+  if (params.description) schema.description = params.description;
+  if (params.category) schema.category = params.category;
+  if (params.budgetMin || params.budgetMax) {
+    schema.offers = {
+      "@type": "Offer",
+      priceCurrency: params.budgetCurrency ?? "LKR",
+      ...(params.budgetMin ? { minPrice: params.budgetMin } : {}),
+      ...(params.budgetMax ? { maxPrice: params.budgetMax } : {}),
+    };
+  }
+
+  return schema;
+}
+
 export interface FaqItem {
   question: string;
   answer: string;

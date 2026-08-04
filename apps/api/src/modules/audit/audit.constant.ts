@@ -37,6 +37,17 @@ export const AUDIT_ACTIONS = {
   SEO_PAGE_REGENERATED: 'seo.page.regenerated',
   SEO_PAGE_DEACTIVATED: 'seo.page.deactivated',
   SEO_PAGE_REACTIVATED: 'seo.page.reactivated',
+
+  FREELANCE_PROFILE_APPROVED: 'freelance_profile.approved',
+  FREELANCE_PROFILE_REJECTED: 'freelance_profile.rejected',
+  FREELANCE_PROFILE_DELETED: 'freelance_profile.deleted',
+
+  GIG_APPROVED: 'gig.approved',
+  GIG_REJECTED: 'gig.rejected',
+  GIG_DELETED: 'gig.deleted',
+
+  REPORT_REVIEWED: 'report.reviewed',
+  REPORT_DISMISSED: 'report.dismissed',
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];

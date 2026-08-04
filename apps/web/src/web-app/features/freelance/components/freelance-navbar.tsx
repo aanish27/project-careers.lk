@@ -11,24 +11,38 @@ import {
   IconMessageCircle,
   IconSearch,
 } from "@tabler/icons-react";
+import Link from "next/link";
 
-const NAV_LINKS = [
+interface NavItem {
+  label: string;
+  href?: string;
+}
+
+const NAV_LINKS: { label: string; items: NavItem[] }[] = [
   {
-    label: "Find Talent",
+    label: "Find Freelancers",
     items: [
-      "Browse Talent",
-      "Post a Job",
-      "Talent Marketplace",
-      "Project Catalog",
+      { label: "Browse Freelancers", href: "/freelance/freelancers" },
+      { label: "Post a Gig", href: "/freelance/gigs/new" },
+      { label: "Freelancer Marketplace", href: "/freelance/freelancers" },
+      { label: "Project Catalog" },
     ],
   },
   {
     label: "Find Work",
-    items: ["Browse Jobs", "Saved Jobs", "My Proposals"],
+    items: [
+      { label: "Browse Gigs", href: "/freelance/gigs" },
+      { label: "My Profile", href: "/freelance/profile/edit" },
+      { label: "My Proposals" },
+    ],
   },
   {
     label: "Why Freelance",
-    items: ["Success Stories", "How It Works", "Community"],
+    items: [
+      { label: "Success Stories" },
+      { label: "How It Works" },
+      { label: "Community" },
+    ],
   },
 ];
 
@@ -46,9 +60,18 @@ const FreelanceNavbar = () => {
               <IconChevronDown className="size-3.5 transition-transform duration-200 group-data-popup-open/nav-item:rotate-180" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              {items.map((item) => (
-                <DropdownMenuItem key={item}>{item}</DropdownMenuItem>
-              ))}
+              {items.map((item) =>
+                item.href ? (
+                  <DropdownMenuItem
+                    key={item.label}
+                    render={<Link href={item.href}>{item.label}</Link>}
+                  />
+                ) : (
+                  <DropdownMenuItem key={item.label}>
+                    {item.label}
+                  </DropdownMenuItem>
+                ),
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         ))}
@@ -72,6 +95,7 @@ const FreelanceNavbar = () => {
           variant="ghost"
           size="icon"
           className="rounded-full text-foreground/70 hover:bg-white/40 hover:text-foreground dark:hover:bg-white/10"
+          render={<Link href="/freelance/messages" />}
         >
           <IconMessageCircle className="size-4.5" />
         </Button>

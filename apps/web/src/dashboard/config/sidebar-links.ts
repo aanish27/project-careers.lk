@@ -15,12 +15,15 @@ import {
   Tag,
   UserCheck,
   Users,
-  type LucideIcon,
 } from "lucide-react";
+import { IconShieldExclamation } from "@tabler/icons-react";
+import type { ComponentType } from "react";
 
 interface SidebarItem {
   label: string;
-  icon: LucideIcon;
+  // Loose enough to accept both lucide-react and @tabler/icons-react
+  // components — sidebar-menu.tsx only ever renders `<Icon className="..." />`.
+  icon: ComponentType<{ className?: string }>;
   href: string;
   /** Omit to always show — only gate items backed by a real permission. */
   permission?: PermissionKey;
@@ -99,6 +102,34 @@ export const sidebarLinks: SidebarLinks[] = [
             icon: ShieldCheck,
             href: "/admin/jobs/pending",
             permission: PERMISSIONS.JOBS_APPROVE,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    moduleName: "freelance",
+    sections: [
+      {
+        title: "Manage",
+        items: [
+          {
+            label: "Pending Profiles",
+            icon: UserCheck,
+            href: "/admin/freelance/profiles/pending",
+            permission: PERMISSIONS.FREELANCE_PROFILES_APPROVE,
+          },
+          {
+            label: "Pending Gigs",
+            icon: Briefcase,
+            href: "/admin/freelance/gigs/pending",
+            permission: PERMISSIONS.GIGS_APPROVE,
+          },
+          {
+            label: "Reports",
+            icon: IconShieldExclamation,
+            href: "/admin/freelance/reports",
+            permission: PERMISSIONS.REPORTS_READ,
           },
         ],
       },

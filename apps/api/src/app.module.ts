@@ -20,17 +20,26 @@ import { AiLogsModule } from './modules/ai-logs/ai-logs.module';
 import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
 import { CompaniesModule } from './modules/companies/companies.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { FreelanceProfilesModule } from './modules/freelance-profiles/freelance-profiles.module';
+import { GigsModule } from './modules/gigs/gigs.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { KeywordsModule } from './modules/keywords/keywords.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PublicCompaniesModule } from './modules/public-companies/public-companies.module';
+import { PublicFreelanceProfilesModule } from './modules/public-freelance-profiles/public-freelance-profiles.module';
+import { PublicGigsModule } from './modules/public-gigs/public-gigs.module';
 import { PublicJobsModule } from './modules/public-jobs/public-jobs.module';
 import { QueueLogsModule } from './modules/queue-logs/queue-logs.module';
+import { ReportsModule } from './modules/reports/reports.module';
 import { ScrapeLogsModule } from './modules/scrape-logs/scrape-logs.module';
 import { SeoAdminModule } from './modules/seo-admin/seo-admin.module';
 import { SeoModule } from './modules/seo/seo.module';
 import { WebUserAuthModule } from './modules/web-user-auth/web-user-auth.module';
+import { WebUserBlocksModule } from './modules/web-user-blocks/web-user-blocks.module';
+import { WebUserChatModule } from './modules/web-user-chat/web-user-chat.module';
+import { WebUserFreelanceModule } from './modules/web-user-freelance/web-user-freelance.module';
 import { WebUserJobsModule } from './modules/web-user-jobs/web-user-jobs.module';
+import { WebUserReportsModule } from './modules/web-user-reports/web-user-reports.module';
 import { WebUsersModule } from './modules/web-users/web-users.module';
 import { StorageModule } from './shared/storage/storage.module';
 
@@ -128,6 +137,18 @@ import { StorageModule } from './shared/storage/storage.module';
             path: '',
             module: SeoAdminModule,
           },
+          {
+            path: '',
+            module: FreelanceProfilesModule,
+          },
+          {
+            path: '',
+            module: GigsModule,
+          },
+          {
+            path: '',
+            module: ReportsModule,
+          },
         ],
       },
     ]),
@@ -136,6 +157,9 @@ import { StorageModule } from './shared/storage/storage.module';
     CompaniesModule,
     ScraperModule,
     JobsModule,
+    FreelanceProfilesModule,
+    GigsModule,
+    ReportsModule,
     KeywordsModule,
     ScrapeLogsModule,
     AuditLogsModule,
@@ -149,9 +173,15 @@ import { StorageModule } from './shared/storage/storage.module';
     SeoModule,
     PublicJobsModule,
     PublicCompaniesModule,
+    PublicFreelanceProfilesModule,
+    PublicGigsModule,
     WebUsersModule,
     WebUserAuthModule,
     WebUserJobsModule,
+    WebUserFreelanceModule,
+    WebUserBlocksModule,
+    WebUserChatModule,
+    WebUserReportsModule,
   ],
   controllers: [AppController],
   providers: [

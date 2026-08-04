@@ -7,6 +7,7 @@ import {
   IconListDetails,
   IconSearch,
   IconUsersGroup,
+  IconUserSearch,
 } from "@tabler/icons-react";
 
 export interface IconSidebarSection {
@@ -41,6 +42,12 @@ export const sections: IconSidebarSection[] = [
     icon: IconBriefcase,
     href: "admin/jobs",
     permission: PERMISSIONS.JOBS_READ,
+  },
+  {
+    label: "freelance",
+    icon: IconUserSearch,
+    href: "admin/freelance",
+    permission: PERMISSIONS.FREELANCE_PROFILES_READ,
   },
   {
     label: "SEO",

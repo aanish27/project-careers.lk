@@ -50,6 +50,17 @@ export const PERMISSION_DESCRIPTIONS = {
   'seo.read': 'View generated SEO pages and their content',
   'seo.update':
     'Manually override SEO page content, indexability, and lifecycle',
+
+  'freelance-profiles.read': 'View freelance profiles',
+  'freelance-profiles.approve': 'Approve or reject pending freelance profiles',
+  'freelance-profiles.delete': 'Remove freelance profiles',
+
+  'gigs.read': 'View gig postings',
+  'gigs.approve': 'Approve or reject pending gig postings',
+  'gigs.delete': 'Remove gig postings',
+
+  'reports.read': 'View filed abuse/report submissions',
+  'reports.review': 'Mark reports as reviewed or dismiss them',
 } as const;
 
 export type PermissionKey = keyof typeof PERMISSION_DESCRIPTIONS;
@@ -103,6 +114,17 @@ export const PERMISSIONS = {
 
   SEO_READ: 'seo.read',
   SEO_UPDATE: 'seo.update',
+
+  FREELANCE_PROFILES_READ: 'freelance-profiles.read',
+  FREELANCE_PROFILES_APPROVE: 'freelance-profiles.approve',
+  FREELANCE_PROFILES_DELETE: 'freelance-profiles.delete',
+
+  GIGS_READ: 'gigs.read',
+  GIGS_APPROVE: 'gigs.approve',
+  GIGS_DELETE: 'gigs.delete',
+
+  REPORTS_READ: 'reports.read',
+  REPORTS_REVIEW: 'reports.review',
 } as const satisfies Record<string, PermissionKey>;
 
 // Compile error if a PERMISSION_DESCRIPTIONS key has no matching PERMISSIONS constant.

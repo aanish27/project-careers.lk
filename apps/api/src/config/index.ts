@@ -42,6 +42,8 @@ export default () => ({
       'image/png',
       'image/webp',
       'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ],
     s3: {
       region: process.env.AWS_REGION,

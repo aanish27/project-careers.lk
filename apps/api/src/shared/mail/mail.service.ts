@@ -54,4 +54,29 @@ export class MailService {
 
     this.logger.log(`Sent OTP email to ${email}`);
   }
+
+  async sendNewMessageEmail(
+    email: string,
+    recipientName: string,
+    senderName: string,
+    messagePreview: string,
+    conversationUrl: string,
+  ): Promise<void> {
+    const fromEmail = this.config.getOrThrow<string>('mail.fromEmail');
+    const fromName = this.config.get<string>('mail.fromName');
+    const preview =
+      messagePreview.length > 200
+        ? `${messagePreview.slice(0, 200)}…`
+        : messagePreview;
+
+    await this.getTransporter().sendMail({
+      from: `"${fromName}" <${fromEmail}>`,
+      to: email,
+      subject: `New message from ${senderName} on careers.lk`,
+      text: `Hi ${recipientName}, ${senderName} sent you a message: "${preview}". View it here: ${conversationUrl}`,
+      html: `<p>Hi ${recipientName},</p><p><strong>${senderName}</strong> sent you a message:</p><blockquote>${preview}</blockquote><p><a href="${conversationUrl}">View conversation</a></p>`,
+    });
+
+    this.logger.log(`Sent new-message email to ${email}`);
+  }
 }

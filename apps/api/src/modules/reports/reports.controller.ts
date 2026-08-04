@@ -1,0 +1,76 @@
+import {
+  CurrentPrincipal,
+  RequirePermissions,
+} from '@/common/decorators/rbac.decorator';
+import { PermissionsGuard } from '@/common/guards/permissions.guard';
+import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
+import { AuditContext } from '@/modules/audit/audit.service';
+import type { AuthenticatedPrincipal } from '@/modules/auth/interfaces/jwt-payload.interface';
+import { PERMISSIONS } from '@careerslk/lib';
+import { ResolveReportInput, resolveReportSchema } from '@careerslk/types';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import type { Request } from 'express';
+import { FilterReportsDto } from './dto/filters.dto';
+import { ReportsService } from './reports.service';
+
+@Controller('reports')
+@UseGuards(PermissionsGuard)
+export class ReportsController {
+  constructor(private readonly reportsService: ReportsService) {}
+
+  private auditContext(
+    principal: AuthenticatedPrincipal,
+    req: Request,
+  ): AuditContext {
+    return {
+      actorUserId: principal.userId,
+      actorEmail: principal.email,
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers['user-agent']?.slice(0, 255) ?? null,
+    };
+  }
+
+  @Get()
+  @RequirePermissions(PERMISSIONS.REPORTS_READ)
+  findAll(@Query() filters: FilterReportsDto) {
+    return this.reportsService.findAll(filters);
+  }
+
+  @Get(':id')
+  @RequirePermissions(PERMISSIONS.REPORTS_READ)
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.reportsService.findOne(id);
+  }
+
+  @Post(':id/review')
+  @RequirePermissions(PERMISSIONS.REPORTS_REVIEW)
+  review(
+    @CurrentPrincipal() actor: AuthenticatedPrincipal,
+    @Param('id', ParseIntPipe) id: number,
+    @Body(new ZodValidationPipe(resolveReportSchema)) dto: ResolveReportInput,
+    @Req() req: Request,
+  ) {
+    return this.reportsService.review(id, dto, this.auditContext(actor, req));
+  }
+
+  @Post(':id/dismiss')
+  @RequirePermissions(PERMISSIONS.REPORTS_REVIEW)
+  dismiss(
+    @CurrentPrincipal() actor: AuthenticatedPrincipal,
+    @Param('id', ParseIntPipe) id: number,
+    @Body(new ZodValidationPipe(resolveReportSchema)) dto: ResolveReportInput,
+    @Req() req: Request,
+  ) {
+    return this.reportsService.dismiss(id, dto, this.auditContext(actor, req));
+  }
+}

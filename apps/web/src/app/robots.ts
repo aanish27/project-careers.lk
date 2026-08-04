@@ -9,6 +9,8 @@ const SITEMAP_BUCKETS = [
   "skills",
   "companies",
   "misc",
+  "freelancer-detail",
+  "gig-detail",
 ];
 
 export default function robots(): MetadataRoute.Robots {

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import LandingGradient from "@/web-app/components/landing-gradient";
 import { PrimaryNavbar } from "@/web-app/components/primary-navbar";
 import FreelanceNavbar from "@/web-app/features/freelance/components/freelance-navbar";
+import { FREELANCE_CATEGORIES } from "@careerslk/types";
 import {
   IconCalculator,
   IconCode,
@@ -13,6 +14,7 @@ import {
   IconSpeakerphone,
   IconStarFilled,
 } from "@tabler/icons-react";
+import Link from "next/link";
 
 const POPULAR_SEARCHES = [
   "Website Design",
@@ -24,16 +26,19 @@ const POPULAR_SEARCHES = [
   "Social Media Marketing",
 ];
 
-const CATEGORIES = [
-  { label: "Development & IT", icon: IconCode },
-  { label: "Design & Creative", icon: IconPencil },
-  { label: "Sales & Marketing", icon: IconSpeakerphone },
-  { label: "Writing & Translation", icon: IconPencil },
-  { label: "Admin & Support", icon: IconHeadset },
-  { label: "Finance & Accounting", icon: IconCalculator },
-  { label: "Legal", icon: IconScale },
-  { label: "Engineering & Architecture", icon: IconCode },
-];
+// Icons keyed by the shared FREELANCE_CATEGORY_TAXONOMY labels (single
+// source of truth in @careerslk/types) — falls back to IconCode for any
+// category added there without a matching icon here.
+const CATEGORY_ICONS: Record<string, typeof IconCode> = {
+  "Development & IT": IconCode,
+  "Design & Creative": IconPencil,
+  "Sales & Marketing": IconSpeakerphone,
+  "Writing & Translation": IconPencil,
+  "Admin & Support": IconHeadset,
+  "Finance & Accounting": IconCalculator,
+  Legal: IconScale,
+  "Engineering & Architecture": IconCode,
+};
 
 export default function FreelancePage() {
   return (
@@ -54,7 +59,7 @@ export default function FreelancePage() {
         </Badge>
 
         <div className="mb-4 max-w-3xl text-6xl font-extrabold tracking-tight text-foreground">
-          Find the talent needed to get your business growing.
+          Find the freelancers needed to get your business growing.
         </div>
         <div className="mb-8 max-w-xl text-lg text-muted-foreground">
           Hire skilled freelancers for any project, from web development to
@@ -88,17 +93,21 @@ export default function FreelancePage() {
         </div>
 
         <div className="mt-16 grid w-full max-w-5xl grid-cols-2 gap-4 pb-24 sm:grid-cols-3 lg:grid-cols-4">
-          {CATEGORIES.map(({ label, icon: Icon }) => (
-            <div
-              key={label}
-              className="flex cursor-pointer flex-col items-start gap-4 rounded-2xl border border-border bg-white p-5 text-left shadow-sm transition-colors hover:border-primary/40 hover:bg-primary/5"
-            >
-              <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Icon className="size-5" />
-              </span>
-              <span className="font-semibold text-foreground">{label}</span>
-            </div>
-          ))}
+          {FREELANCE_CATEGORIES.map((label) => {
+            const Icon = CATEGORY_ICONS[label] ?? IconCode;
+            return (
+              <Link
+                key={label}
+                href={`/freelance/freelancers?category=${encodeURIComponent(label)}`}
+                className="flex cursor-pointer flex-col items-start gap-4 rounded-2xl border border-border bg-white p-5 text-left shadow-sm transition-colors hover:border-primary/40 hover:bg-primary/5"
+              >
+                <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Icon className="size-5" />
+                </span>
+                <span className="font-semibold text-foreground">{label}</span>
+              </Link>
+            );
+          })}
         </div>
       </main>
     </div>

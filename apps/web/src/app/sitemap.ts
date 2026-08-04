@@ -1,3 +1,7 @@
+import {
+  freelancerProfilesApi,
+  gigsApi,
+} from "@web-app-features/freelance/api/api";
 import { jobsApi } from "@web-app-features/jobs/api/api";
 import { seoPagesApi } from "@web-app-features/seo/api/api";
 import type { MetadataRoute } from "next";
@@ -11,12 +15,14 @@ const SITEMAP_BUCKETS = [
   "skills",
   "companies",
   "misc",
+  "freelancer-detail",
+  "gig-detail",
 ] as const;
 
 type SitemapBucket = (typeof SITEMAP_BUCKETS)[number];
 
 const PAGE_TYPES_BY_BUCKET: Record<
-  Exclude<SitemapBucket, "job-detail">,
+  Exclude<SitemapBucket, "job-detail" | "freelancer-detail" | "gig-detail">,
   string[]
 > = {
   sector: ["SECTOR"],
@@ -48,6 +54,22 @@ export default async function sitemap({
     const entries = await jobsApi.sitemapEntries();
     return entries.map((entry) => ({
       url: absoluteUrl(`jobs/${entry.slug}`),
+      lastModified: entry.updatedAt,
+    }));
+  }
+
+  if (bucketId === "freelancer-detail") {
+    const entries = await freelancerProfilesApi.sitemapEntries();
+    return entries.map((entry) => ({
+      url: absoluteUrl(`freelance/freelancers/${entry.slug}`),
+      lastModified: entry.updatedAt,
+    }));
+  }
+
+  if (bucketId === "gig-detail") {
+    const entries = await gigsApi.sitemapEntries();
+    return entries.map((entry) => ({
+      url: absoluteUrl(`freelance/gigs/${entry.slug}`),
       lastModified: entry.updatedAt,
     }));
   }
