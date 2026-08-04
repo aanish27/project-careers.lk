@@ -9,9 +9,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PERMISSIONS } from "@careerslk/lib";
+import { Can } from "@dashboard-components/can";
 import { StatusPill } from "@dashboard-components/status-pill";
 import {
   companyStatusMeta,
+  companyAutoApprovalStatusMeta,
   aiLogStatusMeta,
   scrapeLogStatusMeta,
 } from "@dashboard/utils/status-variant";
@@ -21,6 +24,7 @@ import {
   IconHistory,
   IconRefresh,
   IconRobot,
+  IconShieldCheck,
 } from "@tabler/icons-react";
 import { useCompany } from "../hooks/use-company";
 import {
@@ -28,6 +32,7 @@ import {
   useCompanyAuditLogs,
   useCompanyScrapeLogs,
 } from "../hooks/use-company-logs";
+import { TrustCompanyButton } from "./trust-company-button";
 
 function formatDate(value: string) {
   return new Date(value).toLocaleString();
@@ -84,6 +89,37 @@ export function CompanyDetail({ companyId }: { companyId: number }) {
           <div>
             <div className="text-muted-foreground">Created</div>
             <div>{formatDate(company.createdAt)}</div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <IconShieldCheck className="text-muted-foreground size-4" />
+            Job auto-approval
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <div className="text-muted-foreground">Status</div>
+            <StatusPill
+              meta={companyAutoApprovalStatusMeta(company.autoApprovalStatus)}
+              label={company.autoApprovalStatus}
+            />
+          </div>
+          <div>
+            <div className="text-muted-foreground">Requested</div>
+            <div>
+              {company.autoApprovalRequestedAt
+                ? formatDate(company.autoApprovalRequestedAt)
+                : "—"}
+            </div>
+          </div>
+          <div className="col-span-2">
+            <Can permission={PERMISSIONS.COMPANIES_TRUST}>
+              <TrustCompanyButton company={company} />
+            </Can>
           </div>
         </CardContent>
       </Card>

@@ -26,6 +26,20 @@ export function jobStatusMeta(status: string): StatusMeta {
   return status === "ACTIVE" ? SUCCESS : NEUTRAL;
 }
 
+/** Company.autoApprovalStatus — whether a company's postings auto-publish. */
+export function companyAutoApprovalStatusMeta(status: string): StatusMeta {
+  switch (status) {
+    case "GRANTED":
+      return SUCCESS;
+    case "REQUESTED":
+      return WARNING;
+    case "DENIED":
+      return DESTRUCTIVE;
+    default: // NONE
+      return NEUTRAL;
+  }
+}
+
 /** Company.scrapeStatus — health of a company's scrape configuration. */
 export function companyScrapeStatusMeta(status: string): StatusMeta {
   switch (status) {

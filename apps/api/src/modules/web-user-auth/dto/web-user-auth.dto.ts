@@ -76,6 +76,9 @@ export class WebUserDataDto {
 
   @ApiProperty({ nullable: true })
   avatarUrl: string | null;
+
+  @ApiProperty({ nullable: true })
+  companyId: number | null;
 }
 
 export class WebUserAuthResponseDto {

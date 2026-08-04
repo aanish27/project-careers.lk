@@ -5,11 +5,13 @@ import { generateUniqueSlug } from '@careerslk/database';
 import { assertNotSsrf } from '@careerslk/lib/ssrf';
 import { slugify } from '@careerslk/lib/slugify';
 import {
+  ClaimStatus,
+  CompanyAutoApprovalStatus,
   CompanyScrapeSummary,
   CreateCompanyInput,
   UpdateCompanyInput,
 } from '@careerslk/types';
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 
 interface LatestScrapeLogRow {
   companyId: number;
@@ -134,6 +136,10 @@ export class CompaniesService {
           status: dto.status,
           paginationType: dto.paginationType,
           paginationBtn: dto.paginationBtn,
+          linkedinUrl: dto.linkedinUrl,
+          twitterUrl: dto.twitterUrl,
+          facebookUrl: dto.facebookUrl,
+          instagramUrl: dto.instagramUrl,
         },
       });
 
@@ -189,6 +195,10 @@ export class CompaniesService {
           status: dto.status,
           paginationType: dto.paginationType,
           paginationBtn: dto.paginationBtn,
+          linkedinUrl: dto.linkedinUrl,
+          twitterUrl: dto.twitterUrl,
+          facebookUrl: dto.facebookUrl,
+          instagramUrl: dto.instagramUrl,
         },
       });
 
@@ -227,6 +237,141 @@ export class CompaniesService {
       );
 
       return company;
+    });
+  }
+
+  async trust(id: number, context: AuditContext) {
+    return await this.prisma.$transaction(async (tx) => {
+      const company = await tx.company.update({
+        where: { id },
+        data: {
+          autoApproveJobs: true,
+          autoApprovalStatus: CompanyAutoApprovalStatus.GRANTED,
+        },
+      });
+
+      await this.audit.record(
+        context,
+        {
+          action: AUDIT_ACTIONS.COMPANY_TRUST_GRANTED,
+          entityType: 'company',
+          entityId: company.id,
+          newValue: { autoApproveJobs: true },
+        },
+        tx,
+      );
+
+      return company;
+    });
+  }
+
+  async untrust(id: number, context: AuditContext) {
+    return await this.prisma.$transaction(async (tx) => {
+      const company = await tx.company.update({
+        where: { id },
+        data: {
+          autoApproveJobs: false,
+          autoApprovalStatus: CompanyAutoApprovalStatus.DENIED,
+        },
+      });
+
+      await this.audit.record(
+        context,
+        {
+          action: AUDIT_ACTIONS.COMPANY_TRUST_REVOKED,
+          entityType: 'company',
+          entityId: company.id,
+          newValue: { autoApproveJobs: false },
+        },
+        tx,
+      );
+
+      return company;
+    });
+  }
+
+  async listClaims(status?: ClaimStatus) {
+    return await this.prisma.companyClaim.findMany({
+      where: status ? { status } : undefined,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        webUser: {
+          select: { id: true, email: true, firstName: true, lastName: true },
+        },
+        company: {
+          select: { id: true, name: true, websiteUrl: true, logoUrl: true },
+        },
+      },
+    });
+  }
+
+  async approveClaim(id: number, adminUserId: number, context: AuditContext) {
+    return await this.prisma.$transaction(async (tx) => {
+      const claim = await tx.companyClaim.findFirstOrThrow({ where: { id } });
+
+      const webUser = await tx.webUser.findUniqueOrThrow({
+        where: { id: claim.webUserId },
+      });
+      if (webUser.companyId !== null && webUser.companyId !== claim.companyId) {
+        throw new ConflictException(
+          'This web user has already linked a different company',
+        );
+      }
+
+      await tx.webUser.update({
+        where: { id: claim.webUserId },
+        data: { companyId: claim.companyId },
+      });
+
+      const updated = await tx.companyClaim.update({
+        where: { id },
+        data: {
+          status: ClaimStatus.APPROVED,
+          reviewedByAdminId: adminUserId,
+          reviewedAt: new Date(),
+        },
+      });
+
+      await this.audit.record(
+        context,
+        {
+          action: AUDIT_ACTIONS.COMPANY_CLAIM_APPROVED,
+          entityType: 'company_claim',
+          entityId: updated.id,
+          newValue: {
+            webUserId: updated.webUserId,
+            companyId: updated.companyId,
+          },
+        },
+        tx,
+      );
+
+      return updated;
+    });
+  }
+
+  async rejectClaim(id: number, adminUserId: number, context: AuditContext) {
+    return await this.prisma.$transaction(async (tx) => {
+      const claim = await tx.companyClaim.update({
+        where: { id },
+        data: {
+          status: ClaimStatus.REJECTED,
+          reviewedByAdminId: adminUserId,
+          reviewedAt: new Date(),
+        },
+      });
+
+      await this.audit.record(
+        context,
+        {
+          action: AUDIT_ACTIONS.COMPANY_CLAIM_REJECTED,
+          entityType: 'company_claim',
+          entityId: claim.id,
+        },
+        tx,
+      );
+
+      return claim;
     });
   }
 }

@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
+import type { JobFilters } from "../api/api";
 import { jobsApi } from "../api/api";
 import { jobsKeys } from "./query-keys";
 
-export function useJobs(filters?: { companyId?: number }) {
+export function useJobs(filters?: JobFilters) {
   return useQuery({
     queryKey: jobsKeys.list(filters),
     queryFn: () => jobsApi.list(filters),

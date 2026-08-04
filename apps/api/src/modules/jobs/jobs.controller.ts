@@ -7,7 +7,12 @@ import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
 import { AuditContext } from '@/modules/audit/audit.service';
 import type { AuthenticatedPrincipal } from '@/modules/auth/interfaces/jwt-payload.interface';
 import { PERMISSIONS } from '@careerslk/lib';
-import { UpdateJobInput, updateJobSchema } from '@careerslk/types';
+import {
+  RejectJobInput,
+  rejectJobSchema,
+  UpdateJobInput,
+  updateJobSchema,
+} from '@careerslk/types';
 import {
   Body,
   Controller,
@@ -16,6 +21,7 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  Post,
   Query,
   Req,
   UseGuards,
@@ -72,5 +78,30 @@ export class JobsController {
     @Req() req: Request,
   ) {
     return this.jobsService.softDelete(id, this.auditContext(actor, req));
+  }
+
+  @Post(':id/approve')
+  @RequirePermissions(PERMISSIONS.JOBS_APPROVE)
+  approve(
+    @CurrentPrincipal() actor: AuthenticatedPrincipal,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+  ) {
+    return this.jobsService.approve(
+      id,
+      actor.userId,
+      this.auditContext(actor, req),
+    );
+  }
+
+  @Post(':id/reject')
+  @RequirePermissions(PERMISSIONS.JOBS_APPROVE)
+  reject(
+    @CurrentPrincipal() actor: AuthenticatedPrincipal,
+    @Param('id', ParseIntPipe) id: number,
+    @Body(new ZodValidationPipe(rejectJobSchema)) dto: RejectJobInput,
+    @Req() req: Request,
+  ) {
+    return this.jobsService.reject(id, dto, this.auditContext(actor, req));
   }
 }

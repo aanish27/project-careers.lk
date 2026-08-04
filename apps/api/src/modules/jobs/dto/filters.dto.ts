@@ -1,4 +1,4 @@
-import { JobStatus } from '@careerslk/types';
+import { JobApprovalStatus, JobStatus } from '@careerslk/types';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
@@ -34,4 +34,13 @@ export class FilterJobsDto {
   @IsOptional()
   @IsString()
   sector?: string;
+
+  @ApiPropertyOptional({
+    description: 'Filter by approval status',
+    enum: JobApprovalStatus,
+    example: JobApprovalStatus.PENDING,
+  })
+  @IsOptional()
+  @IsEnum(JobApprovalStatus)
+  approvalStatus?: JobApprovalStatus;
 }

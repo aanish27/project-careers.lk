@@ -98,6 +98,31 @@ export const destroyWebUserSession = async (): Promise<void> => {
   (await cookies()).delete(WEB_USER_SESSION_COOKIE_NAME);
 };
 
+// Server Action only (same cookie-write restriction as the token updater
+// above). The cached `user` snapshot in the session cookie (companyId in
+// particular) goes stale the moment a company is created/claimed server-side
+// — callers that just changed it should patch the cookie immediately rather
+// than waiting for the next login or token refresh, since neither of those
+// re-fetches the user.
+export const updateWebUserSessionUser = async (
+  user: WebUser,
+): Promise<void> => {
+  const cookieStore = await cookies();
+  const cookie = cookieStore.get(WEB_USER_SESSION_COOKIE_NAME);
+  const session = cookie ? await decryptWebUserSession(cookie.value) : null;
+  if (!session) return;
+
+  const updated: WebUserSessionPayload = { ...session, user };
+  const signed = await encryptWebUserSession(updated);
+  cookieStore.set(WEB_USER_SESSION_COOKIE_NAME, signed, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: WEB_USER_SESSION_MAX_AGE_MS / 1000,
+  });
+};
+
 // Render-safe: reads and decrypts the cookie only, never writes it. Next.js
 // only allows cookie mutations inside a Server Action or Route Handler, but
 // this is called from plain Server Component renders (layouts/pages), so it

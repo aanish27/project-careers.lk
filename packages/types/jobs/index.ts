@@ -1,5 +1,5 @@
 import type { Company } from '../company';
-import type { JobStatus } from '../enums';
+import type { JobApprovalStatus, JobSource, JobStatus } from '../enums';
 import type { Keyword } from '../keywords';
 
 export * from './schemas';
@@ -27,6 +27,12 @@ export interface Job {
   lastSeenAt: string;
   createdAt: string;
   updatedAt: string;
+  source: JobSource;
+  postedByWebUserId: number | null;
+  approvalStatus: JobApprovalStatus;
+  approvedByAdminId: number | null;
+  approvedAt: string | null;
+  rejectionReason: string | null;
 }
 
 export interface JobWithCompany extends Job {

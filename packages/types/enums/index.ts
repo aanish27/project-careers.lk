@@ -87,3 +87,39 @@ export const CompanyStatus = {
 } as const;
 
 export type CompanyStatus = (typeof CompanyStatus)[keyof typeof CompanyStatus];
+
+// Plain const+type (see SeoPageType above) so Prisma-returned Job/Company/
+// CompanyClaim values are directly assignable without a cast.
+export const JobSource = {
+  SCRAPED: 'SCRAPED',
+  USER_SUBMITTED: 'USER_SUBMITTED',
+} as const;
+
+export type JobSource = (typeof JobSource)[keyof typeof JobSource];
+
+export const JobApprovalStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+} as const;
+
+export type JobApprovalStatus =
+  (typeof JobApprovalStatus)[keyof typeof JobApprovalStatus];
+
+export const CompanyAutoApprovalStatus = {
+  NONE: 'NONE',
+  REQUESTED: 'REQUESTED',
+  GRANTED: 'GRANTED',
+  DENIED: 'DENIED',
+} as const;
+
+export type CompanyAutoApprovalStatus =
+  (typeof CompanyAutoApprovalStatus)[keyof typeof CompanyAutoApprovalStatus];
+
+export const ClaimStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+} as const;
+
+export type ClaimStatus = (typeof ClaimStatus)[keyof typeof ClaimStatus];

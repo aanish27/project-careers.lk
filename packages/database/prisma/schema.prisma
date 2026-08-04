@@ -50,6 +50,9 @@ model AdminUser {
 
   roleAssignments RoleAssignment[]
 
+  approvedJobs         Job[]
+  reviewedCompanyClaims CompanyClaim[]
+
   @@index([email])
   @@map("admin_users")
 }
@@ -68,8 +71,17 @@ model WebUser {
   updatedAt        DateTime  @updatedAt
   lastLoginAt      DateTime  @default(now())
 
+  companyId Int?
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  createdCompanies Company[]      @relation("CompanyCreatedByWebUser")
+  postedJobs       Job[]
+  savedJobs        SavedJob[]
+  companyClaims    CompanyClaim[]
+
   @@index([email])
   @@index([googleId])
+  @@index([companyId])
   @@map("web_users")
 }
 
@@ -151,6 +163,19 @@ enum CompanyStatus {
   INACTIVE
 }
 
+enum CompanyAutoApprovalStatus {
+  NONE
+  REQUESTED
+  GRANTED
+  DENIED
+}
+
+enum ClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 // scrape status not needed?
 model Company {
   id                     Int           @id @default(autoincrement())
@@ -174,13 +199,61 @@ model Company {
   createdAt              DateTime      @default(now())
   updatedAt              DateTime      @updatedAt
 
-  jobs        Job[]
-  scrapeLogs  ScrapeLog[]
-  aiLogs      AiLog[]
-  aiBatchLogs AiBatchLog[]
-  seoPages    SeoPage[]
+  description  String?
+  linkedinUrl  String?
+  twitterUrl   String?
+  facebookUrl  String?
+  instagramUrl String?
+
+  createdByWebUserId Int?
+  createdByWebUser   WebUser? @relation("CompanyCreatedByWebUser", fields: [createdByWebUserId], references: [id])
+
+  autoApproveJobs         Boolean                   @default(false)
+  autoApprovalStatus      CompanyAutoApprovalStatus @default(NONE)
+  autoApprovalRequestedAt DateTime?
+
+  jobs         Job[]
+  scrapeLogs   ScrapeLog[]
+  aiLogs       AiLog[]
+  aiBatchLogs  AiBatchLog[]
+  seoPages     SeoPage[]
+  webUsers     WebUser[]
+  companyClaims CompanyClaim[]
 
   slug String @unique
+
+  @@index([createdByWebUserId])
+}
+
+model CompanyClaim {
+  id        Int      @id @default(autoincrement())
+  webUserId Int
+  webUser   WebUser  @relation(fields: [webUserId], references: [id])
+  companyId Int
+  company   Company  @relation(fields: [companyId], references: [id])
+
+  status ClaimStatus @default(PENDING)
+
+  reviewedByAdminId Int?
+  reviewedByAdmin   AdminUser? @relation(fields: [reviewedByAdminId], references: [id])
+  reviewedAt        DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@unique([webUserId, companyId])
+  @@index([companyId, status])
+  @@map("company_claims")
+}
+
+enum JobSource {
+  SCRAPED
+  USER_SUBMITTED
+}
+
+enum JobApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model Job {
@@ -210,6 +283,15 @@ model Job {
   batchId        String?
   batch          AiBatchLog? @relation(fields: [batchId], references: [id])
 
+  source             JobSource         @default(SCRAPED)
+  postedByWebUserId  Int?
+  postedBy           WebUser?          @relation(fields: [postedByWebUserId], references: [id])
+  approvalStatus     JobApprovalStatus @default(APPROVED)
+  approvedByAdminId  Int?
+  approvedByAdmin    AdminUser?        @relation(fields: [approvedByAdminId], references: [id])
+  approvedAt         DateTime?
+  rejectionReason    String?
+
   skills   JobSkill[]
   keywords JobKeyword[]
 
@@ -219,6 +301,8 @@ model Job {
   seoLocationId Int?
   seoLocation   SeoLocation? @relation(fields: [seoLocationId], references: [id])
 
+  savedBy SavedJob[]
+
   @@index([companyId])
   @@index([status])
   @@index([fingerprint])
@@ -226,6 +310,8 @@ model Job {
   @@index([slug])
   @@index([seoRoleId])
   @@index([seoLocationId])
+  @@index([approvalStatus])
+  @@index([postedByWebUserId])
 }
 
 enum SkillType {
@@ -532,4 +618,18 @@ model SeoSkill {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model SavedJob {
+  id        Int      @id @default(autoincrement())
+  webUserId Int
+  webUser   WebUser  @relation(fields: [webUserId], references: [id], onDelete: Cascade)
+  jobId     Int
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([webUserId, jobId])
+  @@index([webUserId])
+  @@index([jobId])
+  @@map("saved_jobs")
 }

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Patch,
   Post,
   Req,
   Res,
@@ -37,6 +38,11 @@ import {
 } from './dto/web-user-auth.dto';
 import { WebUserJwtAuthGuard } from './guards/web-user-jwt-auth.guard';
 import { AuthenticatedWebUserPrincipal } from './interfaces/web-user-jwt-payload.interface';
+import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
+import {
+  UpdateWebUserProfileInput,
+  updateWebUserProfileSchema,
+} from '@careerslk/types';
 
 @ApiTags('Web User Authentication')
 @Controller('web-users/auth')
@@ -181,5 +187,19 @@ export class WebUserAuthController {
     @CurrentUser() principal: AuthenticatedWebUserPrincipal,
   ): Promise<WebUserAuthResponseDto['user']> {
     return this.webUserAuthService.getCurrentUser(principal.webUserId);
+  }
+
+  @Public()
+  @UseGuards(WebUserJwtAuthGuard)
+  @Patch('me')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: "Update the current web user's profile" })
+  @ApiResponse({ status: 200, type: WebUserAuthResponseDto })
+  async updateMe(
+    @CurrentUser() principal: AuthenticatedWebUserPrincipal,
+    @Body(new ZodValidationPipe(updateWebUserProfileSchema))
+    dto: UpdateWebUserProfileInput,
+  ): Promise<WebUserAuthResponseDto['user']> {
+    return this.webUserAuthService.updateProfile(principal.webUserId, dto);
   }
 }

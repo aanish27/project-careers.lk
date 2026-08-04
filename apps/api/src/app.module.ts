@@ -30,6 +30,7 @@ import { ScrapeLogsModule } from './modules/scrape-logs/scrape-logs.module';
 import { SeoAdminModule } from './modules/seo-admin/seo-admin.module';
 import { SeoModule } from './modules/seo/seo.module';
 import { WebUserAuthModule } from './modules/web-user-auth/web-user-auth.module';
+import { WebUserJobsModule } from './modules/web-user-jobs/web-user-jobs.module';
 import { WebUsersModule } from './modules/web-users/web-users.module';
 import { StorageModule } from './shared/storage/storage.module';
 
@@ -150,6 +151,7 @@ import { StorageModule } from './shared/storage/storage.module';
     PublicCompaniesModule,
     WebUsersModule,
     WebUserAuthModule,
+    WebUserJobsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -80,6 +80,19 @@ export class WebUsersService {
     });
   }
 
+  async updateProfile(
+    id: number,
+    data: { firstName?: string; lastName?: string },
+  ): Promise<WebUser> {
+    return this.prisma.webUser.update({
+      where: { id },
+      data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+      },
+    });
+  }
+
   async setRefreshTokenHash(id: number, refreshToken: string): Promise<void> {
     const hash = await bcrypt.hash(refreshToken, 10);
     await this.prisma.webUser.update({

@@ -8,6 +8,7 @@ import { AuditContext } from '@/modules/audit/audit.service';
 import type { AuthenticatedPrincipal } from '@/modules/auth/interfaces/jwt-payload.interface';
 import { PERMISSIONS } from '@careerslk/lib';
 import {
+  ClaimStatus,
   CreateCompanyInput,
   createCompanySchema,
   UpdateCompanyInput,
@@ -22,6 +23,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -69,6 +71,41 @@ export class CompaniesController {
     return this.companiesService.getScrapeSummaries();
   }
 
+  // Also literal — same route-ordering reasoning as 'scrape-summary' above.
+  @Get('claims')
+  @RequirePermissions(PERMISSIONS.COMPANIES_CLAIMS_REVIEW)
+  listClaims(@Query('status') status?: ClaimStatus) {
+    return this.companiesService.listClaims(status);
+  }
+
+  @Post('claims/:id/approve')
+  @RequirePermissions(PERMISSIONS.COMPANIES_CLAIMS_REVIEW)
+  approveClaim(
+    @CurrentPrincipal() actor: AuthenticatedPrincipal,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+  ) {
+    return this.companiesService.approveClaim(
+      id,
+      actor.userId,
+      this.auditContext(actor, req),
+    );
+  }
+
+  @Post('claims/:id/reject')
+  @RequirePermissions(PERMISSIONS.COMPANIES_CLAIMS_REVIEW)
+  rejectClaim(
+    @CurrentPrincipal() actor: AuthenticatedPrincipal,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+  ) {
+    return this.companiesService.rejectClaim(
+      id,
+      actor.userId,
+      this.auditContext(actor, req),
+    );
+  }
+
   @Get(':id')
   @RequirePermissions(PERMISSIONS.COMPANIES_READ)
   findOne(@Param('id', ParseIntPipe) id: number) {
@@ -94,5 +131,25 @@ export class CompaniesController {
     @Req() req: Request,
   ) {
     return this.companiesService.softDelete(id, this.auditContext(actor, req));
+  }
+
+  @Post(':id/trust')
+  @RequirePermissions(PERMISSIONS.COMPANIES_TRUST)
+  trust(
+    @CurrentPrincipal() actor: AuthenticatedPrincipal,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+  ) {
+    return this.companiesService.trust(id, this.auditContext(actor, req));
+  }
+
+  @Post(':id/untrust')
+  @RequirePermissions(PERMISSIONS.COMPANIES_TRUST)
+  untrust(
+    @CurrentPrincipal() actor: AuthenticatedPrincipal,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+  ) {
+    return this.companiesService.untrust(id, this.auditContext(actor, req));
   }
 }

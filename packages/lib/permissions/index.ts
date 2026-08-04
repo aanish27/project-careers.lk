@@ -17,11 +17,16 @@ export const PERMISSION_DESCRIPTIONS = {
   'jobs.read': 'View all the jobs',
   'jobs.update': 'Edit job listing details',
   'jobs.delete': 'Remove job listings',
+  'jobs.approve': 'Approve or reject pending user-submitted job postings',
 
   'companies.read': 'View company records',
   'companies.create': 'Add new companies to scrape',
   'companies.update': 'Edit company details and scrape configuration',
   'companies.delete': 'Remove companies',
+  'companies.trust':
+    "Grant or revoke a company's auto-approval (trusted) status",
+  'companies.claims.review':
+    'Approve or reject requests to claim an existing company',
 
   'keywords.read': 'View the keyword catalogue and job-keyword assignments',
   'keywords.create': 'Create new keywords',
@@ -68,11 +73,14 @@ export const PERMISSIONS = {
   JOBS_READ: 'jobs.read',
   JOBS_UPDATE: 'jobs.update',
   JOBS_DELETE: 'jobs.delete',
+  JOBS_APPROVE: 'jobs.approve',
 
   COMPANIES_READ: 'companies.read',
   COMPANIES_CREATE: 'companies.create',
   COMPANIES_UPDATE: 'companies.update',
   COMPANIES_DELETE: 'companies.delete',
+  COMPANIES_TRUST: 'companies.trust',
+  COMPANIES_CLAIMS_REVIEW: 'companies.claims.review',
 
   KEYWORDS_READ: 'keywords.read',
   KEYWORDS_CREATE: 'keywords.create',

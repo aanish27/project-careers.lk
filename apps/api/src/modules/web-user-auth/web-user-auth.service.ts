@@ -28,6 +28,7 @@ function toUserData(user: WebUser): WebUserAuthResponseDto['user'] {
     firstName: user.firstName,
     lastName: user.lastName,
     avatarUrl: user.avatarUrl,
+    companyId: user.companyId,
   };
 }
 
@@ -204,6 +205,14 @@ export class WebUserAuthService {
     if (!user) {
       throw new UnauthorizedException();
     }
+    return toUserData(user);
+  }
+
+  async updateProfile(
+    webUserId: number,
+    data: { firstName?: string; lastName?: string },
+  ): Promise<WebUserAuthResponseDto['user']> {
+    const user = await this.webUsers.updateProfile(webUserId, data);
     return toUserData(user);
   }
 }

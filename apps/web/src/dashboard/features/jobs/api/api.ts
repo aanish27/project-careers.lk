@@ -1,8 +1,17 @@
-import type { JobDetail, JobWithCompany } from "@careerslk/types";
+import type {
+  JobApprovalStatus,
+  JobDetail,
+  JobWithCompany,
+} from "@careerslk/types";
 import { api } from "@dashboard-lib/axios";
 
+export interface JobFilters {
+  companyId?: number;
+  approvalStatus?: JobApprovalStatus;
+}
+
 export const jobsApi = {
-  list: (filters?: { companyId?: number }) =>
+  list: (filters?: JobFilters) =>
     api
       .get<JobWithCompany[]>("/admin/jobs", { params: filters })
       .then((res) => res.data),
@@ -10,4 +19,12 @@ export const jobsApi = {
     api.get<JobDetail>(`/admin/jobs/${id}`).then((res) => res.data),
   remove: (id: number) =>
     api.delete<void>(`/admin/jobs/${id}`).then((res) => res.data),
+  approve: (id: number) =>
+    api
+      .post<JobWithCompany>(`/admin/jobs/${id}/approve`)
+      .then((res) => res.data),
+  reject: (id: number, reason: string) =>
+    api
+      .post<JobWithCompany>(`/admin/jobs/${id}/reject`, { reason })
+      .then((res) => res.data),
 };

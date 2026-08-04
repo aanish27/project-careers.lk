@@ -1,7 +1,15 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
+import { useRequireAuth } from "@jobboard/hooks/use-require-auth";
+import { useWebUser } from "@jobboard/providers/web-user-provider";
 import Image from "next/image";
+import Link from "next/link";
 
 export const PrimaryNavbar = () => {
+  const { isLoggedIn, openLoginModal } = useWebUser();
+  const requireAuth = useRequireAuth();
+
   return (
     <nav className="relative w-full p-2 flex flex-row justify-between items-center rounded-3xl border border-white/40 dark:border-white/10 bg-white/20 dark:bg-white/5 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_8px_32px_rgba(31,38,135,0.15)] overflow-hidden before:pointer-events-none before:absolute before:inset-0 before:rounded-3xl before:bg-linear-to-b before:from-white/50 before:to-transparent before:opacity-40 dark:before:from-white/10">
       <Image
@@ -23,9 +31,36 @@ export const PrimaryNavbar = () => {
           Talents
         </div>
       </div>
-      <Button className="p-5 font-semibold backdrop-blur-sm bg-primary/90 hover:bg-primary">
-        Signup
-      </Button>
+      <div className="flex items-center gap-2">
+        {isLoggedIn ? (
+          <Button
+            variant="outline"
+            className="p-5 font-semibold backdrop-blur-sm"
+            render={<Link href="/post-job">Post a Job</Link>}
+          />
+        ) : (
+          <Button
+            variant="outline"
+            className="p-5 font-semibold backdrop-blur-sm"
+            onClick={() => requireAuth(() => {})}
+          >
+            Post a Job
+          </Button>
+        )}
+        {isLoggedIn ? (
+          <Button
+            className="p-5 font-semibold backdrop-blur-sm bg-primary/90 hover:bg-primary"
+            render={<Link href="/profile">Profile</Link>}
+          />
+        ) : (
+          <Button
+            className="p-5 font-semibold backdrop-blur-sm bg-primary/90 hover:bg-primary"
+            onClick={() => openLoginModal()}
+          >
+            Sign in
+          </Button>
+        )}
+      </div>
     </nav>
   );
 };

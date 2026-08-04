@@ -1,3 +1,14 @@
+import type {
+  Company,
+  CreateWebUserCompanyInput,
+  CreateWebUserJobInput,
+  Job,
+  JobWithCompany,
+  UpdateWebUserCompanyInput,
+  UpdateWebUserJobInput,
+  UpdateWebUserProfileInput,
+} from "@careerslk/types";
+import { ClaimStatus } from "@careerslk/types";
 import { apiFetch, ApiError, extractCookieValue } from "@lib/api-client";
 import "server-only";
 
@@ -7,6 +18,7 @@ export interface WebUser {
   firstName: string | null;
   lastName: string | null;
   avatarUrl: string | null;
+  companyId: number | null;
 }
 
 export interface GoogleProfile {
@@ -113,6 +125,219 @@ export async function fetchCurrentWebUser(
     headers: { Authorization: `Bearer ${accessToken}` },
   });
   return data;
+}
+
+export async function saveJobRequest(
+  accessToken: string,
+  jobId: number,
+): Promise<void> {
+  await apiFetch(`/web-users/jobs/${jobId}/save`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+}
+
+export async function unsaveJobRequest(
+  accessToken: string,
+  jobId: number,
+): Promise<void> {
+  await apiFetch(`/web-users/jobs/${jobId}/save`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+}
+
+export async function updateWebUserProfileRequest(
+  accessToken: string,
+  input: UpdateWebUserProfileInput,
+): Promise<WebUser> {
+  const { data } = await apiFetch<WebUser>("/web-users/me", {
+    method: "PATCH",
+    body: JSON.stringify(input),
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return data;
+}
+
+export interface SavedJobEntry {
+  id: number;
+  webUserId: number;
+  jobId: number;
+  createdAt: string;
+  job: Job & { company: Pick<Company, "id" | "name" | "logoUrl" | "slug"> };
+}
+
+export async function submitJobRequest(
+  accessToken: string,
+  input: CreateWebUserJobInput,
+): Promise<Job> {
+  const { data } = await apiFetch<Job>("/web-users/jobs", {
+    method: "POST",
+    body: JSON.stringify(input),
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return data;
+}
+
+export async function fetchMyJobsRequest(
+  accessToken: string,
+): Promise<JobWithCompany[]> {
+  const { data } = await apiFetch<JobWithCompany[]>("/web-users/jobs/mine", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return data;
+}
+
+export async function updateJobRequest(
+  accessToken: string,
+  jobId: number,
+  input: UpdateWebUserJobInput,
+): Promise<Job> {
+  const { data } = await apiFetch<Job>(`/web-users/jobs/${jobId}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return data;
+}
+
+export async function withdrawJobRequest(
+  accessToken: string,
+  jobId: number,
+): Promise<void> {
+  await apiFetch(`/web-users/jobs/${jobId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+}
+
+export async function fetchSavedJobsRequest(
+  accessToken: string,
+): Promise<SavedJobEntry[]> {
+  const { data } = await apiFetch<SavedJobEntry[]>("/web-users/jobs/saved", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return data;
+}
+
+export interface CompanySearchResult {
+  id: number;
+  name: string;
+  websiteUrl: string;
+  logoUrl: string | null;
+}
+
+export async function searchCompaniesRequest(
+  accessToken: string,
+  q: string,
+): Promise<CompanySearchResult[]> {
+  const { data } = await apiFetch<CompanySearchResult[]>(
+    `/web-users/companies/search?q=${encodeURIComponent(q)}`,
+    { headers: { Authorization: `Bearer ${accessToken}` } },
+  );
+  return data;
+}
+
+export async function createCompanyRequest(
+  accessToken: string,
+  input: CreateWebUserCompanyInput,
+): Promise<Company> {
+  const { data } = await apiFetch<Company>("/web-users/companies", {
+    method: "POST",
+    body: JSON.stringify(input),
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return data;
+}
+
+export type ClaimCompanyResult =
+  | { status: typeof ClaimStatus.APPROVED; companyId: number }
+  | {
+      status: typeof ClaimStatus.PENDING | typeof ClaimStatus.REJECTED;
+      claimId: number;
+    };
+
+export async function claimCompanyRequest(
+  accessToken: string,
+  companyId: number,
+): Promise<ClaimCompanyResult> {
+  const { data } = await apiFetch<ClaimCompanyResult>(
+    `/web-users/companies/${companyId}/claim`,
+    { method: "POST", headers: { Authorization: `Bearer ${accessToken}` } },
+  );
+  return data;
+}
+
+export async function fetchMyCompanyRequest(
+  accessToken: string,
+): Promise<Company | null> {
+  const { data } = await apiFetch<Company | null>("/web-users/companies/me", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return data;
+}
+
+export async function updateMyCompanyRequest(
+  accessToken: string,
+  input: UpdateWebUserCompanyInput,
+): Promise<Company> {
+  const { data } = await apiFetch<Company>("/web-users/companies/me", {
+    method: "PATCH",
+    body: JSON.stringify(input),
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return data;
+}
+
+export async function requestCompanyAutoApprovalRequest(
+  accessToken: string,
+): Promise<Company> {
+  const { data } = await apiFetch<Company>(
+    "/web-users/companies/me/request-auto-approval",
+    { method: "POST", headers: { Authorization: `Bearer ${accessToken}` } },
+  );
+  return data;
+}
+
+// Multipart upload can't go through `apiFetch` — it always forces
+// `Content-Type: application/json`, which breaks the multipart boundary the
+// browser/undici needs to set itself. This mirrors apiFetch's envelope
+// handling by hand instead.
+export async function uploadCompanyLogoRequest(
+  accessToken: string,
+  file: File,
+): Promise<Company> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  let res: Response;
+  try {
+    res = await fetch(`${process.env.API_URL}/web-users/companies/me/logo`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}` },
+      body: formData,
+    });
+  } catch {
+    throw new ApiError(0, "NETWORK_ERROR", "Unable to reach the API server");
+  }
+
+  const body = (await res.json()) as
+    | { success: true; data: Company }
+    | {
+        success: false;
+        error: { code: string; message: string; details?: unknown };
+      };
+
+  if (body.success) {
+    return body.data;
+  }
+
+  throw new ApiError(
+    res.status,
+    body.error.code,
+    body.error.message,
+    body.error.details,
+  );
 }
 
 export async function webUserRefreshRequest(

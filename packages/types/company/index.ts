@@ -1,4 +1,8 @@
-import type { CompanyStatus, PaginationType } from '../enums';
+import type {
+  CompanyAutoApprovalStatus,
+  CompanyStatus,
+  PaginationType,
+} from '../enums';
 
 export * from './schemas';
 
@@ -19,6 +23,15 @@ export interface Company {
   paginationBtn: string | null;
   createdAt: string;
   updatedAt: string;
+  description: string | null;
+  linkedinUrl: string | null;
+  twitterUrl: string | null;
+  facebookUrl: string | null;
+  instagramUrl: string | null;
+  createdByWebUserId: number | null;
+  autoApproveJobs: boolean;
+  autoApprovalStatus: CompanyAutoApprovalStatus;
+  autoApprovalRequestedAt: string | null;
 }
 
 export interface CompanyScrapeSummary {

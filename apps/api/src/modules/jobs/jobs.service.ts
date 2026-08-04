@@ -1,7 +1,12 @@
 import { PrismaService } from '@/database/prisma.service';
 import { AUDIT_ACTIONS } from '@/modules/audit/audit.constant';
 import { AuditContext, AuditService } from '@/modules/audit/audit.service';
-import { JobStatus, UpdateJobInput } from '@careerslk/types';
+import {
+  JobApprovalStatus,
+  JobStatus,
+  RejectJobInput,
+  UpdateJobInput,
+} from '@careerslk/types';
 import { Injectable } from '@nestjs/common';
 
 interface JobFilters {
@@ -9,6 +14,7 @@ interface JobFilters {
   companyId?: number;
   status?: JobStatus;
   sector?: string;
+  approvalStatus?: JobApprovalStatus;
 }
 
 @Injectable()
@@ -23,6 +29,7 @@ export class JobsService {
       status: filters.status,
       companyId: filters.companyId,
       sector: filters.sector,
+      approvalStatus: filters.approvalStatus,
       company: filters.company ? { name: filters.company } : undefined,
       deletedAt: null,
     };
@@ -89,6 +96,70 @@ export class JobsService {
           entityType: 'job',
           entityId: job.id,
           oldValue: { title: job.title },
+        },
+        tx,
+      );
+
+      return job;
+    });
+  }
+
+  async approve(id: number, adminUserId: number, context: AuditContext) {
+    return await this.prisma.$transaction(async (tx) => {
+      const before = await tx.job.findFirstOrThrow({
+        where: { id, deletedAt: null },
+      });
+
+      const job = await tx.job.update({
+        where: { id },
+        data: {
+          approvalStatus: JobApprovalStatus.APPROVED,
+          approvedByAdminId: adminUserId,
+          approvedAt: new Date(),
+          rejectionReason: null,
+        },
+      });
+
+      await this.audit.record(
+        context,
+        {
+          action: AUDIT_ACTIONS.JOB_APPROVED,
+          entityType: 'job',
+          entityId: job.id,
+          oldValue: { approvalStatus: before.approvalStatus },
+          newValue: { approvalStatus: job.approvalStatus },
+        },
+        tx,
+      );
+
+      return job;
+    });
+  }
+
+  async reject(id: number, dto: RejectJobInput, context: AuditContext) {
+    return await this.prisma.$transaction(async (tx) => {
+      const before = await tx.job.findFirstOrThrow({
+        where: { id, deletedAt: null },
+      });
+
+      const job = await tx.job.update({
+        where: { id },
+        data: {
+          approvalStatus: JobApprovalStatus.REJECTED,
+          rejectionReason: dto.reason,
+          approvedByAdminId: null,
+          approvedAt: null,
+        },
+      });
+
+      await this.audit.record(
+        context,
+        {
+          action: AUDIT_ACTIONS.JOB_REJECTED,
+          entityType: 'job',
+          entityId: job.id,
+          oldValue: { approvalStatus: before.approvalStatus },
+          newValue: { approvalStatus: job.approvalStatus, reason: dto.reason },
         },
         tx,
       );

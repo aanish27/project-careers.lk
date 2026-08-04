@@ -1,4 +1,5 @@
 import type {
+  ClaimStatus,
   Company,
   CompanyScrapeSummary,
   CompanyWithScrapeSummary,
@@ -6,6 +7,28 @@ import type {
   UpdateCompanyInput,
 } from "@careerslk/types";
 import { api } from "@dashboard-lib/axios";
+
+export interface CompanyClaim {
+  id: number;
+  webUserId: number;
+  companyId: number;
+  status: ClaimStatus;
+  reviewedByAdminId: number | null;
+  reviewedAt: string | null;
+  createdAt: string;
+  webUser: {
+    id: number;
+    email: string;
+    firstName: string | null;
+    lastName: string | null;
+  };
+  company: {
+    id: number;
+    name: string;
+    websiteUrl: string;
+    logoUrl: string | null;
+  };
+}
 
 export const companyApi = {
   list: () => api.get<Company[]>("/admin/companies").then((res) => res.data),
@@ -22,6 +45,25 @@ export const companyApi = {
   scrapeSummaries: () =>
     api
       .get<CompanyScrapeSummary[]>("/admin/companies/scrape-summary")
+      .then((res) => res.data),
+  trust: (id: number) =>
+    api.post<Company>(`/admin/companies/${id}/trust`).then((res) => res.data),
+  untrust: (id: number) =>
+    api.post<Company>(`/admin/companies/${id}/untrust`).then((res) => res.data),
+};
+
+export const companyClaimsApi = {
+  list: (status?: ClaimStatus) =>
+    api
+      .get<CompanyClaim[]>("/admin/companies/claims", { params: { status } })
+      .then((res) => res.data),
+  approve: (id: number) =>
+    api
+      .post<CompanyClaim>(`/admin/companies/claims/${id}/approve`)
+      .then((res) => res.data),
+  reject: (id: number) =>
+    api
+      .post<CompanyClaim>(`/admin/companies/claims/${id}/reject`)
       .then((res) => res.data),
 };
 

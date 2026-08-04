@@ -1,6 +1,10 @@
 import { PrismaService } from '@/database/prisma.service';
 import type { JobWhereInput } from '@careerslk/database';
-import { JobStatus, SEO_RETIREMENT_DAYS } from '@careerslk/types';
+import {
+  JobApprovalStatus,
+  JobStatus,
+  SEO_RETIREMENT_DAYS,
+} from '@careerslk/types';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { FilterPublicJobsDto } from './dto/filter-public-jobs.dto';
 
@@ -32,7 +36,11 @@ export class PublicJobsService {
 
   async findAll(filters: FilterPublicJobsDto) {
     const and: JobWhereInput[] = [
-      { status: JobStatus.ACTIVE, deletedAt: null },
+      {
+        status: JobStatus.ACTIVE,
+        approvalStatus: JobApprovalStatus.APPROVED,
+        deletedAt: null,
+      },
     ];
 
     if (filters.location) {
@@ -141,7 +149,11 @@ export class PublicJobsService {
   /** Bulk export for sitemap generation — not paginated, no filters. */
   async sitemapEntries() {
     return this.prisma.job.findMany({
-      where: { status: JobStatus.ACTIVE, deletedAt: null },
+      where: {
+        status: JobStatus.ACTIVE,
+        approvalStatus: JobApprovalStatus.APPROVED,
+        deletedAt: null,
+      },
       select: { slug: true, updatedAt: true },
     });
   }
@@ -169,7 +181,11 @@ export class PublicJobsService {
     const id = parseInt(match[1], 10);
 
     const job = await this.prisma.job.findFirst({
-      where: { id, deletedAt: null },
+      where: {
+        id,
+        approvalStatus: JobApprovalStatus.APPROVED,
+        deletedAt: null,
+      },
       include: {
         company: {
           select: {
@@ -192,6 +208,7 @@ export class PublicJobsService {
           companyId: job.companyId,
           id: { not: job.id },
           status: JobStatus.ACTIVE,
+          approvalStatus: JobApprovalStatus.APPROVED,
           deletedAt: null,
         },
         take: RELATED_JOBS_LIMIT,
@@ -204,6 +221,7 @@ export class PublicJobsService {
               roleCategory: job.roleCategory,
               id: { not: job.id },
               status: JobStatus.ACTIVE,
+              approvalStatus: JobApprovalStatus.APPROVED,
               deletedAt: null,
             },
             take: RELATED_JOBS_LIMIT,

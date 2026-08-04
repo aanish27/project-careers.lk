@@ -1,11 +1,19 @@
 import { Footer } from "@web-app-components/footer";
+import { LoginModal } from "@web-app-features/auth/components/login-modal";
+import { WebUserProvider } from "@jobboard/providers/web-user-provider";
+import { getWebUserSession } from "@web-app-lib/web-user-session";
 import { ReactNode } from "react";
 
-export default function layout({ children }: { children: ReactNode }) {
+export default async function layout({ children }: { children: ReactNode }) {
+  const session = await getWebUserSession();
+
   return (
-    <div className="container mx-auto px-8">
-      {children}
-      <Footer />
-    </div>
+    <WebUserProvider initialUser={session?.user ?? null}>
+      <div className="container mx-auto px-8">
+        {children}
+        <Footer />
+      </div>
+      <LoginModal />
+    </WebUserProvider>
   );
 }

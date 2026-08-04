@@ -13,6 +13,10 @@ export const AUDIT_ACTIONS = {
   COMPANY_CREATED: 'company.created',
   COMPANY_UPDATED: 'company.updated',
   COMPANY_DELETED: 'company.deleted',
+  COMPANY_TRUST_GRANTED: 'company.trust.granted',
+  COMPANY_TRUST_REVOKED: 'company.trust.revoked',
+  COMPANY_CLAIM_APPROVED: 'company.claim.approved',
+  COMPANY_CLAIM_REJECTED: 'company.claim.rejected',
 
   KEYWORD_CREATED: 'keyword.created',
   KEYWORD_UPDATED: 'keyword.updated',
@@ -26,6 +30,8 @@ export const AUDIT_ACTIONS = {
 
   JOB_UPDATED: 'job.updated',
   JOB_DELETED: 'job.deleted',
+  JOB_APPROVED: 'job.approved',
+  JOB_REJECTED: 'job.rejected',
 
   SEO_PAGE_UPDATED: 'seo.page.updated',
   SEO_PAGE_REGENERATED: 'seo.page.regenerated',
