@@ -1,18 +1,3 @@
-export const SRI_LANKAN_CITIES = [
-  'Colombo',
-  'Nugegoda',
-  'Rajagiriya',
-  'Kandy',
-  'Galle',
-  'Negombo',
-  'Kotte',
-  'Moratuwa',
-  'Kurunegala',
-  'Jaffna',
-  'Battaramulla',
-  'Malabe',
-];
-
 export const ATS_PLATFORMS = [
   'greenhouse',
   'bamboohr',
@@ -22,20 +7,6 @@ export const ATS_PLATFORMS = [
   'smartrecruiters',
   'recruitee',
   null,
-];
-
-export const DEPARTMENTS = [
-  'Engineering',
-  'Product',
-  'Design',
-  'Marketing',
-  'People & Culture',
-  'Finance',
-  'Operations',
-  'Customer Success',
-  'Data',
-  'Legal',
-  'Admin',
 ];
 
 export const EXPLICIT_SKILLS = [

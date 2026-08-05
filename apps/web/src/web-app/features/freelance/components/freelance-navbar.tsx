@@ -96,6 +96,7 @@ const FreelanceNavbar = () => {
           size="icon"
           className="rounded-full text-foreground/70 hover:bg-white/40 hover:text-foreground dark:hover:bg-white/10"
           render={<Link href="/freelance/messages" />}
+          nativeButton={false}
         >
           <IconMessageCircle className="size-4.5" />
         </Button>

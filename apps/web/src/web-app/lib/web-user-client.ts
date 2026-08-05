@@ -179,6 +179,44 @@ export async function submitJobRequest(
   return data;
 }
 
+export async function uploadJobImageRequest(
+  accessToken: string,
+  jobId: number,
+  file: File,
+): Promise<Job> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  let res: Response;
+  try {
+    res = await fetch(`${process.env.API_URL}/web-users/jobs/${jobId}/image`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}` },
+      body: formData,
+    });
+  } catch {
+    throw new ApiError(0, "NETWORK_ERROR", "Unable to reach the API server");
+  }
+
+  const body = (await res.json()) as
+    | { success: true; data: Job }
+    | {
+        success: false;
+        error: { code: string; message: string; details?: unknown };
+      };
+
+  if (body.success) {
+    return body.data;
+  }
+
+  throw new ApiError(
+    res.status,
+    body.error.code,
+    body.error.message,
+    body.error.details,
+  );
+}
+
 export async function fetchMyJobsRequest(
   accessToken: string,
 ): Promise<JobWithCompany[]> {
@@ -223,7 +261,7 @@ export async function fetchSavedJobsRequest(
 export interface CompanySearchResult {
   id: number;
   name: string;
-  websiteUrl: string;
+  websiteUrl: string | null;
   logoUrl: string | null;
 }
 

@@ -1,7 +1,11 @@
-import { ALL_CATEGORIES } from '@careerslk/types';
+import { ALL_CATEGORIES, ALL_CITIES } from '@careerslk/types';
 
 const ROLE_CATEGORY_PROPERTY = {
   anyOf: [{ type: 'string', enum: [...ALL_CATEGORIES] }, { type: 'null' }],
+} as const;
+
+const CITY_PROPERTY = {
+  anyOf: [{ type: 'string', enum: [...ALL_CITIES] }, { type: 'null' }],
 } as const;
 
 export const CLAUDE_SCHEMA_COMPANY = {
@@ -127,6 +131,7 @@ export const CLAUDE_SCHEMA_COMPANY_JOBS = {
             properties: {
               title: { type: 'string' },
               location: { type: ['string', 'null'] },
+              city: CITY_PROPERTY,
               work_mode: {
                 type: 'string',
                 enum: ['hybrid', 'remote', 'onsite'],
@@ -147,7 +152,6 @@ export const CLAUDE_SCHEMA_COMPANY_JOBS = {
                 ],
               },
               role_category: ROLE_CATEGORY_PROPERTY,
-              department: { type: ['string', 'null'] },
               description: { type: ['string', 'null'] },
               apply_url: { type: 'string' },
               keywords: {
@@ -158,10 +162,10 @@ export const CLAUDE_SCHEMA_COMPANY_JOBS = {
             required: [
               'title',
               'location',
+              'city',
               'work_mode',
               'employment_type',
               'role_category',
-              'department',
               'description',
               'apply_url',
               'keywords',
@@ -189,6 +193,7 @@ export const CLAUDE_SCHEMA_JOBS = {
             properties: {
               title: { type: 'string' },
               location: { type: ['string', 'null'] },
+              city: CITY_PROPERTY,
               work_mode: {
                 type: 'string',
                 enum: ['hybrid', 'remote', 'onsite'],
@@ -209,7 +214,6 @@ export const CLAUDE_SCHEMA_JOBS = {
                 ],
               },
               role_category: ROLE_CATEGORY_PROPERTY,
-              department: { type: ['string', 'null'] },
               description: { type: ['string', 'null'] },
               apply_url: { type: 'string' },
               keywords: {
@@ -220,10 +224,10 @@ export const CLAUDE_SCHEMA_JOBS = {
             required: [
               'title',
               'location',
+              'city',
               'work_mode',
               'employment_type',
               'role_category',
-              'department',
               'description',
               'apply_url',
               'keywords',

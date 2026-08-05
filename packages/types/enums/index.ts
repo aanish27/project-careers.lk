@@ -92,7 +92,7 @@ export type CompanyStatus = (typeof CompanyStatus)[keyof typeof CompanyStatus];
 // CompanyClaim values are directly assignable without a cast.
 export const JobSource = {
   SCRAPED: 'SCRAPED',
-  USER_SUBMITTED: 'USER_SUBMITTED',
+  POSTED: 'POSTED',
 } as const;
 
 export type JobSource = (typeof JobSource)[keyof typeof JobSource];
@@ -123,6 +123,14 @@ export const ClaimStatus = {
 } as const;
 
 export type ClaimStatus = (typeof ClaimStatus)[keyof typeof ClaimStatus];
+
+export const LocationLevel = {
+  PROVINCE: 'PROVINCE',
+  DISTRICT: 'DISTRICT',
+  CITY: 'CITY',
+} as const;
+
+export type LocationLevel = (typeof LocationLevel)[keyof typeof LocationLevel];
 
 export const FreelanceApprovalStatus = {
   PENDING: 'PENDING',

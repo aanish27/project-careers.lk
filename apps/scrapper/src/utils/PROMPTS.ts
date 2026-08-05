@@ -1,4 +1,4 @@
-import { ALL_CATEGORIES } from '@careerslk/types';
+import { ALL_CATEGORIES, ALL_CITIES } from '@careerslk/types';
 
 const ROLE_CATEGORY_SCHEMA_LINE = `"role_category": ${ALL_CATEGORIES.map((c) => `"${c}"`).join(' | ')} | null,`;
 
@@ -6,6 +6,12 @@ const ROLE_CATEGORY_FIELD_RULES = `role_category
 - Classify the job into exactly one of the category values listed in the OUTPUT SCHEMA above (~${ALL_CATEGORIES.length} specific categories grouped by industry, e.g. "Software Engineering", "Civil Engineering", "Nursing", "Teaching").
 - Choose the single most specific category that matches the job title and description — never guess a broader one when a specific one applies.
 - null only if the job content is too ambiguous to classify at all.`;
+
+const CITY_SCHEMA_LINE = `"city": ${ALL_CITIES.map((c) => `"${c}"`).join(' | ')} | null,`;
+
+const CITY_FIELD_RULES = `city
+- If the job is located in Sri Lanka and maps cleanly to one of the city values listed in the OUTPUT SCHEMA above, set city to that value (the town/suburb closest to the stated location).
+- Otherwise — the job isn't in Sri Lanka, or doesn't map cleanly to any city in the list — use null. The free-text \`location\` field remains the fallback description in that case.`;
 
 export const USER_PROMPT_COMPANY = (
   html: string,
@@ -157,10 +163,10 @@ OUTPUT SCHEMA:
     {
       "title": string,
       "location": string | null,
+      ${CITY_SCHEMA_LINE}
       "work_mode": "hybrid" | "remote" | "onsite",
       "employment_type": "Full-time" | "Part-time" | "Contract" | "Internship" | "Freelance" | null,
       ${ROLE_CATEGORY_SCHEMA_LINE}
-      "department": string | null,
       "description": string | null,
       "apply_url": string,
       "keywords": [string]
@@ -252,6 +258,8 @@ location
 - If only a country is mentioned, use "Country".
 - If fully remote with no location, use null and set work_mode: "remote".
 
+${CITY_FIELD_RULES}
+
 work_mode
 - "remote" if the job explicitly says remote, work from home, WFH, or distributed.
 - "hybrid" if the job mentions hybrid, flexible, or a mix of remote and office.
@@ -264,11 +272,6 @@ employment_type
 - null if completely absent or ambiguous.
 
 ${ROLE_CATEGORY_FIELD_RULES}
-
-department
-- Extract the department name only if explicitly stated in the posting.
-- Examples: "Product Engineering", "Growth Marketing", "Customer Success", "Platform Team"
-- Do not infer or guess — null if not mentioned.
 
 description
 - Extract the full job description text as plain text — no HTML tags.
@@ -317,10 +320,10 @@ OUTPUT SCHEMA — each object in the array must follow this exact structure:
 {
   "title": string,
   "location": string | null,
+  ${CITY_SCHEMA_LINE}
   "work_mode": "hybrid" | "remote" | "onsite",
   "employment_type": "Full-time" | "Part-time" | "Contract" | "Internship" | "Freelance" | null,
   ${ROLE_CATEGORY_SCHEMA_LINE}
-  "department": string | null,
   "description": string | null,
   "apply_url": string,
   "keywords": [string]
@@ -339,6 +342,8 @@ location
 - If only a country is mentioned, use "Country".
 - If fully remote with no location, use null and set work_mode: "remote".
 
+${CITY_FIELD_RULES}
+
 work_mode
 - "remote" if the job explicitly says remote, work from home, WFH, or distributed.
 - "hybrid" if the job mentions hybrid, flexible, or a mix of remote and office.
@@ -351,11 +356,6 @@ employment_type
 - null if completely absent or ambiguous.
 
 ${ROLE_CATEGORY_FIELD_RULES}
-
-department
-- Extract the department name only if explicitly stated in the posting.
-- Examples: "Product Engineering", "Growth Marketing", "Customer Success", "Platform Team"
-- Do not infer or guess — null if not mentioned.
 
 description
 - Extract the full job description text as plain text — no HTML tags.

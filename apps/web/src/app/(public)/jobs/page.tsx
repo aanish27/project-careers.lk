@@ -9,12 +9,12 @@ export const dynamic = "force-dynamic";
 
 type JobsPageProps = {
   searchParams: Promise<{
-    location?: string;
+    province?: string;
+    district?: string;
     workMode?: string;
     employmentType?: string;
     salaryMin?: string;
     salaryMax?: string;
-    skills?: string;
   }>;
 };
 
@@ -30,7 +30,7 @@ export async function generateMetadata({
   return {
     title: "Browse Jobs in Sri Lanka | Jobswala",
     description:
-      "Explore the latest job openings across IT, engineering, sales, and more sectors in Sri Lanka. Filter by location, work mode, employment type, skills, and salary to find your next role.",
+      "Explore the latest job openings across IT, engineering, sales, and more sectors in Sri Lanka. Filter by province, district, work mode, and employment type to find your next role.",
     alternates: { canonical: "/jobs" },
     robots: hasSalaryFilter ? { index: false, follow: true } : undefined,
   };
@@ -38,29 +38,22 @@ export async function generateMetadata({
 
 export default async function JobsPage({ searchParams }: JobsPageProps) {
   const {
-    location = "",
+    province = "all",
+    district = "all",
     workMode = "all",
     employmentType = "all",
     salaryMin,
     salaryMax,
-    skills = "",
   } = await searchParams;
-
-  const skillsList = skills
-    ? skills
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean)
-    : [];
 
   const [{ items: jobs }, allJobsPage] = await Promise.all([
     jobsApi.list({
-      location: location.trim() || undefined,
+      province: province !== "all" ? province : undefined,
+      district: district !== "all" ? district : undefined,
       workMode: workMode !== "all" ? [workMode] : undefined,
       employmentType: employmentType !== "all" ? [employmentType] : undefined,
       salaryMin: salaryMin ? Number(salaryMin) : undefined,
       salaryMax: salaryMax ? Number(salaryMax) : undefined,
-      skills: skillsList.length ? skillsList : undefined,
     }),
     seoPagesApi.getBySlug("jobs"),
   ]);
@@ -75,12 +68,10 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
       <JobsListing
         jobs={jobs}
         activeCategory="All Jobs"
-        location={location}
+        province={province}
+        district={district}
         workMode={workMode}
         employmentType={employmentType}
-        salaryMin={salaryMin ? Number(salaryMin) : undefined}
-        salaryMax={salaryMax ? Number(salaryMax) : undefined}
-        skills={skillsList}
       />
 
       {contentPage && (

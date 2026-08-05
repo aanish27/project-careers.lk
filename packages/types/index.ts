@@ -10,6 +10,7 @@ export * from './freelance-taxonomy';
 export * from './job-taxonomy';
 export * from './jobs';
 export * from './keywords';
+export * from './location-taxonomy';
 export * from './logs';
 export * from './notifications';
 export * from './rbac-entities';

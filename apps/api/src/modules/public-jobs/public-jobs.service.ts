@@ -48,6 +48,15 @@ export class PublicJobsService {
         location: { contains: filters.location, mode: 'insensitive' },
       });
     }
+    if (filters.province) {
+      and.push({ province: { equals: filters.province, mode: 'insensitive' } });
+    }
+    if (filters.district) {
+      and.push({ district: { equals: filters.district, mode: 'insensitive' } });
+    }
+    if (filters.city) {
+      and.push({ city: { equals: filters.city, mode: 'insensitive' } });
+    }
     if (filters.sector) and.push({ sector: filters.sector });
     if (filters.workMode?.length) {
       and.push({ workMode: { in: filters.workMode, mode: 'insensitive' } });

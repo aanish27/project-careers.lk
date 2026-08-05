@@ -32,8 +32,8 @@ export type UpdateCompanyInput = z.infer<typeof updateCompanySchema>;
 // fields, and no `status` (always active immediately).
 export const createWebUserCompanySchema = z.object({
   name: z.string().min(1),
-  websiteUrl: z.url(),
-  careerUrl: z.url(),
+  websiteUrl: z.url().optional(),
+  careerUrl: z.url().optional(),
   logoUrl: z.url().optional(),
   description: z.string().optional(),
   ...socialLinksSchema,

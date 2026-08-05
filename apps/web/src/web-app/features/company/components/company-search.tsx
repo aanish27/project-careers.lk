@@ -100,9 +100,11 @@ export function CompanySearch() {
             >
               <div className="min-w-0">
                 <p className="truncate font-medium">{company.name}</p>
-                <p className="truncate text-sm text-muted-foreground">
-                  {company.websiteUrl}
-                </p>
+                {company.websiteUrl && (
+                  <p className="truncate text-sm text-muted-foreground">
+                    {company.websiteUrl}
+                  </p>
+                )}
                 {claimMessage[company.id] && (
                   <p className="mt-1 text-sm text-muted-foreground">
                     {claimMessage[company.id]}

@@ -2,6 +2,8 @@ import { PrismaService } from '@/database/prisma.service';
 import { AUDIT_ACTIONS } from '@/modules/audit/audit.constant';
 import { AuditContext, AuditService } from '@/modules/audit/audit.service';
 import {
+  getCitySlug,
+  getDistrictSlug,
   JobApprovalStatus,
   JobStatus,
   RejectJobInput,
@@ -64,7 +66,26 @@ export class JobsService {
         where: { id, deletedAt: null },
       });
 
-      const job = await tx.job.update({ where: { id }, data: { ...dto } });
+      // Correcting a scraper misclassification: resync the display
+      // `location` string and the SeoLocation FK from the picked district/city.
+      let locationPatch: { location?: string; seoLocationId?: number } = {};
+      if (dto.district) {
+        const locationSlug = dto.city
+          ? getCitySlug(dto.city)
+          : getDistrictSlug(dto.district);
+        const seoLocation = locationSlug
+          ? await tx.seoLocation.findUnique({ where: { slug: locationSlug } })
+          : null;
+        locationPatch = {
+          location: dto.city ? `${dto.city}, ${dto.district}` : dto.district,
+          seoLocationId: seoLocation?.id,
+        };
+      }
+
+      const job = await tx.job.update({
+        where: { id },
+        data: { ...dto, ...locationPatch },
+      });
 
       await this.audit.record(
         context,

@@ -7,43 +7,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getDistrictsForProvince, PROVINCES } from "@careerslk/types";
 import {
   IconBriefcase,
   IconBuildingSkyscraper,
   IconMapPin,
 } from "@tabler/icons-react";
-import SalaryRangeFilter from "./salary-range-filter";
-import SkillsFilter from "./skills-filter";
 
 type JobFilterBarProps = {
   resultCount: number;
-  location: string;
-  onLocationChange: (value: string) => void;
+  province: string;
+  onProvinceChange: (value: string) => void;
+  district: string;
+  onDistrictChange: (value: string) => void;
   workMode: string;
   onWorkModeChange: (value: string) => void;
   employmentType: string;
   onEmploymentTypeChange: (value: string) => void;
-  salaryMin?: number;
-  salaryMax?: number;
-  onSalaryChange: (min: number | undefined, max: number | undefined) => void;
-  skills: string[];
-  onSkillsChange: (skills: string[]) => void;
 };
 
 const JobFilterBar = ({
   resultCount,
-  location,
-  onLocationChange,
+  province,
+  onProvinceChange,
+  district,
+  onDistrictChange,
   workMode,
   onWorkModeChange,
   employmentType,
   onEmploymentTypeChange,
-  salaryMin,
-  salaryMax,
-  onSalaryChange,
-  skills,
-  onSkillsChange,
 }: JobFilterBarProps) => {
+  const districts = getDistrictsForProvince(
+    province !== "all" ? province : undefined,
+  );
+
   return (
     <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
       <h2 className="text-xl font-bold text-foreground">
@@ -54,16 +51,44 @@ const JobFilterBar = ({
       </h2>
 
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2 rounded-full border border-border bg-white px-4 py-2">
-          <IconMapPin className="size-4 shrink-0 text-muted-foreground" />
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => onLocationChange(e.target.value)}
-            placeholder="Location"
-            className="w-36 bg-transparent text-sm font-medium text-foreground outline-none placeholder:text-muted-foreground"
-          />
-        </div>
+        <Select
+          value={province}
+          onValueChange={(value) => onProvinceChange(value ?? "all")}
+        >
+          <SelectTrigger className="gap-2 rounded-full border-border bg-white px-4">
+            <IconMapPin className="size-4 text-muted-foreground" />
+            <SelectValue placeholder="Province" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Provinces</SelectItem>
+            {PROVINCES.map((option) => (
+              <SelectItem key={option} value={option}>
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={district}
+          onValueChange={(value) => onDistrictChange(value ?? "all")}
+        >
+          <SelectTrigger
+            className="gap-2 rounded-full border-border bg-white px-4"
+            disabled={province === "all"}
+          >
+            <IconMapPin className="size-4 text-muted-foreground" />
+            <SelectValue placeholder="District" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Districts</SelectItem>
+            {districts.map((option) => (
+              <SelectItem key={option} value={option}>
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         <Select
           value={workMode}
@@ -95,17 +120,8 @@ const JobFilterBar = ({
             <SelectItem value="part_time">Part-Time</SelectItem>
             <SelectItem value="contract">Contract</SelectItem>
             <SelectItem value="internship">Internship</SelectItem>
-            <SelectItem value="freelance">Freelance</SelectItem>
           </SelectContent>
         </Select>
-
-        <SalaryRangeFilter
-          salaryMin={salaryMin}
-          salaryMax={salaryMax}
-          onChange={onSalaryChange}
-        />
-
-        <SkillsFilter skills={skills} onChange={onSkillsChange} />
       </div>
     </div>
   );

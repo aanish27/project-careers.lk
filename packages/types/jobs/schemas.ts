@@ -4,11 +4,13 @@ import { EmploymentType, JobStatus } from '../enums';
 export const updateJobSchema = z.object({
   title: z.string().min(1).optional(),
   location: z.string().optional(),
+  province: z.string().optional(),
+  district: z.string().optional(),
+  city: z.string().optional(),
   workMode: z.string().optional(),
   employmentType: z.enum(EmploymentType).optional(),
   sector: z.string().optional(),
   roleCategory: z.string().optional(),
-  department: z.string().optional(),
   salaryMin: z.number().int().optional(),
   salaryMax: z.number().int().optional(),
   salaryCurrency: z.string().optional(),
@@ -27,16 +29,31 @@ export const rejectJobSchema = z.object({
 
 export type RejectJobInput = z.infer<typeof rejectJobSchema>;
 
-// A web user's own job submission — no `companyId`/`status`/approval fields,
-// those are derived server-side from the caller's linked company.
+// Freelance work is its own marketplace (gigs) — not an employment type a
+// web user can post a regular job listing under.
+export const WEB_USER_EMPLOYMENT_TYPES = [
+  'full_time',
+  'part_time',
+  'contract',
+  'internship',
+] as const;
+
+export const WEB_USER_WORK_MODES = ['onsite', 'hybrid', 'remote'] as const;
+
+// A web user's own job submission — no `companyId`/`status`/approval fields.
+// `workMode` is a required pick (the posting form has no "not specified"
+// option). Location is a structured Province -> District -> City pick (city
+// optional) rather than free text; the display `location` string and
+// `seoLocationId` are derived server-side from these.
 export const createWebUserJobSchema = z.object({
   title: z.string().min(1),
-  location: z.string().optional(),
-  workMode: z.string().optional(),
-  employmentType: z.enum(EmploymentType).optional(),
+  province: z.string().min(1),
+  district: z.string().min(1),
+  city: z.string().optional(),
+  workMode: z.enum(WEB_USER_WORK_MODES),
+  employmentType: z.enum(WEB_USER_EMPLOYMENT_TYPES).optional(),
   sector: z.string().optional(),
   roleCategory: z.string().optional(),
-  department: z.string().optional(),
   salaryMin: z.number().int().optional(),
   salaryMax: z.number().int().optional(),
   salaryCurrency: z.string().optional(),

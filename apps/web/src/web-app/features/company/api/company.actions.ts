@@ -81,22 +81,13 @@ export async function createCompany(
   if (!accessToken) redirect("/login");
 
   const name = formData.get("name");
-  const websiteUrl = formData.get("websiteUrl");
-  const careerUrl = formData.get("careerUrl");
   if (typeof name !== "string" || !name.trim()) {
     return { error: "Company name is required" };
-  }
-  if (typeof websiteUrl !== "string" || !websiteUrl.trim()) {
-    return { error: "Website URL is required" };
-  }
-  if (typeof careerUrl !== "string" || !careerUrl.trim()) {
-    return { error: "Career page URL is required" };
   }
 
   const input: CreateWebUserCompanyInput = {
     name: name.trim(),
-    websiteUrl: websiteUrl.trim(),
-    careerUrl: careerUrl.trim(),
+    websiteUrl: optionalString(formData.get("websiteUrl")),
     description: optionalString(formData.get("description")),
     linkedinUrl: optionalString(formData.get("linkedinUrl")),
     twitterUrl: optionalString(formData.get("twitterUrl")),
@@ -124,17 +115,12 @@ export async function updateCompany(
   if (!accessToken) redirect("/login");
 
   const name = formData.get("name");
-  const careerUrl = formData.get("careerUrl");
   if (typeof name !== "string" || !name.trim()) {
     return { error: "Company name is required" };
-  }
-  if (typeof careerUrl !== "string" || !careerUrl.trim()) {
-    return { error: "Career page URL is required" };
   }
 
   const input: UpdateWebUserCompanyInput = {
     name: name.trim(),
-    careerUrl: careerUrl.trim(),
     description: optionalString(formData.get("description")),
     linkedinUrl: optionalString(formData.get("linkedinUrl")),
     twitterUrl: optionalString(formData.get("twitterUrl")),

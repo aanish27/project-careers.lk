@@ -1,6 +1,10 @@
-import { normalizeLocationName } from '@careerslk/lib/normalizers';
 import { slugify } from '@careerslk/lib/slugify';
-import { getSectorForCategory } from '@careerslk/types';
+import {
+  getCitySlug,
+  getDistrictForCity,
+  getProvinceForDistrict,
+  getSectorForCategory,
+} from '@careerslk/types';
 import { prisma } from '../utils/prisma';
 import { AiJob } from '../utils/types';
 import { HashService } from './hash.service';
@@ -41,7 +45,11 @@ export async function upsertJobs(
   await Promise.all(
     jobs.map(async (job) => {
       const fingerprint = buildJobFingerprint(companyId, job);
-      const normalizedLocation = normalizeLocationName(job.location);
+      // district/province are never asked of the AI — derived deterministically
+      // from the classified city, same as `sector` from `role_category`.
+      const district = getDistrictForCity(job.city);
+      const province = getProvinceForDistrict(district);
+      const citySlug = getCitySlug(job.city);
 
       const upserted = await prisma.job.upsert({
         where: { fingerprint },
@@ -52,17 +60,19 @@ export async function upsertJobs(
           slug: `pending-${fingerprint}`,
           applyUrl: job.apply_url,
           description: job.description,
-          department: job.department,
           roleCategory: job.role_category,
           sector: getSectorForCategory(job.role_category),
           seoRoleId: job.role_category
             ? seoLookups.roleIdBySlug.get(slugify(job.role_category))
             : undefined,
-          seoLocationId: normalizedLocation
-            ? seoLookups.locationIdBySlug.get(slugify(normalizedLocation))
+          seoLocationId: citySlug
+            ? seoLookups.locationIdBySlug.get(citySlug)
             : undefined,
           workMode: job.work_mode,
           location: job.location,
+          city: job.city,
+          district,
+          province,
           employmentType: job.employment_type,
           company: { connect: { id: companyId } },
           lastSeenAt: new Date(),

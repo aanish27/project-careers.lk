@@ -29,7 +29,8 @@ export class WebUserCompaniesService {
     );
   }
 
-  private hostnameOf(url: string): string {
+  private hostnameOf(url: string | null): string {
+    if (!url) return '';
     try {
       return new URL(url).hostname.replace(/^www\./, '').toLowerCase();
     } catch {

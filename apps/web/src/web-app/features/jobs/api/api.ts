@@ -3,10 +3,11 @@ import type { PublicJobDetailResponse, PublicJobsListResponse } from "../types";
 
 export interface JobFilters {
   location?: string;
+  province?: string;
+  district?: string;
   sector?: string;
   workMode?: string[];
   employmentType?: string[];
-  skills?: string[];
   keywords?: string[];
   salaryMin?: number;
   salaryMax?: number;
@@ -19,13 +20,14 @@ export interface JobFilters {
 function buildQuery(filters: JobFilters): string {
   const params = new URLSearchParams();
   if (filters.location) params.set("location", filters.location);
+  if (filters.province) params.set("province", filters.province);
+  if (filters.district) params.set("district", filters.district);
   if (filters.sector) params.set("sector", filters.sector);
   if (filters.workMode?.length)
     params.set("workMode", filters.workMode.join(","));
   if (filters.employmentType?.length) {
     params.set("employmentType", filters.employmentType.join(","));
   }
-  if (filters.skills?.length) params.set("skills", filters.skills.join(","));
   if (filters.keywords?.length)
     params.set("keywords", filters.keywords.join(","));
   if (filters.salaryMin !== undefined) {

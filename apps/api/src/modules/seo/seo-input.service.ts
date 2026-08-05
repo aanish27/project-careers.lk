@@ -1,5 +1,5 @@
 import { PrismaService } from '@/database/prisma.service';
-import { SeoInputObject, SeoPageType } from '@careerslk/types';
+import { LocationLevel, SeoInputObject, SeoPageType } from '@careerslk/types';
 import { Injectable } from '@nestjs/common';
 import { buildJobWhereForPage } from './seo-query.util';
 
@@ -8,11 +8,15 @@ interface NamedEntity {
   name: string;
 }
 
+export interface NamedLocationEntity extends NamedEntity {
+  level: LocationLevel;
+}
+
 export interface BuildSeoInputParams {
   pageType: SeoPageType;
   sector?: string;
   role?: NamedEntity;
-  location?: NamedEntity;
+  location?: NamedLocationEntity;
   company?: NamedEntity;
   skill?: NamedEntity;
 }
@@ -28,7 +32,9 @@ export class SeoInputService {
       pageType: params.pageType,
       sector: params.sector,
       roleId: params.role?.id,
-      locationId: params.location?.id,
+      location: params.location
+        ? { name: params.location.name, level: params.location.level }
+        : undefined,
       companyId: params.company?.id,
       skillId: params.skill?.id,
     });

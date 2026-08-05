@@ -31,6 +31,7 @@ import {
 import Link from "next/link";
 import { useJob } from "../hooks/use-jobs";
 import { useJobAiBatch, useJobAuditLogs } from "../hooks/use-job-logs";
+import { EditJobLocationDialog } from "./edit-job-location-dialog";
 
 function formatDate(value: string | null) {
   return value ? new Date(value).toLocaleString() : "—";
@@ -68,6 +69,11 @@ export function JobDetail({ jobId }: { jobId: number }) {
           <div>
             <div className="text-muted-foreground">Location</div>
             <div>{job.location ?? "—"}</div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              {[job.city, job.district, job.province]
+                .filter(Boolean)
+                .join(", ") || "Not classified"}
+            </div>
           </div>
           <div>
             <div className="text-muted-foreground">Work mode</div>
@@ -86,8 +92,8 @@ export function JobDetail({ jobId }: { jobId: number }) {
             <div>{job.roleCategory ?? "—"}</div>
           </div>
           <div>
-            <div className="text-muted-foreground">Department</div>
-            <div>{job.department ?? "—"}</div>
+            <div className="mb-1 text-muted-foreground">Fix location</div>
+            <EditJobLocationDialog job={job} />
           </div>
           <div>
             <div className="text-muted-foreground">Salary</div>

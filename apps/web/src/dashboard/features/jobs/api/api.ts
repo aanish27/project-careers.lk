@@ -2,6 +2,7 @@ import type {
   JobApprovalStatus,
   JobDetail,
   JobWithCompany,
+  UpdateJobInput,
 } from "@careerslk/types";
 import { api } from "@dashboard-lib/axios";
 
@@ -19,6 +20,10 @@ export const jobsApi = {
     api.get<JobDetail>(`/admin/jobs/${id}`).then((res) => res.data),
   remove: (id: number) =>
     api.delete<void>(`/admin/jobs/${id}`).then((res) => res.data),
+  update: (id: number, body: UpdateJobInput) =>
+    api
+      .patch<JobWithCompany>(`/admin/jobs/${id}`, body)
+      .then((res) => res.data),
   approve: (id: number) =>
     api
       .post<JobWithCompany>(`/admin/jobs/${id}/approve`)

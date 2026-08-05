@@ -16,7 +16,10 @@ export default function DashboardNotFound() {
           This page doesn&apos;t exist, or you don&apos;t have access to it.
         </p>
       </div>
-      <Button render={<Link href="/admin">Back to dashboard</Link>} />
+      <Button
+        render={<Link href="/admin">Back to dashboard</Link>}
+        nativeButton={false}
+      />
     </div>
   );
 }

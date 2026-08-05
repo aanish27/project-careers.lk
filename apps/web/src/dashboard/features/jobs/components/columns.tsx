@@ -33,10 +33,6 @@ export const columns: ColumnDef<JobWithCompany>[] = [
   },
 
   {
-    accessorKey: "department",
-    header: "Department",
-  },
-  {
     accessorKey: "salaryMin",
     header: "Salary Min",
   },

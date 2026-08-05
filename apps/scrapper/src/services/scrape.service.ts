@@ -146,6 +146,13 @@ export class ScrapeService {
     type: ScrapeType,
     trigger: ScrapeLogTrigger = ScrapeLogTrigger.MANUAL,
   ) {
+    // careerUrl is nullable now (web-user-created companies can skip it at
+    // signup) — nothing to scrape without one.
+    if (!company.careerUrl) {
+      console.error(`Skipping scrape for company ${company.id}: no careerUrl`);
+      return null;
+    }
+
     const startedAt = Date.now();
     let scrapeLogId: number | undefined;
 

@@ -1,7 +1,12 @@
 import { PrismaService } from '@/database/prisma.service';
 import type { SeoPageUncheckedCreateInput } from '@careerslk/database';
 import { slugify } from '@careerslk/lib/slugify';
-import { SECTORS, SEO_PAGE_THRESHOLDS, SeoPageType } from '@careerslk/types';
+import {
+  LocationLevel,
+  SECTORS,
+  SEO_PAGE_THRESHOLDS,
+  SeoPageType,
+} from '@careerslk/types';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SeoInputService } from './seo-input.service';
@@ -15,12 +20,16 @@ interface NamedSlugEntity {
   slug: string;
 }
 
+interface NamedSlugLocation extends NamedSlugEntity {
+  level: LocationLevel;
+}
+
 interface GenerateOneParams {
   pageType: SeoPageType;
   slug: string;
   sector?: string;
   role?: NamedSlugEntity;
-  location?: NamedSlugEntity;
+  location?: NamedSlugLocation;
   company?: NamedSlugEntity;
   skill?: NamedSlugEntity;
 }
@@ -59,27 +68,53 @@ export class SeoGenerationService {
       failedValidation: 0,
     };
 
-    const [roles, locations, skills, companies, roleLocationPairs] =
-      await Promise.all([
-        this.prisma.seoRole.findMany(),
-        this.prisma.seoLocation.findMany(),
-        this.prisma.seoSkill.findMany(),
-        this.prisma.company.findMany({
-          where: { jobs: { some: { status: 'ACTIVE', deletedAt: null } } },
-        }),
-        this.prisma.job.groupBy({
-          by: ['seoRoleId', 'seoLocationId'],
-          where: {
-            status: 'ACTIVE',
-            deletedAt: null,
-            seoRoleId: { not: null },
-            seoLocationId: { not: null },
-          },
-        }),
-      ]);
+    const [
+      roles,
+      locations,
+      skills,
+      companies,
+      roleDistrictPairs,
+      roleProvincePairs,
+    ] = await Promise.all([
+      this.prisma.seoRole.findMany(),
+      this.prisma.seoLocation.findMany(),
+      this.prisma.seoSkill.findMany(),
+      this.prisma.company.findMany({
+        where: { jobs: { some: { status: 'ACTIVE', deletedAt: null } } },
+      }),
+      // Combo pages generate at district/province level, never city — a
+      // role×city combo would almost never clear the ROLE_LOCATION threshold.
+      this.prisma.job.groupBy({
+        by: ['seoRoleId', 'district'],
+        where: {
+          status: 'ACTIVE',
+          deletedAt: null,
+          seoRoleId: { not: null },
+          district: { not: null },
+        },
+      }),
+      this.prisma.job.groupBy({
+        by: ['seoRoleId', 'province'],
+        where: {
+          status: 'ACTIVE',
+          deletedAt: null,
+          seoRoleId: { not: null },
+          province: { not: null },
+        },
+      }),
+    ]);
 
     const roleById = new Map(roles.map((r) => [r.id, r]));
-    const locationById = new Map(locations.map((l) => [l.id, l]));
+    const districtLocationByName = new Map(
+      locations
+        .filter((l) => l.level === LocationLevel.DISTRICT)
+        .map((l) => [l.name, l]),
+    );
+    const provinceLocationByName = new Map(
+      locations
+        .filter((l) => l.level === LocationLevel.PROVINCE)
+        .map((l) => [l.name, l]),
+    );
 
     for (const sector of SECTORS) {
       await this.generateOne(
@@ -111,9 +146,21 @@ export class SeoGenerationService {
     }
 
     const liveRoleLocationSlugs = new Set<string>();
-    for (const pair of roleLocationPairs) {
+    for (const pair of roleDistrictPairs) {
       const role = roleById.get(pair.seoRoleId!);
-      const location = locationById.get(pair.seoLocationId!);
+      const location = districtLocationByName.get(pair.district!);
+      if (!role || !location) continue;
+
+      const slug = `jobs/${role.slug}/in/${location.slug}`;
+      liveRoleLocationSlugs.add(slug);
+      await this.generateOne(
+        { pageType: SeoPageType.ROLE_LOCATION, role, location, slug },
+        summary,
+      );
+    }
+    for (const pair of roleProvincePairs) {
+      const role = roleById.get(pair.seoRoleId!);
+      const location = provinceLocationByName.get(pair.province!);
       if (!role || !location) continue;
 
       const slug = `jobs/${role.slug}/in/${location.slug}`;

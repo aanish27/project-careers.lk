@@ -1,20 +1,18 @@
 import { JobStatus, PrismaClient, SkillType } from '@careerslk/database';
 import type { Company } from '@careerslk/database';
-import {
-  normalizeLocationName,
-  normalizeSkillName,
-} from '@careerslk/lib/normalizers';
+import { normalizeSkillName } from '@careerslk/lib/normalizers';
 import { slugify } from '@careerslk/lib/slugify';
-import { ALL_CATEGORIES, getSectorForCategory } from '@careerslk/types';
+import {
+  ALL_CATEGORIES,
+  ALL_CITIES,
+  getCitySlug,
+  getDistrictForCity,
+  getProvinceForDistrict,
+  getSectorForCategory,
+} from '@careerslk/types';
 import { faker } from '@faker-js/faker';
 import { createHash } from 'node:crypto';
-import {
-  DEPARTMENTS,
-  EXPLICIT_SKILLS,
-  KEYWORD_POOL,
-  SALARY_CURRENCY,
-  SRI_LANKAN_CITIES,
-} from './data.ts';
+import { EXPLICIT_SKILLS, KEYWORD_POOL, SALARY_CURRENCY } from './data.ts';
 
 interface SeoLookupMaps {
   roleIdBySlug: Map<string, number>;
@@ -83,14 +81,18 @@ async function seedJobForCompany(
     ? faker.number.int({ min: 50_000, max: 200_000 })
     : null;
   const roleCategory = faker.helpers.arrayElement(ALL_CATEGORIES);
-  const location = faker.datatype.boolean({ probability: 0.85 })
-    ? `${faker.helpers.arrayElement(SRI_LANKAN_CITIES)}, Sri Lanka`
-    : null;
 
-  const normalizedLocation = normalizeLocationName(location);
+  const city = faker.datatype.boolean({ probability: 0.85 })
+    ? faker.helpers.arrayElement(ALL_CITIES)
+    : null;
+  const district = getDistrictForCity(city);
+  const province = getProvinceForDistrict(district);
+  const location = city ? `${city}, ${district}` : null;
+
   const seoRoleId = seoLookups.roleIdBySlug.get(slugify(roleCategory));
-  const seoLocationId = normalizedLocation
-    ? seoLookups.locationIdBySlug.get(slugify(normalizedLocation))
+  const citySlug = getCitySlug(city);
+  const seoLocationId = citySlug
+    ? seoLookups.locationIdBySlug.get(citySlug)
     : undefined;
 
   const jobFingerprint = fingerprint(company.id, title, applyUrl);
@@ -105,13 +107,15 @@ async function seedJobForCompany(
       // Real slug depends on the autoincrement id, patched in below.
       slug: `pending-${jobFingerprint}`,
       location,
+      province,
+      district,
+      city,
       workMode: faker.helpers.arrayElement(WORK_MODES),
       employmentType: faker.helpers.arrayElement(EMPLOYMENT_TYPES),
       roleCategory,
       sector: getSectorForCategory(roleCategory),
       seoRoleId,
       seoLocationId,
-      department: faker.helpers.arrayElement(DEPARTMENTS),
       salaryMin,
       salaryMax: hasSalary
         ? salaryMin! + faker.number.int({ min: 20_000, max: 100_000 })

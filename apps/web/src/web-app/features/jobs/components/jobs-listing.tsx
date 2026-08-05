@@ -7,37 +7,23 @@ import JobCard from "@web-app-features/jobs/components/job-card";
 import JobFilterBar from "@web-app-features/jobs/components/job-filter-bar";
 import JobsNavbar from "@web-app-features/jobs/components/jobs-navbar";
 import type { PublicJob } from "@web-app-features/jobs/types";
-import { debounce } from "lodash";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-
-const LOCATION_DEBOUNCE_MS = 400;
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
 type JobsListingProps = {
   jobs: PublicJob[];
   activeCategory: string;
-  location: string;
+  province: string;
+  district: string;
   workMode: string;
   employmentType: string;
-  salaryMin?: number;
-  salaryMax?: number;
-  skills: string[];
 };
 
 interface NavigateParams {
-  location: string;
+  province: string;
+  district: string;
   workMode: string;
   employmentType: string;
-  salaryMin: number | undefined;
-  salaryMax: number | undefined;
-  skills: string[];
 }
 
 type FilterUpdate = Partial<NavigateParams>;
@@ -45,27 +31,15 @@ type FilterUpdate = Partial<NavigateParams>;
 const JobsListing = ({
   jobs,
   activeCategory,
-  location,
+  province,
+  district,
   workMode,
   employmentType,
-  salaryMin,
-  salaryMax,
-  skills,
 }: JobsListingProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
-
-  // Mirrors `location` locally so the input feels instant while the URL
-  // navigation is debounced. Resets on prop change without an effect, per
-  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
-  const [prevLocationProp, setPrevLocationProp] = useState(location);
-  const [locationInput, setLocationInput] = useState(location);
-  if (location !== prevLocationProp) {
-    setPrevLocationProp(location);
-    setLocationInput(location);
-  }
 
   useLayoutEffect(() => {
     const node = headerRef.current;
@@ -81,16 +55,11 @@ const JobsListing = ({
   const navigate = useCallback(
     (merged: NavigateParams) => {
       const params = new URLSearchParams();
-      if (merged.location.trim())
-        params.set("location", merged.location.trim());
+      if (merged.province !== "all") params.set("province", merged.province);
+      if (merged.district !== "all") params.set("district", merged.district);
       if (merged.workMode !== "all") params.set("workMode", merged.workMode);
       if (merged.employmentType !== "all")
         params.set("employmentType", merged.employmentType);
-      if (merged.salaryMin !== undefined)
-        params.set("salaryMin", String(merged.salaryMin));
-      if (merged.salaryMax !== undefined)
-        params.set("salaryMax", String(merged.salaryMax));
-      if (merged.skills.length) params.set("skills", merged.skills.join(","));
 
       const query = params.toString();
       router.replace(query ? `${pathname}?${query}` : pathname, {
@@ -103,42 +72,14 @@ const JobsListing = ({
   const updateFilters = useCallback(
     (update: FilterUpdate) => {
       navigate({
-        location: update.location ?? location,
+        province: update.province ?? province,
+        district: update.district ?? district,
         workMode: update.workMode ?? workMode,
         employmentType: update.employmentType ?? employmentType,
-        salaryMin: "salaryMin" in update ? update.salaryMin : salaryMin,
-        salaryMax: "salaryMax" in update ? update.salaryMax : salaryMax,
-        skills: update.skills ?? skills,
       });
     },
-    [
-      location,
-      workMode,
-      employmentType,
-      salaryMin,
-      salaryMax,
-      skills,
-      navigate,
-    ],
+    [province, district, workMode, employmentType, navigate],
   );
-
-  const debouncedLocationUpdate = useMemo(
-    () =>
-      debounce(
-        (value: string) => updateFilters({ location: value }),
-        LOCATION_DEBOUNCE_MS,
-      ),
-    [updateFilters],
-  );
-
-  useEffect(() => {
-    return () => debouncedLocationUpdate.cancel();
-  }, [debouncedLocationUpdate]);
-
-  const handleLocationChange = (value: string) => {
-    setLocationInput(value);
-    debouncedLocationUpdate(value);
-  };
 
   return (
     <div className="relative flex min-h-screen flex-col">
@@ -155,21 +96,18 @@ const JobsListing = ({
         <div className="flex flex-1 flex-col">
           <JobFilterBar
             resultCount={jobs.length}
-            location={locationInput}
-            onLocationChange={handleLocationChange}
+            province={province}
+            onProvinceChange={(value) =>
+              updateFilters({ province: value, district: "all" })
+            }
+            district={district}
+            onDistrictChange={(value) => updateFilters({ district: value })}
             workMode={workMode}
             onWorkModeChange={(value) => updateFilters({ workMode: value })}
             employmentType={employmentType}
             onEmploymentTypeChange={(value) =>
               updateFilters({ employmentType: value })
             }
-            salaryMin={salaryMin}
-            salaryMax={salaryMax}
-            onSalaryChange={(min, max) =>
-              updateFilters({ salaryMin: min, salaryMax: max })
-            }
-            skills={skills}
-            onSkillsChange={(next) => updateFilters({ skills: next })}
           />
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">

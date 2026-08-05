@@ -23,6 +23,7 @@ function RowActions({ log }: { log: ScrapeLogWithCompany }) {
             size="icon-xs"
             aria-label="View detail"
             render={<Link href={`/admin/logs/scrapes/${log.id}`}></Link>}
+            nativeButton={false}
           >
             <IconEye />
           </Button>

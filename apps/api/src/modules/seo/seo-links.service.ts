@@ -135,17 +135,56 @@ export class SeoLinksService {
   }
 
   private async locationLinks(locationId: number) {
-    const roleLocationPages = await this.prisma.seoPage.findMany({
-      where: {
-        pageType: SeoPageType.ROLE_LOCATION,
-        locationId,
-        isIndexable: true,
-      },
-      select: { slug: true },
-      take: MAX_LINKS_PER_GROUP,
-    });
+    const [roleLocationPages, location] = await Promise.all([
+      this.prisma.seoPage.findMany({
+        where: {
+          pageType: SeoPageType.ROLE_LOCATION,
+          locationId,
+          isIndexable: true,
+        },
+        select: { slug: true },
+        take: MAX_LINKS_PER_GROUP,
+      }),
+      this.prisma.seoLocation.findUnique({ where: { id: locationId } }),
+    ]);
 
-    return roleLocationPages.map((p) => p.slug);
+    const links = roleLocationPages.map((p) => p.slug);
+    if (!location?.parentId) return links;
+
+    // Hierarchical internal linking: up to the parent (province<-district,
+    // district<-city) and across to a few siblings under the same parent.
+    const [parentPage, siblings] = await Promise.all([
+      this.prisma.seoPage.findFirst({
+        where: {
+          pageType: SeoPageType.LOCATION,
+          locationId: location.parentId,
+          isIndexable: true,
+        },
+        select: { slug: true },
+      }),
+      this.prisma.seoLocation.findMany({
+        where: { parentId: location.parentId, id: { not: locationId } },
+        select: { id: true },
+        take: MAX_LINKS_PER_GROUP,
+      }),
+    ]);
+
+    if (parentPage) links.push(parentPage.slug);
+
+    if (siblings.length > 0) {
+      const siblingPages = await this.prisma.seoPage.findMany({
+        where: {
+          pageType: SeoPageType.LOCATION,
+          locationId: { in: siblings.map((s) => s.id) },
+          isIndexable: true,
+        },
+        select: { slug: true },
+        take: MAX_LINKS_PER_GROUP,
+      });
+      links.push(...siblingPages.map((p) => p.slug));
+    }
+
+    return links;
   }
 
   private async skillLinks(skillId: number) {

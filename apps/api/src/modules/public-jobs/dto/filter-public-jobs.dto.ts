@@ -29,6 +29,21 @@ export class FilterPublicJobsDto {
   @IsString()
   location?: string;
 
+  @ApiPropertyOptional({ description: 'Province, e.g. "Central Province"' })
+  @IsOptional()
+  @IsString()
+  province?: string;
+
+  @ApiPropertyOptional({ description: 'District, e.g. "Kandy"' })
+  @IsOptional()
+  @IsString()
+  district?: string;
+
+  @ApiPropertyOptional({ description: 'City, e.g. "Kandy City"' })
+  @IsOptional()
+  @IsString()
+  city?: string;
+
   @ApiPropertyOptional({ description: 'Sector, e.g. "IT & Software"' })
   @IsOptional()
   @IsString()

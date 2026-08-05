@@ -54,6 +54,7 @@ function RowActions({ company }: { company: Company }) {
               size="icon-xs"
               aria-label="View detail"
               render={<Link href={`/admin/company/${company.id}`}></Link>}
+              nativeButton={false}
             >
               <IconEye />
             </Button>
@@ -69,6 +70,7 @@ function RowActions({ company }: { company: Company }) {
               size="icon-xs"
               aria-label="View jobs"
               render={<Link href={`/admin/company/${company.id}/jobs`}></Link>}
+              nativeButton={false}
             >
               <IconBriefcase />
             </Button>

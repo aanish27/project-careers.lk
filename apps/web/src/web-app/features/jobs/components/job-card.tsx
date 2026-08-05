@@ -41,6 +41,10 @@ const JobCard = ({ job, index }: { job: PublicJob; index: number }) => {
   const requireAuth = useRequireAuth();
   const { bg, text } = getJobCardColors(index);
   const salary = formatSalary(job);
+  // Posted (web-user-submitted) jobs always route to our own detail page,
+  // in a new tab, where the Apply button lives — scraped jobs keep linking
+  // straight out to the company's own apply URL, unchanged.
+  const isPosted = job.source === "POSTED";
 
   const toggleSaved = () => {
     requireAuth(() => {
@@ -79,7 +83,12 @@ const JobCard = ({ job, index }: { job: PublicJob; index: number }) => {
         </button>
       </div>
 
-      <Link href={`/jobs/${job.slug}`} className="flex flex-col ">
+      <Link
+        href={`/jobs/${job.slug}`}
+        target={isPosted ? "_blank" : undefined}
+        rel={isPosted ? "noopener noreferrer" : undefined}
+        className="flex flex-col "
+      >
         <h3 className="mb-1 text-xl font-bold text-neutral-900 text-wrap">
           {job.title}
         </h3>
@@ -116,7 +125,21 @@ const JobCard = ({ job, index }: { job: PublicJob; index: number }) => {
       </div>
 
       <div className="flex gap-3">
-        {job.applyUrl ? (
+        {isPosted ? (
+          <Button
+            render={
+              <Link
+                href={`/jobs/${job.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View Details
+              </Link>
+            }
+            className="flex-1 rounded-lg h-10"
+            nativeButton={false}
+          />
+        ) : job.applyUrl ? (
           <Button
             render={
               <a href={job.applyUrl} target="_blank" rel="noopener noreferrer">
@@ -124,11 +147,13 @@ const JobCard = ({ job, index }: { job: PublicJob; index: number }) => {
               </a>
             }
             className="flex-1 rounded-lg bg-white text-black font-semibold h-10 hover:bg-accent"
+            nativeButton={false}
           />
         ) : (
           <Button
             render={<Link href={`/jobs/${job.slug}`}>View Details</Link>}
             className="flex-1 rounded-lg h-10"
+            nativeButton={false}
           />
         )}
       </div>

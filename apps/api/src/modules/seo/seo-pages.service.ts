@@ -10,7 +10,10 @@ export class SeoPagesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findBySlug(slug: string) {
-    const page = await this.prisma.seoPage.findUnique({ where: { slug } });
+    const page = await this.prisma.seoPage.findUnique({
+      where: { slug },
+      include: { location: { select: { name: true, level: true } } },
+    });
     if (!page) return null;
 
     const relatedSlugs = Array.isArray(page.relatedLinksJson)
@@ -25,7 +28,7 @@ export class SeoPagesService {
           pageType: page.pageType,
           sector: page.sector,
           roleId: page.roleId,
-          locationId: page.locationId,
+          location: page.location,
           companyId: page.companyId,
           skillId: page.skillId,
         }),

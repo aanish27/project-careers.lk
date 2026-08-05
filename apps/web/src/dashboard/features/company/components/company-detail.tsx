@@ -62,25 +62,33 @@ export function CompanyDetail({ companyId }: { companyId: number }) {
         <CardContent className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <div className="text-muted-foreground">Website</div>
-            <a
-              href={company.websiteUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="underline"
-            >
-              {company.websiteUrl}
-            </a>
+            {company.websiteUrl ? (
+              <a
+                href={company.websiteUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="underline"
+              >
+                {company.websiteUrl}
+              </a>
+            ) : (
+              <div>—</div>
+            )}
           </div>
           <div>
             <div className="text-muted-foreground">Career page</div>
-            <a
-              href={company.careerUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="underline"
-            >
-              {company.careerUrl}
-            </a>
+            {company.careerUrl ? (
+              <a
+                href={company.careerUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="underline"
+              >
+                {company.careerUrl}
+              </a>
+            ) : (
+              <div>—</div>
+            )}
           </div>
           <div>
             <div className="text-muted-foreground">ATS platform</div>

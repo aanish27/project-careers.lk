@@ -24,6 +24,7 @@ function RowActions({ page }: { page: SeoPageSummary }) {
             size="icon-xs"
             aria-label="View detail"
             render={<Link href={`/admin/seo/${page.id}`}></Link>}
+            nativeButton={false}
           >
             <IconEye />
           </Button>

@@ -25,28 +25,18 @@ export function CompanyForm({ company }: { company?: Company }) {
 
         {!isEdit && (
           <Field>
-            <FieldLabel htmlFor="websiteUrl">Website URL</FieldLabel>
+            <FieldLabel htmlFor="websiteUrl">
+              Website URL{" "}
+              <span className="text-muted-foreground">(optional)</span>
+            </FieldLabel>
             <Input
               id="websiteUrl"
               name="websiteUrl"
               type="url"
-              required
               placeholder="https://example.com"
             />
           </Field>
         )}
-
-        <Field>
-          <FieldLabel htmlFor="careerUrl">Career page URL</FieldLabel>
-          <Input
-            id="careerUrl"
-            name="careerUrl"
-            type="url"
-            required
-            placeholder="https://example.com/careers"
-            defaultValue={company?.careerUrl}
-          />
-        </Field>
 
         <Field>
           <FieldLabel htmlFor="description">Description</FieldLabel>

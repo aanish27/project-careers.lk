@@ -1,8 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from '@/database/prisma.service';
+import { StorageService } from '@/shared/storage/storage.service';
 import { slugify } from '@careerslk/lib/slugify';
 import {
   CreateWebUserJobInput,
+  getCitySlug,
+  getDistrictSlug,
   JobApprovalStatus,
   JobSource,
   UpdateWebUserJobInput,
@@ -13,9 +16,19 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
+// district/city -> the matching (city- or district-level) slug to resolve a
+// SeoLocation row — same derivation the scraper does from an AI-classified
+// city (see apps/scrapper/src/services/job.service.ts).
+function locationSlugFor(district: string, city?: string): string | null {
+  return city ? getCitySlug(city) : getDistrictSlug(district);
+}
+
 @Injectable()
 export class WebUserJobsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
 
   async submit(webUserId: number, dto: CreateWebUserJobInput) {
     const webUser = await this.prisma.webUser.findUniqueOrThrow({
@@ -33,6 +46,11 @@ export class WebUserJobsService {
 
     return await this.prisma.$transaction(async (tx) => {
       const fingerprint = `web:${randomUUID()}`;
+      const location = dto.city ? `${dto.city}, ${dto.district}` : dto.district;
+      const locationSlug = locationSlugFor(dto.district, dto.city);
+      const seoLocation = locationSlug
+        ? await tx.seoLocation.findUnique({ where: { slug: locationSlug } })
+        : null;
 
       const created = await tx.job.create({
         data: {
@@ -42,8 +60,10 @@ export class WebUserJobsService {
           // Real slug depends on the autoincrement id, patched in below —
           // same two-step pattern the scraper uses (see job.service.ts).
           slug: `pending-${fingerprint}`,
+          location,
+          seoLocationId: seoLocation?.id,
           lastSeenAt: new Date(),
-          source: JobSource.USER_SUBMITTED,
+          source: JobSource.POSTED,
           postedByWebUserId: webUserId,
           approvalStatus: company.autoApproveJobs
             ? JobApprovalStatus.APPROVED
@@ -88,10 +108,26 @@ export class WebUserJobsService {
       const reapprove = wasApproved && company.autoApproveJobs;
       const resetToPending = wasApproved && !company.autoApproveJobs;
 
+      // Only recomputed when the poster actually resubmitted a district
+      // (the edit form always sends district+city together, never one
+      // without the other).
+      let locationPatch: { location?: string; seoLocationId?: number } = {};
+      if (dto.district) {
+        const locationSlug = locationSlugFor(dto.district, dto.city);
+        const seoLocation = locationSlug
+          ? await tx.seoLocation.findUnique({ where: { slug: locationSlug } })
+          : null;
+        locationPatch = {
+          location: dto.city ? `${dto.city}, ${dto.district}` : dto.district,
+          seoLocationId: seoLocation?.id,
+        };
+      }
+
       return tx.job.update({
         where: { id: jobId },
         data: {
           ...dto,
+          ...locationPatch,
           ...(resetToPending && {
             approvalStatus: JobApprovalStatus.PENDING,
             approvedAt: null,
@@ -100,6 +136,24 @@ export class WebUserJobsService {
           ...(reapprove && { approvedAt: new Date() }),
         },
       });
+    });
+  }
+
+  async uploadImage(
+    webUserId: number,
+    jobId: number,
+    file: Express.Multer.File,
+  ) {
+    const job = await this.prisma.job.findFirst({
+      where: { id: jobId, postedByWebUserId: webUserId, deletedAt: null },
+    });
+    if (!job) throw new NotFoundException('Job not found');
+
+    const result = await this.storage.upload(file, 'job-images');
+
+    return this.prisma.job.update({
+      where: { id: jobId },
+      data: { imageUrl: result.url },
     });
   }
 

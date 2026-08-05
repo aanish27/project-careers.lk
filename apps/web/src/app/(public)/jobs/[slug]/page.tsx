@@ -166,6 +166,16 @@ async function JobDetailPage({ slug }: { slug: string }) {
         </div>
       )}
 
+      {job.imageUrl && (
+        <Image
+          src={job.imageUrl}
+          alt=""
+          width={800}
+          height={300}
+          className="mb-6 h-56 w-full rounded-xl object-cover"
+        />
+      )}
+
       <div className="mb-6 flex items-start gap-4">
         {job.company.logoUrl && (
           <Image

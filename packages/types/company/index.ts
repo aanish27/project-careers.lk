@@ -11,8 +11,8 @@ export interface Company {
   name: string;
   slug: string;
   logoUrl: string | null;
-  websiteUrl: string;
-  careerUrl: string;
+  websiteUrl: string | null;
+  careerUrl: string | null;
   atsPlatform: string | null;
   status: CompanyStatus;
   scrapeStatus: string;

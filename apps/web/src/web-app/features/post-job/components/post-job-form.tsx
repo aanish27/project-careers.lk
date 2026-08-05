@@ -1,6 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { getCategoriesForSector, SECTORS } from "@careerslk/types";
+import { LocationPicker } from "@components/location-picker";
+import { useActionState, useState } from "react";
 import { Button } from "@ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@ui/field";
 import { Input } from "@ui/input";
@@ -12,7 +14,6 @@ const EMPLOYMENT_TYPES = [
   { value: "part_time", label: "Part time" },
   { value: "contract", label: "Contract" },
   { value: "internship", label: "Internship" },
-  { value: "freelance", label: "Freelance" },
 ];
 
 const WORK_MODES = [
@@ -24,12 +25,60 @@ const WORK_MODES = [
 const selectClassName =
   "h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-2.5 py-1 text-base shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30";
 
-export function PostJobForm() {
+export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
   const [state, formAction, isPending] = useActionState(postJob, undefined);
+  const [sector, setSector] = useState("");
+  const roleCategories = getCategoriesForSector(sector || undefined);
 
   return (
     <form action={formAction}>
       <FieldGroup>
+        {!hasCompany && (
+          <div className="rounded-md border border-border bg-muted/30 p-4">
+            <p className="mb-3 text-sm font-medium">
+              First time posting — tell us about your company and we&apos;ll set
+              up your company profile from this.
+            </p>
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="companyName">Company name</FieldLabel>
+                <Input
+                  id="companyName"
+                  name="companyName"
+                  required
+                  placeholder="Acme Inc."
+                />
+              </Field>
+              <Field orientation="responsive">
+                <Field>
+                  <FieldLabel htmlFor="companyWebsiteUrl">
+                    Website URL{" "}
+                    <span className="text-muted-foreground">(optional)</span>
+                  </FieldLabel>
+                  <Input
+                    id="companyWebsiteUrl"
+                    name="companyWebsiteUrl"
+                    type="url"
+                    placeholder="https://example.com"
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="companyCareerUrl">
+                    Career page URL{" "}
+                    <span className="text-muted-foreground">(optional)</span>
+                  </FieldLabel>
+                  <Input
+                    id="companyCareerUrl"
+                    name="companyCareerUrl"
+                    type="url"
+                    placeholder="https://example.com/careers"
+                  />
+                </Field>
+              </Field>
+            </FieldGroup>
+          </div>
+        )}
+
         <Field>
           <FieldLabel htmlFor="title">Job title</FieldLabel>
           <Input
@@ -41,23 +90,19 @@ export function PostJobForm() {
         </Field>
 
         <Field orientation="responsive">
-          <Field>
-            <FieldLabel htmlFor="location">Location</FieldLabel>
-            <Input
-              id="location"
-              name="location"
-              placeholder="Colombo, Sri Lanka"
-            />
-          </Field>
+          <LocationPicker />
+        </Field>
+
+        <Field orientation="responsive">
           <Field>
             <FieldLabel htmlFor="workMode">Work mode</FieldLabel>
             <select
               id="workMode"
               name="workMode"
               className={selectClassName}
-              defaultValue=""
+              required
+              defaultValue={WORK_MODES[0].value}
             >
-              <option value="">Not specified</option>
               {WORK_MODES.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -65,9 +110,6 @@ export function PostJobForm() {
               ))}
             </select>
           </Field>
-        </Field>
-
-        <Field orientation="responsive">
           <Field>
             <FieldLabel htmlFor="employmentType">Employment type</FieldLabel>
             <select
@@ -93,19 +135,38 @@ export function PostJobForm() {
         <Field orientation="responsive">
           <Field>
             <FieldLabel htmlFor="sector">Sector</FieldLabel>
-            <Input id="sector" name="sector" placeholder="Software & IT" />
+            <select
+              id="sector"
+              name="sector"
+              className={selectClassName}
+              value={sector}
+              onChange={(e) => setSector(e.target.value)}
+            >
+              <option value="">Not specified</option>
+              {SECTORS.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
           </Field>
           <Field>
             <FieldLabel htmlFor="roleCategory">Role category</FieldLabel>
-            <Input
+            <select
+              key={sector}
               id="roleCategory"
               name="roleCategory"
-              placeholder="Engineering"
-            />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="department">Department</FieldLabel>
-            <Input id="department" name="department" placeholder="Product" />
+              className={selectClassName}
+              defaultValue=""
+              disabled={roleCategories.length === 0}
+            >
+              <option value="">Not specified</option>
+              {roleCategories.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
           </Field>
         </Field>
 
@@ -151,6 +212,19 @@ export function PostJobForm() {
             name="applyUrl"
             type="url"
             placeholder="https://example.com/apply"
+          />
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor="image">
+            Job image <span className="text-muted-foreground">(optional)</span>
+          </FieldLabel>
+          <input
+            id="image"
+            name="image"
+            type="file"
+            accept="image/*"
+            className="text-sm text-muted-foreground"
           />
         </Field>
 

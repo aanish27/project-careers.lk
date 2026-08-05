@@ -23,6 +23,7 @@ function RowActions({ job }: { job: JobWithCompany }) {
             size="icon-xs"
             aria-label="View detail"
             render={<Link href={`/admin/jobs/${job.id}`}></Link>}
+            nativeButton={false}
           >
             <IconEye />
           </Button>

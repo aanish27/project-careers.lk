@@ -2,6 +2,7 @@ import { PaginationType } from '@careerslk/types';
 export interface AiJob {
   title: string;
   location: string | null;
+  city: string | null;
   work_mode: 'hybrid' | 'remote' | 'onsite' | null;
   employment_type:
     | 'Full-time'
@@ -11,7 +12,6 @@ export interface AiJob {
     | 'Freelance'
     | null;
   role_category: string | null;
-  department: string | null;
   description: string | null;
   apply_url: string | null;
   keywords: string[];

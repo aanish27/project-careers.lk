@@ -24,9 +24,11 @@ export interface PublicJob {
   salaryCurrency: string | null;
   salaryRaw: string | null;
   description: string | null;
+  imageUrl: string | null;
   deadline: string | null;
   applyUrl: string | null;
   lastSeenAt: string;
+  source: "SCRAPED" | "POSTED";
   company: PublicJobCompany;
   skills: PublicJobSkill[];
 }

@@ -17,8 +17,11 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
 import { WebUserJobsService } from './web-user-jobs.service';
 
@@ -56,6 +59,16 @@ export class WebUserJobsController {
     dto: UpdateWebUserJobInput,
   ) {
     return this.webUserJobsService.update(webUserId, id, dto);
+  }
+
+  @Post(':id/image')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadImage(
+    @CurrentUser('webUserId') webUserId: number,
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.webUserJobsService.uploadImage(webUserId, id, file);
   }
 
   @Delete(':id')

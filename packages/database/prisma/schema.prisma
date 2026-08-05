@@ -196,8 +196,8 @@ model Company {
   id                     Int           @id @default(autoincrement())
   name                   String
   logoUrl                String?
-  websiteUrl             String        @unique
-  careerUrl              String
+  websiteUrl             String?       @unique
+  careerUrl              String?
   atsPlatform            String?
   pageHash               String?
   lastScrapedAt          DateTime?
@@ -262,7 +262,7 @@ model CompanyClaim {
 
 enum JobSource {
   SCRAPED
-  USER_SUBMITTED
+  POSTED
 }
 
 enum JobApprovalStatus {
@@ -278,16 +278,19 @@ model Job {
   fingerprint    String      @unique
   title          String
   location       String?
+  province       String?
+  district       String?
+  city           String?
   workMode       String?
   employmentType String?
   sector         String?
   roleCategory   String?
-  department     String?
   salaryMin      Int?
   salaryMax      Int?
   salaryCurrency String?
   salaryRaw      String?
   description    String?
+  imageUrl       String?
   deadline       DateTime?
   applyUrl       String?
   status         JobStatus   @default(ACTIVE)
@@ -327,6 +330,9 @@ model Job {
   @@index([seoLocationId])
   @@index([approvalStatus])
   @@index([postedByWebUserId])
+  @@index([province])
+  @@index([district])
+  @@index([city])
 }
 
 enum SkillType {
@@ -610,17 +616,31 @@ model SeoRole {
   updatedAt DateTime @updatedAt
 }
 
+enum LocationLevel {
+  PROVINCE
+  DISTRICT
+  CITY
+}
+
 model SeoLocation {
-  id      Int    @id @default(autoincrement())
+  id      Int           @id @default(autoincrement())
   name    String
-  slug    String @unique
+  slug    String        @unique
   country String
+  level   LocationLevel
+
+  parentId Int?
+  parent   SeoLocation?  @relation("LocationHierarchy", fields: [parentId], references: [id])
+  children SeoLocation[] @relation("LocationHierarchy")
 
   jobs     Job[]
   seoPages SeoPage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([level])
+  @@index([parentId])
 }
 
 model SeoSkill {
