@@ -22,21 +22,25 @@ export function ProfileNameForm({
     <form action={formAction}>
       <FieldGroup>
         <Field orientation="responsive">
-          <Field>
+          <Field data-invalid={!!state?.fieldErrors?.firstName}>
             <FieldLabel htmlFor="firstName">First name</FieldLabel>
             <Input
               id="firstName"
               name="firstName"
               defaultValue={firstName ?? ""}
+              aria-invalid={!!state?.fieldErrors?.firstName}
             />
+            <FieldError>{state?.fieldErrors?.firstName}</FieldError>
           </Field>
-          <Field>
+          <Field data-invalid={!!state?.fieldErrors?.lastName}>
             <FieldLabel htmlFor="lastName">Last name</FieldLabel>
             <Input
               id="lastName"
               name="lastName"
               defaultValue={lastName ?? ""}
+              aria-invalid={!!state?.fieldErrors?.lastName}
             />
+            <FieldError>{state?.fieldErrors?.lastName}</FieldError>
           </Field>
         </Field>
         <Field data-invalid={!!state?.error}>

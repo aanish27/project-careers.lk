@@ -26,7 +26,7 @@ export function FreelancerProfileForm({
   return (
     <form action={formAction}>
       <FieldGroup>
-        <Field>
+        <Field data-invalid={!!state?.fieldErrors?.bio}>
           <FieldLabel htmlFor="bio">Bio</FieldLabel>
           <Textarea
             id="bio"
@@ -34,17 +34,20 @@ export function FreelancerProfileForm({
             rows={5}
             defaultValue={profile?.bio ?? undefined}
             placeholder="Tell clients what you do and how you can help"
+            aria-invalid={!!state?.fieldErrors?.bio}
           />
+          <FieldError>{state?.fieldErrors?.bio}</FieldError>
         </Field>
 
         <Field orientation="responsive">
-          <Field>
+          <Field data-invalid={!!state?.fieldErrors?.category}>
             <FieldLabel htmlFor="category">Category</FieldLabel>
             <select
               id="category"
               name="category"
               defaultValue={profile?.category ?? ""}
               className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm"
+              aria-invalid={!!state?.fieldErrors?.category}
             >
               <option value="">Select a category</option>
               {FREELANCE_CATEGORIES.map((category) => (
@@ -53,8 +56,9 @@ export function FreelancerProfileForm({
                 </option>
               ))}
             </select>
+            <FieldError>{state?.fieldErrors?.category}</FieldError>
           </Field>
-          <Field>
+          <Field data-invalid={!!state?.fieldErrors?.rate}>
             <FieldLabel htmlFor="rate">Rate</FieldLabel>
             <div className="flex gap-2">
               <Input
@@ -64,6 +68,7 @@ export function FreelancerProfileForm({
                 min={0}
                 defaultValue={profile?.rate ?? undefined}
                 placeholder="e.g. 5000"
+                aria-invalid={!!state?.fieldErrors?.rate}
               />
               <Input
                 name="rateCurrency"
@@ -71,27 +76,32 @@ export function FreelancerProfileForm({
                 className="w-24"
               />
             </div>
+            <FieldError>{state?.fieldErrors?.rate}</FieldError>
           </Field>
         </Field>
 
-        <Field>
+        <Field data-invalid={!!state?.fieldErrors?.skills}>
           <FieldLabel htmlFor="skills">Skills</FieldLabel>
           <Input
             id="skills"
             name="skills"
             defaultValue={profile?.skills.join(", ")}
             placeholder="Comma-separated, e.g. React, Figma, Copywriting"
+            aria-invalid={!!state?.fieldErrors?.skills}
           />
+          <FieldError>{state?.fieldErrors?.skills}</FieldError>
         </Field>
 
-        <Field>
+        <Field data-invalid={!!state?.fieldErrors?.portfolioLinks}>
           <FieldLabel htmlFor="portfolioLinks">Portfolio links</FieldLabel>
           <Input
             id="portfolioLinks"
             name="portfolioLinks"
             defaultValue={profile?.portfolioLinks.join(", ")}
             placeholder="Comma-separated URLs"
+            aria-invalid={!!state?.fieldErrors?.portfolioLinks}
           />
+          <FieldError>{state?.fieldErrors?.portfolioLinks}</FieldError>
         </Field>
 
         <Field data-invalid={!!state?.error}>

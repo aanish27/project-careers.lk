@@ -33,7 +33,11 @@ export function EmailOtpForm({ next }: { next?: string }) {
         <FieldGroup>
           <input type="hidden" name="email" value={email} />
           {next && <input type="hidden" name="next" value={next} />}
-          <Field>
+          <Field
+            data-invalid={
+              !!verifyState?.error || !!verifyState?.fieldErrors?.code
+            }
+          >
             <FieldLabel htmlFor="code">
               Enter the code sent to {email}
             </FieldLabel>
@@ -44,11 +48,15 @@ export function EmailOtpForm({ next }: { next?: string }) {
               pattern="\d{6}"
               maxLength={6}
               placeholder="123456"
-              aria-invalid={!!verifyState?.error}
+              aria-invalid={
+                !!verifyState?.error || !!verifyState?.fieldErrors?.code
+              }
               required
               autoFocus
             />
-            <FieldError>{verifyState?.error}</FieldError>
+            <FieldError>
+              {verifyState?.error ?? verifyState?.fieldErrors?.code}
+            </FieldError>
           </Field>
           <Field>
             <Button type="submit" disabled={verifying}>
@@ -64,17 +72,25 @@ export function EmailOtpForm({ next }: { next?: string }) {
     <form action={requestAction}>
       <FieldGroup>
         {next && <input type="hidden" name="next" value={next} />}
-        <Field data-invalid={!!requestState?.error}>
+        <Field
+          data-invalid={
+            !!requestState?.error || !!requestState?.fieldErrors?.email
+          }
+        >
           <FieldLabel htmlFor="email">Email</FieldLabel>
           <Input
             id="email"
             name="email"
             type="email"
             placeholder="you@example.com"
-            aria-invalid={!!requestState?.error}
+            aria-invalid={
+              !!requestState?.error || !!requestState?.fieldErrors?.email
+            }
             required
           />
-          <FieldError>{requestState?.error}</FieldError>
+          <FieldError>
+            {requestState?.error ?? requestState?.fieldErrors?.email}
+          </FieldError>
         </Field>
         <Field>
           <Button type="submit" variant="outline" disabled={requesting}>

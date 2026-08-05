@@ -40,17 +40,19 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
               up your company profile from this.
             </p>
             <FieldGroup>
-              <Field>
+              <Field data-invalid={!!state?.fieldErrors?.name}>
                 <FieldLabel htmlFor="companyName">Company name</FieldLabel>
                 <Input
                   id="companyName"
                   name="companyName"
                   required
                   placeholder="Acme Inc."
+                  aria-invalid={!!state?.fieldErrors?.name}
                 />
+                <FieldError>{state?.fieldErrors?.name}</FieldError>
               </Field>
               <Field orientation="responsive">
-                <Field>
+                <Field data-invalid={!!state?.fieldErrors?.websiteUrl}>
                   <FieldLabel htmlFor="companyWebsiteUrl">
                     Website URL{" "}
                     <span className="text-muted-foreground">(optional)</span>
@@ -60,9 +62,11 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
                     name="companyWebsiteUrl"
                     type="url"
                     placeholder="https://example.com"
+                    aria-invalid={!!state?.fieldErrors?.websiteUrl}
                   />
+                  <FieldError>{state?.fieldErrors?.websiteUrl}</FieldError>
                 </Field>
-                <Field>
+                <Field data-invalid={!!state?.fieldErrors?.careerUrl}>
                   <FieldLabel htmlFor="companyCareerUrl">
                     Career page URL{" "}
                     <span className="text-muted-foreground">(optional)</span>
@@ -72,29 +76,38 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
                     name="companyCareerUrl"
                     type="url"
                     placeholder="https://example.com/careers"
+                    aria-invalid={!!state?.fieldErrors?.careerUrl}
                   />
+                  <FieldError>{state?.fieldErrors?.careerUrl}</FieldError>
                 </Field>
               </Field>
             </FieldGroup>
           </div>
         )}
 
-        <Field>
+        <Field data-invalid={!!state?.fieldErrors?.title}>
           <FieldLabel htmlFor="title">Job title</FieldLabel>
           <Input
             id="title"
             name="title"
             required
             placeholder="Software Engineer"
+            aria-invalid={!!state?.fieldErrors?.title}
           />
+          <FieldError>{state?.fieldErrors?.title}</FieldError>
         </Field>
 
         <Field orientation="responsive">
           <LocationPicker />
         </Field>
+        {(state?.fieldErrors?.province || state?.fieldErrors?.district) && (
+          <FieldError>
+            {state.fieldErrors.province ?? state.fieldErrors.district}
+          </FieldError>
+        )}
 
         <Field orientation="responsive">
-          <Field>
+          <Field data-invalid={!!state?.fieldErrors?.workMode}>
             <FieldLabel htmlFor="workMode">Work mode</FieldLabel>
             <select
               id="workMode"
@@ -102,6 +115,7 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
               className={selectClassName}
               required
               defaultValue={WORK_MODES[0].value}
+              aria-invalid={!!state?.fieldErrors?.workMode}
             >
               {WORK_MODES.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -109,14 +123,16 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
                 </option>
               ))}
             </select>
+            <FieldError>{state?.fieldErrors?.workMode}</FieldError>
           </Field>
-          <Field>
+          <Field data-invalid={!!state?.fieldErrors?.employmentType}>
             <FieldLabel htmlFor="employmentType">Employment type</FieldLabel>
             <select
               id="employmentType"
               name="employmentType"
               className={selectClassName}
               defaultValue=""
+              aria-invalid={!!state?.fieldErrors?.employmentType}
             >
               <option value="">Not specified</option>
               {EMPLOYMENT_TYPES.map((option) => (
@@ -125,10 +141,17 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
                 </option>
               ))}
             </select>
+            <FieldError>{state?.fieldErrors?.employmentType}</FieldError>
           </Field>
-          <Field>
+          <Field data-invalid={!!state?.fieldErrors?.deadline}>
             <FieldLabel htmlFor="deadline">Application deadline</FieldLabel>
-            <Input id="deadline" name="deadline" type="date" />
+            <Input
+              id="deadline"
+              name="deadline"
+              type="date"
+              aria-invalid={!!state?.fieldErrors?.deadline}
+            />
+            <FieldError>{state?.fieldErrors?.deadline}</FieldError>
           </Field>
         </Field>
 
@@ -171,25 +194,41 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
         </Field>
 
         <Field orientation="responsive">
-          <Field>
+          <Field data-invalid={!!state?.fieldErrors?.salaryMin}>
             <FieldLabel htmlFor="salaryMin">Salary min</FieldLabel>
-            <Input id="salaryMin" name="salaryMin" type="number" min="0" />
+            <Input
+              id="salaryMin"
+              name="salaryMin"
+              type="number"
+              min="0"
+              aria-invalid={!!state?.fieldErrors?.salaryMin}
+            />
+            <FieldError>{state?.fieldErrors?.salaryMin}</FieldError>
           </Field>
-          <Field>
+          <Field data-invalid={!!state?.fieldErrors?.salaryMax}>
             <FieldLabel htmlFor="salaryMax">Salary max</FieldLabel>
-            <Input id="salaryMax" name="salaryMax" type="number" min="0" />
+            <Input
+              id="salaryMax"
+              name="salaryMax"
+              type="number"
+              min="0"
+              aria-invalid={!!state?.fieldErrors?.salaryMax}
+            />
+            <FieldError>{state?.fieldErrors?.salaryMax}</FieldError>
           </Field>
-          <Field>
+          <Field data-invalid={!!state?.fieldErrors?.salaryCurrency}>
             <FieldLabel htmlFor="salaryCurrency">Currency</FieldLabel>
             <Input
               id="salaryCurrency"
               name="salaryCurrency"
               placeholder="LKR"
+              aria-invalid={!!state?.fieldErrors?.salaryCurrency}
             />
+            <FieldError>{state?.fieldErrors?.salaryCurrency}</FieldError>
           </Field>
         </Field>
 
-        <Field>
+        <Field data-invalid={!!state?.fieldErrors?.salaryRaw}>
           <FieldLabel htmlFor="salaryRaw">
             Salary (freeform, shown if set)
           </FieldLabel>
@@ -197,22 +236,32 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
             id="salaryRaw"
             name="salaryRaw"
             placeholder="e.g. Negotiable"
+            aria-invalid={!!state?.fieldErrors?.salaryRaw}
           />
+          <FieldError>{state?.fieldErrors?.salaryRaw}</FieldError>
         </Field>
 
-        <Field>
+        <Field data-invalid={!!state?.fieldErrors?.description}>
           <FieldLabel htmlFor="description">Description</FieldLabel>
-          <Textarea id="description" name="description" rows={6} />
+          <Textarea
+            id="description"
+            name="description"
+            rows={6}
+            aria-invalid={!!state?.fieldErrors?.description}
+          />
+          <FieldError>{state?.fieldErrors?.description}</FieldError>
         </Field>
 
-        <Field>
+        <Field data-invalid={!!state?.fieldErrors?.applyUrl}>
           <FieldLabel htmlFor="applyUrl">Apply URL</FieldLabel>
           <Input
             id="applyUrl"
             name="applyUrl"
             type="url"
             placeholder="https://example.com/apply"
+            aria-invalid={!!state?.fieldErrors?.applyUrl}
           />
+          <FieldError>{state?.fieldErrors?.applyUrl}</FieldError>
         </Field>
 
         <Field>

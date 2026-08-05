@@ -1,5 +1,6 @@
 "use server";
 
+import { requestEmailOtpSchema, verifyEmailOtpSchema } from "@careerslk/types";
 import { redirect } from "next/navigation";
 import { ApiError } from "@lib/api-client";
 import { isSafeRedirectPath } from "@utils/utils";
@@ -9,6 +10,7 @@ import {
   verifyEmailOtpRequest,
   webUserLogoutRequest,
 } from "@web-app-lib/web-user-client";
+import { fieldErrorsFromZod } from "@web-app-lib/form-validation";
 import {
   createWebUserSession,
   destroyWebUserSession,
@@ -27,19 +29,26 @@ export const logout = async (): Promise<void> => {
 };
 
 export type EmailOtpFormState =
-  | { step: "email"; error?: string }
-  | { step: "code"; email: string; error?: string }
+  | { step: "email"; error?: string; fieldErrors?: Record<string, string> }
+  | {
+      step: "code";
+      email: string;
+      error?: string;
+      fieldErrors?: Record<string, string>;
+    }
   | undefined;
 
 export const requestEmailOtp = async (
   _state: EmailOtpFormState,
   formData: FormData,
 ): Promise<EmailOtpFormState> => {
-  const email = formData.get("email");
-
-  if (typeof email !== "string" || !email) {
-    return { step: "email", error: "Email is required" };
+  const parsed = requestEmailOtpSchema.safeParse({
+    email: formData.get("email"),
+  });
+  if (!parsed.success) {
+    return { step: "email", fieldErrors: fieldErrorsFromZod(parsed.error) };
   }
+  const { email } = parsed.data;
 
   try {
     await requestEmailOtpRequest(email);
@@ -57,16 +66,25 @@ export const verifyEmailOtp = async (
   _state: EmailOtpFormState,
   formData: FormData,
 ): Promise<EmailOtpFormState> => {
-  const email = formData.get("email");
-  const code = formData.get("code");
+  const emailRaw = formData.get("email");
   const next = formData.get("next");
 
-  if (typeof email !== "string" || !email) {
+  if (typeof emailRaw !== "string" || !emailRaw) {
     return { step: "email", error: "Email is required" };
   }
-  if (typeof code !== "string" || !code) {
-    return { step: "code", email, error: "Code is required" };
+
+  const parsed = verifyEmailOtpSchema.safeParse({
+    email: emailRaw,
+    code: formData.get("code"),
+  });
+  if (!parsed.success) {
+    return {
+      step: "code",
+      email: emailRaw,
+      fieldErrors: fieldErrorsFromZod(parsed.error),
+    };
   }
+  const { email, code } = parsed.data;
 
   let result;
   try {

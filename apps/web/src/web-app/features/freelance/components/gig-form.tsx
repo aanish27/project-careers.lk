@@ -14,34 +14,39 @@ export function GigForm() {
   return (
     <form action={formAction}>
       <FieldGroup>
-        <Field>
+        <Field data-invalid={!!state?.fieldErrors?.title}>
           <FieldLabel htmlFor="title">Title</FieldLabel>
           <Input
             id="title"
             name="title"
             required
             placeholder="e.g. Build a landing page"
+            aria-invalid={!!state?.fieldErrors?.title}
           />
+          <FieldError>{state?.fieldErrors?.title}</FieldError>
         </Field>
 
-        <Field>
+        <Field data-invalid={!!state?.fieldErrors?.description}>
           <FieldLabel htmlFor="description">Description</FieldLabel>
           <Textarea
             id="description"
             name="description"
             rows={5}
             placeholder="Describe the work you need done"
+            aria-invalid={!!state?.fieldErrors?.description}
           />
+          <FieldError>{state?.fieldErrors?.description}</FieldError>
         </Field>
 
         <Field orientation="responsive">
-          <Field>
+          <Field data-invalid={!!state?.fieldErrors?.category}>
             <FieldLabel htmlFor="category">Category</FieldLabel>
             <select
               id="category"
               name="category"
               defaultValue=""
               className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm"
+              aria-invalid={!!state?.fieldErrors?.category}
             >
               <option value="">Select a category</option>
               {FREELANCE_CATEGORIES.map((category) => (
@@ -50,34 +55,53 @@ export function GigForm() {
                 </option>
               ))}
             </select>
+            <FieldError>{state?.fieldErrors?.category}</FieldError>
           </Field>
-          <Field>
+          <Field data-invalid={!!state?.fieldErrors?.skills}>
             <FieldLabel htmlFor="skills">Skills</FieldLabel>
             <Input
               id="skills"
               name="skills"
               placeholder="Comma-separated, e.g. React, Figma"
+              aria-invalid={!!state?.fieldErrors?.skills}
             />
+            <FieldError>{state?.fieldErrors?.skills}</FieldError>
           </Field>
         </Field>
 
         <Field orientation="responsive">
-          <Field>
+          <Field data-invalid={!!state?.fieldErrors?.budgetMin}>
             <FieldLabel htmlFor="budgetMin">Budget min</FieldLabel>
-            <Input id="budgetMin" name="budgetMin" type="number" min={0} />
+            <Input
+              id="budgetMin"
+              name="budgetMin"
+              type="number"
+              min={0}
+              aria-invalid={!!state?.fieldErrors?.budgetMin}
+            />
+            <FieldError>{state?.fieldErrors?.budgetMin}</FieldError>
           </Field>
-          <Field>
+          <Field data-invalid={!!state?.fieldErrors?.budgetMax}>
             <FieldLabel htmlFor="budgetMax">Budget max</FieldLabel>
-            <Input id="budgetMax" name="budgetMax" type="number" min={0} />
+            <Input
+              id="budgetMax"
+              name="budgetMax"
+              type="number"
+              min={0}
+              aria-invalid={!!state?.fieldErrors?.budgetMax}
+            />
+            <FieldError>{state?.fieldErrors?.budgetMax}</FieldError>
           </Field>
-          <Field>
+          <Field data-invalid={!!state?.fieldErrors?.budgetCurrency}>
             <FieldLabel htmlFor="budgetCurrency">Currency</FieldLabel>
             <Input
               id="budgetCurrency"
               name="budgetCurrency"
               defaultValue="LKR"
               className="w-24"
+              aria-invalid={!!state?.fieldErrors?.budgetCurrency}
             />
+            <FieldError>{state?.fieldErrors?.budgetCurrency}</FieldError>
           </Field>
         </Field>
 

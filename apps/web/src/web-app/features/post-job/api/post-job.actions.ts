@@ -1,8 +1,8 @@
 "use server";
 
-import type {
-  CreateWebUserCompanyInput,
-  CreateWebUserJobInput,
+import {
+  createWebUserCompanySchema,
+  createWebUserJobSchema,
 } from "@careerslk/types";
 import { ApiError } from "@lib/api-client";
 import {
@@ -11,13 +11,16 @@ import {
   submitJobRequest,
   uploadJobImageRequest,
 } from "@web-app-lib/web-user-client";
+import { fieldErrorsFromZod } from "@web-app-lib/form-validation";
 import {
   getValidWebUserAccessToken,
   updateWebUserSessionUser,
 } from "@web-app-lib/web-user-session";
 import { redirect } from "next/navigation";
 
-export type PostJobFormState = { error?: string } | undefined;
+export type PostJobFormState =
+  | { error?: string; fieldErrors?: Record<string, string> }
+  | undefined;
 
 function optionalString(value: FormDataEntryValue | null): string | undefined {
   if (typeof value !== "string" || value.trim() === "") return undefined;
@@ -31,6 +34,14 @@ function optionalInt(value: FormDataEntryValue | null): number | undefined {
   return Number.isNaN(parsed) ? undefined : parsed;
 }
 
+// Only the fields the inline "no company yet" block collects — not the full
+// company schema (no description/social links here).
+const postJobCompanySchema = createWebUserCompanySchema.pick({
+  name: true,
+  websiteUrl: true,
+  careerUrl: true,
+});
+
 export const postJob = async (
   _state: PostJobFormState,
   formData: FormData,
@@ -42,13 +53,46 @@ export const postJob = async (
   // collects just enough to create one inline, so posting a job never
   // requires a separate company-setup detour first.
   const companyName = optionalString(formData.get("companyName"));
+  let companyInput: ReturnType<typeof postJobCompanySchema.parse> | undefined;
   if (companyName) {
-    const companyInput: CreateWebUserCompanyInput = {
+    const companyParsed = postJobCompanySchema.safeParse({
       name: companyName,
       websiteUrl: optionalString(formData.get("companyWebsiteUrl")),
       careerUrl: optionalString(formData.get("companyCareerUrl")),
-    };
+    });
+    if (!companyParsed.success) {
+      return { fieldErrors: fieldErrorsFromZod(companyParsed.error) };
+    }
+    companyInput = companyParsed.data;
+  }
 
+  const deadline = optionalString(formData.get("deadline"));
+
+  // Validate the job fields before doing anything else, so an invalid job
+  // submission never leaves behind a newly-created company with no job.
+  const jobParsed = createWebUserJobSchema.safeParse({
+    title: optionalString(formData.get("title")),
+    province: optionalString(formData.get("province")),
+    district: optionalString(formData.get("district")),
+    city: optionalString(formData.get("city")),
+    workMode: optionalString(formData.get("workMode")),
+    employmentType: optionalString(formData.get("employmentType")),
+    sector: optionalString(formData.get("sector")),
+    roleCategory: optionalString(formData.get("roleCategory")),
+    salaryMin: optionalInt(formData.get("salaryMin")),
+    salaryMax: optionalInt(formData.get("salaryMax")),
+    salaryCurrency: optionalString(formData.get("salaryCurrency")),
+    salaryRaw: optionalString(formData.get("salaryRaw")),
+    description: optionalString(formData.get("description")),
+    deadline: deadline ? new Date(deadline).toISOString() : undefined,
+    applyUrl: optionalString(formData.get("applyUrl")),
+  });
+  if (!jobParsed.success) {
+    return { fieldErrors: fieldErrorsFromZod(jobParsed.error) };
+  }
+  const input = jobParsed.data;
+
+  if (companyInput) {
     try {
       await createCompanyRequest(accessToken, companyInput);
       const user = await fetchCurrentWebUser(accessToken);
@@ -61,47 +105,6 @@ export const postJob = async (
       };
     }
   }
-
-  const title = formData.get("title");
-  if (typeof title !== "string" || !title.trim()) {
-    return { error: "Title is required" };
-  }
-
-  const workMode = formData.get("workMode");
-  if (typeof workMode !== "string" || !workMode.trim()) {
-    return { error: "Work mode is required" };
-  }
-
-  const province = formData.get("province");
-  const district = formData.get("district");
-  if (typeof province !== "string" || !province.trim()) {
-    return { error: "Province is required" };
-  }
-  if (typeof district !== "string" || !district.trim()) {
-    return { error: "District is required" };
-  }
-
-  const deadline = optionalString(formData.get("deadline"));
-
-  const input: CreateWebUserJobInput = {
-    title: title.trim(),
-    province: province.trim(),
-    district: district.trim(),
-    city: optionalString(formData.get("city")),
-    workMode: workMode as CreateWebUserJobInput["workMode"],
-    employmentType: optionalString(
-      formData.get("employmentType"),
-    ) as CreateWebUserJobInput["employmentType"],
-    sector: optionalString(formData.get("sector")),
-    roleCategory: optionalString(formData.get("roleCategory")),
-    salaryMin: optionalInt(formData.get("salaryMin")),
-    salaryMax: optionalInt(formData.get("salaryMax")),
-    salaryCurrency: optionalString(formData.get("salaryCurrency")),
-    salaryRaw: optionalString(formData.get("salaryRaw")),
-    description: optionalString(formData.get("description")),
-    deadline: deadline ? new Date(deadline).toISOString() : undefined,
-    applyUrl: optionalString(formData.get("applyUrl")),
-  };
 
   let jobId: number;
   try {

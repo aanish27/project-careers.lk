@@ -1,9 +1,9 @@
 "use server";
 
-import type {
-  Company,
-  CreateWebUserCompanyInput,
-  UpdateWebUserCompanyInput,
+import {
+  type Company,
+  createWebUserCompanySchema,
+  updateWebUserCompanySchema,
 } from "@careerslk/types";
 import { ApiError } from "@lib/api-client";
 import {
@@ -17,6 +17,7 @@ import {
   updateMyCompanyRequest,
   uploadCompanyLogoRequest,
 } from "@web-app-lib/web-user-client";
+import { fieldErrorsFromZod } from "@web-app-lib/form-validation";
 import {
   getValidWebUserAccessToken,
   updateWebUserSessionUser,
@@ -71,7 +72,9 @@ export async function claimCompany(
   }
 }
 
-export type CompanyFormState = { error?: string } | undefined;
+export type CompanyFormState =
+  | { error?: string; fieldErrors?: Record<string, string> }
+  | undefined;
 
 export async function createCompany(
   _state: CompanyFormState,
@@ -80,20 +83,19 @@ export async function createCompany(
   const accessToken = await getValidWebUserAccessToken();
   if (!accessToken) redirect("/login");
 
-  const name = formData.get("name");
-  if (typeof name !== "string" || !name.trim()) {
-    return { error: "Company name is required" };
-  }
-
-  const input: CreateWebUserCompanyInput = {
-    name: name.trim(),
+  const parsed = createWebUserCompanySchema.safeParse({
+    name: optionalString(formData.get("name")),
     websiteUrl: optionalString(formData.get("websiteUrl")),
     description: optionalString(formData.get("description")),
     linkedinUrl: optionalString(formData.get("linkedinUrl")),
     twitterUrl: optionalString(formData.get("twitterUrl")),
     facebookUrl: optionalString(formData.get("facebookUrl")),
     instagramUrl: optionalString(formData.get("instagramUrl")),
-  };
+  });
+  if (!parsed.success) {
+    return { fieldErrors: fieldErrorsFromZod(parsed.error) };
+  }
+  const input = parsed.data;
 
   try {
     await createCompanyRequest(accessToken, input);
@@ -114,19 +116,18 @@ export async function updateCompany(
   const accessToken = await getValidWebUserAccessToken();
   if (!accessToken) redirect("/login");
 
-  const name = formData.get("name");
-  if (typeof name !== "string" || !name.trim()) {
-    return { error: "Company name is required" };
-  }
-
-  const input: UpdateWebUserCompanyInput = {
-    name: name.trim(),
+  const parsed = updateWebUserCompanySchema.safeParse({
+    name: optionalString(formData.get("name")),
     description: optionalString(formData.get("description")),
     linkedinUrl: optionalString(formData.get("linkedinUrl")),
     twitterUrl: optionalString(formData.get("twitterUrl")),
     facebookUrl: optionalString(formData.get("facebookUrl")),
     instagramUrl: optionalString(formData.get("instagramUrl")),
-  };
+  });
+  if (!parsed.success) {
+    return { fieldErrors: fieldErrorsFromZod(parsed.error) };
+  }
+  const input = parsed.data;
 
   try {
     await updateMyCompanyRequest(accessToken, input);
