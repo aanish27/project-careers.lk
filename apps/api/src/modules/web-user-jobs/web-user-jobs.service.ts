@@ -83,7 +83,7 @@ export class WebUserJobsService {
 
   async findMine(webUserId: number) {
     return this.prisma.job.findMany({
-      where: { postedByWebUserId: webUserId, deletedAt: null },
+      where: { postedByWebUserId: webUserId, profileHiddenAt: null },
       orderBy: { createdAt: 'desc' },
       include: {
         company: { select: { id: true, name: true, logoUrl: true } },
@@ -163,9 +163,31 @@ export class WebUserJobsService {
     });
     if (!job) throw new NotFoundException('Job not found');
 
+    return this.prisma.$transaction(async (tx) => {
+      await tx.savedJob.deleteMany({ where: { jobId } });
+      return tx.job.update({
+        where: { id: jobId },
+        data: { deletedAt: new Date() },
+      });
+    });
+  }
+
+  // Only for a job the poster has already withdrawn — permanently drops it
+  // from their own "My job postings" list (soft-hidden, not deleted, so
+  // audit logs/keywords/AI batch records tied to the job id stay intact).
+  async removeFromProfile(webUserId: number, jobId: number) {
+    const job = await this.prisma.job.findFirst({
+      where: {
+        id: jobId,
+        postedByWebUserId: webUserId,
+        deletedAt: { not: null },
+      },
+    });
+    if (!job) throw new NotFoundException('Job not found');
+
     return this.prisma.job.update({
       where: { id: jobId },
-      data: { deletedAt: new Date() },
+      data: { profileHiddenAt: new Date() },
     });
   }
 

@@ -9,6 +9,7 @@ import type { AuthenticatedPrincipal } from '@/modules/auth/interfaces/jwt-paylo
 import { PERMISSIONS } from '@careerslk/lib';
 import {
   ClaimStatus,
+  CompanyAutoApprovalStatus,
   CreateCompanyInput,
   createCompanySchema,
   UpdateCompanyInput,
@@ -59,8 +60,10 @@ export class CompaniesController {
 
   @Get()
   @RequirePermissions(PERMISSIONS.COMPANIES_READ)
-  findAll() {
-    return this.companiesService.findAll();
+  findAll(
+    @Query('autoApprovalStatus') autoApprovalStatus?: CompanyAutoApprovalStatus,
+  ) {
+    return this.companiesService.findAll(autoApprovalStatus);
   }
 
   // Must be registered before ':id' — otherwise ':id' + ParseIntPipe swallows

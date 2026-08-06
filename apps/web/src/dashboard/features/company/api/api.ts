@@ -1,6 +1,7 @@
 import type {
   ClaimStatus,
   Company,
+  CompanyAutoApprovalStatus,
   CompanyScrapeSummary,
   CompanyWithScrapeSummary,
   CreateCompanyInput,
@@ -31,7 +32,10 @@ export interface CompanyClaim {
 }
 
 export const companyApi = {
-  list: () => api.get<Company[]>("/admin/companies").then((res) => res.data),
+  list: (filters?: { autoApprovalStatus?: CompanyAutoApprovalStatus }) =>
+    api
+      .get<Company[]>("/admin/companies", { params: filters })
+      .then((res) => res.data),
   get: (id: number) =>
     api
       .get<CompanyWithScrapeSummary>(`/admin/companies/${id}`)

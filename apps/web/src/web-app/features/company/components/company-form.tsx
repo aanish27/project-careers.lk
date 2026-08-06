@@ -30,22 +30,21 @@ export function CompanyForm({ company }: { company?: Company }) {
           <FieldError>{state?.fieldErrors?.name}</FieldError>
         </Field>
 
-        {!isEdit && (
-          <Field data-invalid={!!state?.fieldErrors?.websiteUrl}>
-            <FieldLabel htmlFor="websiteUrl">
-              Website URL{" "}
-              <span className="text-muted-foreground">(optional)</span>
-            </FieldLabel>
-            <Input
-              id="websiteUrl"
-              name="websiteUrl"
-              type="url"
-              placeholder="https://example.com"
-              aria-invalid={!!state?.fieldErrors?.websiteUrl}
-            />
-            <FieldError>{state?.fieldErrors?.websiteUrl}</FieldError>
-          </Field>
-        )}
+        <Field data-invalid={!!state?.fieldErrors?.websiteUrl}>
+          <FieldLabel htmlFor="websiteUrl">
+            Website URL{" "}
+            <span className="text-muted-foreground">(optional)</span>
+          </FieldLabel>
+          <Input
+            id="websiteUrl"
+            name="websiteUrl"
+            type="url"
+            placeholder="https://example.com"
+            defaultValue={company?.websiteUrl ?? undefined}
+            aria-invalid={!!state?.fieldErrors?.websiteUrl}
+          />
+          <FieldError>{state?.fieldErrors?.websiteUrl}</FieldError>
+        </Field>
 
         <Field data-invalid={!!state?.fieldErrors?.description}>
           <FieldLabel htmlFor="description">Description</FieldLabel>

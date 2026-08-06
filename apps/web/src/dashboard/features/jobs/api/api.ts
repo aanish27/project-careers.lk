@@ -1,6 +1,7 @@
 import type {
   JobApprovalStatus,
   JobDetail,
+  JobSource,
   JobWithCompany,
   UpdateJobInput,
 } from "@careerslk/types";
@@ -9,6 +10,7 @@ import { api } from "@dashboard-lib/axios";
 export interface JobFilters {
   companyId?: number;
   approvalStatus?: JobApprovalStatus;
+  source?: JobSource;
 }
 
 export const jobsApi = {

@@ -43,9 +43,7 @@ export type CreateWebUserCompanyInput = z.infer<
   typeof createWebUserCompanySchema
 >;
 
-export const updateWebUserCompanySchema = createWebUserCompanySchema
-  .omit({ websiteUrl: true })
-  .partial();
+export const updateWebUserCompanySchema = createWebUserCompanySchema.partial();
 
 export type UpdateWebUserCompanyInput = z.infer<
   typeof updateWebUserCompanySchema

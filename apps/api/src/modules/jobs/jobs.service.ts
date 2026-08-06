@@ -5,6 +5,7 @@ import {
   getCitySlug,
   getDistrictSlug,
   JobApprovalStatus,
+  JobSource,
   JobStatus,
   RejectJobInput,
   UpdateJobInput,
@@ -17,6 +18,7 @@ interface JobFilters {
   status?: JobStatus;
   sector?: string;
   approvalStatus?: JobApprovalStatus;
+  source?: JobSource;
 }
 
 @Injectable()
@@ -32,6 +34,7 @@ export class JobsService {
       companyId: filters.companyId,
       sector: filters.sector,
       approvalStatus: filters.approvalStatus,
+      source: filters.source,
       company: filters.company ? { name: filters.company } : undefined,
       deletedAt: null,
     };

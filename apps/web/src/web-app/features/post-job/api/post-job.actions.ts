@@ -39,7 +39,6 @@ function optionalInt(value: FormDataEntryValue | null): number | undefined {
 const postJobCompanySchema = createWebUserCompanySchema.pick({
   name: true,
   websiteUrl: true,
-  careerUrl: true,
 });
 
 export const postJob = async (
@@ -58,7 +57,6 @@ export const postJob = async (
     const companyParsed = postJobCompanySchema.safeParse({
       name: companyName,
       websiteUrl: optionalString(formData.get("companyWebsiteUrl")),
-      careerUrl: optionalString(formData.get("companyCareerUrl")),
     });
     if (!companyParsed.success) {
       return { fieldErrors: fieldErrorsFromZod(companyParsed.error) };

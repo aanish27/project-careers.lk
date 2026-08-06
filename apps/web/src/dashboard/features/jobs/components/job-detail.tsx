@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -14,6 +16,7 @@ import {
   useCompanyAiLogs,
   useCompanyScrapeLogs,
 } from "@dashboard-features/company/hooks/use-company-logs";
+import { Can } from "@dashboard-components/can";
 import { StatusPill } from "@dashboard-components/status-pill";
 import {
   aiBatchStatusMeta,
@@ -21,17 +24,22 @@ import {
   jobStatusMeta,
   scrapeLogStatusMeta,
 } from "@dashboard/utils/status-variant";
+import { PERMISSIONS } from "@careerslk/lib";
 import {
   IconBriefcase,
+  IconCheck,
   IconClipboardList,
   IconHistory,
   IconRobot,
   IconTag,
+  IconX,
 } from "@tabler/icons-react";
 import Link from "next/link";
+import { useApproveJob } from "../hooks/use-approve-job";
 import { useJob } from "../hooks/use-jobs";
 import { useJobAiBatch, useJobAuditLogs } from "../hooks/use-job-logs";
 import { EditJobLocationDialog } from "./edit-job-location-dialog";
+import { RejectJobDialog } from "./reject-job-dialog";
 
 function formatDate(value: string | null) {
   return value ? new Date(value).toLocaleString() : "—";
@@ -43,6 +51,8 @@ export function JobDetail({ jobId }: { jobId: number }) {
   const { data: scrapeLogs } = useCompanyScrapeLogs(job?.companyId ?? NaN);
   const { data: aiLogs } = useCompanyAiLogs(job?.companyId ?? NaN);
   const { data: auditLogs } = useJobAuditLogs(jobId);
+  const approveJob = useApproveJob();
+  const [rejectOpen, setRejectOpen] = useState(false);
 
   if (!job) return null;
 
@@ -54,6 +64,28 @@ export function JobDetail({ jobId }: { jobId: number }) {
             <IconBriefcase className="text-primary size-4" />
             {job.title}
             <StatusPill meta={jobStatusMeta(job.status)} label={job.status} />
+            {job.approvalStatus === "PENDING" && (
+              <Can permission={PERMISSIONS.JOBS_APPROVE}>
+                <div className="ml-auto flex gap-2">
+                  <Button
+                    size="sm"
+                    disabled={approveJob.isPending}
+                    onClick={() => approveJob.mutate(job.id)}
+                  >
+                    <IconCheck />
+                    Approve
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setRejectOpen(true)}
+                  >
+                    <IconX />
+                    Reject
+                  </Button>
+                </div>
+              </Can>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4 text-sm">
@@ -310,6 +342,12 @@ export function JobDetail({ jobId }: { jobId: number }) {
           </Table>
         </CardContent>
       </Card>
+
+      <RejectJobDialog
+        job={job}
+        open={rejectOpen}
+        onOpenChange={setRejectOpen}
+      />
     </div>
   );
 }

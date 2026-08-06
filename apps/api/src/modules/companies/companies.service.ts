@@ -1,6 +1,7 @@
 import { PrismaService } from '@/database/prisma.service';
 import { AUDIT_ACTIONS } from '@/modules/audit/audit.constant';
 import { AuditContext, AuditService } from '@/modules/audit/audit.service';
+import { MailService } from '@/shared/mail/mail.service';
 import { generateUniqueSlug } from '@careerslk/database';
 import { assertNotSsrf } from '@careerslk/lib/ssrf';
 import { slugify } from '@careerslk/lib/slugify';
@@ -28,6 +29,7 @@ export class CompaniesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly mail: MailService,
   ) {}
 
   async getScrapeSummaries(
@@ -158,9 +160,9 @@ export class CompaniesService {
     });
   }
 
-  async findAll() {
+  async findAll(autoApprovalStatus?: CompanyAutoApprovalStatus) {
     return await this.prisma.company.findMany({
-      where: { deletedAt: null },
+      where: { deletedAt: null, autoApprovalStatus },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -241,7 +243,7 @@ export class CompaniesService {
   }
 
   async trust(id: number, context: AuditContext) {
-    return await this.prisma.$transaction(async (tx) => {
+    const company = await this.prisma.$transaction(async (tx) => {
       const company = await tx.company.update({
         where: { id },
         data: {
@@ -263,6 +265,18 @@ export class CompaniesService {
 
       return company;
     });
+
+    if (company.createdByWebUserId) {
+      const creator = await this.prisma.webUser.findUnique({
+        where: { id: company.createdByWebUserId },
+        select: { email: true },
+      });
+      if (creator) {
+        await this.mail.sendTrustGrantedEmail(creator.email, company.name);
+      }
+    }
+
+    return company;
   }
 
   async untrust(id: number, context: AuditContext) {

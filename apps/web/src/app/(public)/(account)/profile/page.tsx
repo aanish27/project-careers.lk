@@ -101,7 +101,13 @@ export default async function ProfilePage() {
       </div>
 
       <div>
-        <h2 className="mb-3 text-lg font-semibold">My job postings</h2>
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold">My job postings</h2>
+          <Button
+            render={<Link href="/post-job">Post a job</Link>}
+            nativeButton={false}
+          />
+        </div>
         <MyJobsList jobs={myJobs} />
       </div>
 

@@ -79,6 +79,14 @@ export class WebUserJobsController {
     return this.webUserJobsService.withdraw(webUserId, id);
   }
 
+  @Delete(':id/profile')
+  removeFromProfile(
+    @CurrentUser('webUserId') webUserId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.webUserJobsService.removeFromProfile(webUserId, id);
+  }
+
   @Post(':id/save')
   save(
     @CurrentUser('webUserId') webUserId: number,

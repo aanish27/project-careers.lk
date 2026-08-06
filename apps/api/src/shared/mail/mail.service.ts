@@ -79,4 +79,22 @@ export class MailService {
 
     this.logger.log(`Sent new-message email to ${email}`);
   }
+
+  async sendTrustGrantedEmail(
+    email: string,
+    companyName: string,
+  ): Promise<void> {
+    const fromEmail = this.config.getOrThrow<string>('mail.fromEmail');
+    const fromName = this.config.get<string>('mail.fromName');
+
+    await this.getTransporter().sendMail({
+      from: `"${fromName}" <${fromEmail}>`,
+      to: email,
+      subject: `${companyName} is now trusted on careers.lk`,
+      text: `Good news — ${companyName} has been granted auto-approval on careers.lk. Future job postings from your company will go live immediately without manual review.`,
+      html: `<p>Good news — <strong>${companyName}</strong> has been granted auto-approval on careers.lk.</p><p>Future job postings from your company will go live immediately without manual review.</p>`,
+    });
+
+    this.logger.log(`Sent trust-granted email to ${email}`);
+  }
 }

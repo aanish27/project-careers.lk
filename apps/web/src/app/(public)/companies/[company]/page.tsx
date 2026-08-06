@@ -53,6 +53,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
         page={page}
         jobs={jobs}
         relatedLinks={relatedLinks}
+        websiteUrl={companyResult?.company.websiteUrl}
         breadcrumbs={[
           { name: "Home", url: "/" },
           { name: "Companies", url: "/jobs" },

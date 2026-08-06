@@ -272,34 +272,37 @@ enum JobApprovalStatus {
 }
 
 model Job {
-  id             Int         @id @default(autoincrement())
-  companyId      Int
-  company        Company     @relation(fields: [companyId], references: [id])
-  fingerprint    String      @unique
-  title          String
-  location       String?
-  province       String?
-  district       String?
-  city           String?
-  workMode       String?
-  employmentType String?
-  sector         String?
-  roleCategory   String?
-  salaryMin      Int?
-  salaryMax      Int?
-  salaryCurrency String?
-  salaryRaw      String?
-  description    String?
-  imageUrl       String?
-  deadline       DateTime?
-  applyUrl       String?
-  status         JobStatus   @default(ACTIVE)
-  lastSeenAt     DateTime
-  deletedAt      DateTime?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  batchId        String?
-  batch          AiBatchLog? @relation(fields: [batchId], references: [id])
+  id              Int         @id @default(autoincrement())
+  companyId       Int
+  company         Company     @relation(fields: [companyId], references: [id])
+  fingerprint     String      @unique
+  title           String
+  location        String?
+  province        String?
+  district        String?
+  city            String?
+  workMode        String?
+  employmentType  String?
+  sector          String?
+  roleCategory    String?
+  salaryMin       Int?
+  salaryMax       Int?
+  salaryCurrency  String?
+  salaryRaw       String?
+  description     String?
+  imageUrl        String?
+  deadline        DateTime?
+  applyUrl        String?
+  status          JobStatus   @default(ACTIVE)
+  lastSeenAt      DateTime
+  deletedAt       DateTime?
+  // Withdrawn (deletedAt set) jobs still show in the poster's own "My job
+  // postings" list until they explicitly delete it — this flags that.
+  profileHiddenAt DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  batchId         String?
+  batch           AiBatchLog? @relation(fields: [batchId], references: [id])
 
   source            JobSource         @default(SCRAPED)
   postedByWebUserId Int?

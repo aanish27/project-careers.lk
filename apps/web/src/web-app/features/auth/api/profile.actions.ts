@@ -3,6 +3,7 @@
 import { updateWebUserProfileSchema } from "@careerslk/types";
 import { ApiError } from "@lib/api-client";
 import {
+  removeJobFromProfileRequest,
   updateWebUserProfileRequest,
   withdrawJobRequest,
 } from "@web-app-lib/web-user-client";
@@ -65,6 +66,20 @@ export async function withdrawJob(jobId: number): Promise<WithdrawJobResult> {
 
   try {
     await withdrawJobRequest(accessToken, jobId);
+    return { ok: true };
+  } catch {
+    return { error: "Something went wrong. Please try again." };
+  }
+}
+
+export async function removeJobFromProfile(
+  jobId: number,
+): Promise<WithdrawJobResult> {
+  const accessToken = await getValidWebUserAccessToken();
+  if (!accessToken) return { requiresAuth: true };
+
+  try {
+    await removeJobFromProfileRequest(accessToken, jobId);
     return { ok: true };
   } catch {
     return { error: "Something went wrong. Please try again." };

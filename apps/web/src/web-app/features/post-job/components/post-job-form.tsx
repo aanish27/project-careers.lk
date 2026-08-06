@@ -16,6 +16,10 @@ const EMPLOYMENT_TYPES = [
   { value: "internship", label: "Internship" },
 ];
 
+function today(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 const WORK_MODES = [
   { value: "onsite", label: "On-site" },
   { value: "hybrid", label: "Hybrid" },
@@ -41,7 +45,9 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
             </p>
             <FieldGroup>
               <Field data-invalid={!!state?.fieldErrors?.name}>
-                <FieldLabel htmlFor="companyName">Company name</FieldLabel>
+                <FieldLabel htmlFor="companyName" required>
+                  Company name
+                </FieldLabel>
                 <Input
                   id="companyName"
                   name="companyName"
@@ -51,42 +57,28 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
                 />
                 <FieldError>{state?.fieldErrors?.name}</FieldError>
               </Field>
-              <Field orientation="responsive">
-                <Field data-invalid={!!state?.fieldErrors?.websiteUrl}>
-                  <FieldLabel htmlFor="companyWebsiteUrl">
-                    Website URL{" "}
-                    <span className="text-muted-foreground">(optional)</span>
-                  </FieldLabel>
-                  <Input
-                    id="companyWebsiteUrl"
-                    name="companyWebsiteUrl"
-                    type="url"
-                    placeholder="https://example.com"
-                    aria-invalid={!!state?.fieldErrors?.websiteUrl}
-                  />
-                  <FieldError>{state?.fieldErrors?.websiteUrl}</FieldError>
-                </Field>
-                <Field data-invalid={!!state?.fieldErrors?.careerUrl}>
-                  <FieldLabel htmlFor="companyCareerUrl">
-                    Career page URL{" "}
-                    <span className="text-muted-foreground">(optional)</span>
-                  </FieldLabel>
-                  <Input
-                    id="companyCareerUrl"
-                    name="companyCareerUrl"
-                    type="url"
-                    placeholder="https://example.com/careers"
-                    aria-invalid={!!state?.fieldErrors?.careerUrl}
-                  />
-                  <FieldError>{state?.fieldErrors?.careerUrl}</FieldError>
-                </Field>
+              <Field data-invalid={!!state?.fieldErrors?.websiteUrl}>
+                <FieldLabel htmlFor="companyWebsiteUrl">
+                  Website URL{" "}
+                  <span className="text-muted-foreground">(optional)</span>
+                </FieldLabel>
+                <Input
+                  id="companyWebsiteUrl"
+                  name="companyWebsiteUrl"
+                  type="url"
+                  placeholder="https://example.com"
+                  aria-invalid={!!state?.fieldErrors?.websiteUrl}
+                />
+                <FieldError>{state?.fieldErrors?.websiteUrl}</FieldError>
               </Field>
             </FieldGroup>
           </div>
         )}
 
         <Field data-invalid={!!state?.fieldErrors?.title}>
-          <FieldLabel htmlFor="title">Job title</FieldLabel>
+          <FieldLabel htmlFor="title" required>
+            Job title
+          </FieldLabel>
           <Input
             id="title"
             name="title"
@@ -108,7 +100,9 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
 
         <Field orientation="responsive">
           <Field data-invalid={!!state?.fieldErrors?.workMode}>
-            <FieldLabel htmlFor="workMode">Work mode</FieldLabel>
+            <FieldLabel htmlFor="workMode" required>
+              Work mode
+            </FieldLabel>
             <select
               id="workMode"
               name="workMode"
@@ -126,15 +120,17 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
             <FieldError>{state?.fieldErrors?.workMode}</FieldError>
           </Field>
           <Field data-invalid={!!state?.fieldErrors?.employmentType}>
-            <FieldLabel htmlFor="employmentType">Employment type</FieldLabel>
+            <FieldLabel htmlFor="employmentType" required>
+              Employment type
+            </FieldLabel>
             <select
               id="employmentType"
               name="employmentType"
               className={selectClassName}
-              defaultValue=""
+              required
+              defaultValue={EMPLOYMENT_TYPES[0].value}
               aria-invalid={!!state?.fieldErrors?.employmentType}
             >
-              <option value="">Not specified</option>
               {EMPLOYMENT_TYPES.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -144,11 +140,15 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
             <FieldError>{state?.fieldErrors?.employmentType}</FieldError>
           </Field>
           <Field data-invalid={!!state?.fieldErrors?.deadline}>
-            <FieldLabel htmlFor="deadline">Application deadline</FieldLabel>
+            <FieldLabel htmlFor="deadline">
+              Application deadline{" "}
+              <span className="text-muted-foreground">(optional)</span>
+            </FieldLabel>
             <Input
               id="deadline"
               name="deadline"
               type="date"
+              min={today()}
               aria-invalid={!!state?.fieldErrors?.deadline}
             />
             <FieldError>{state?.fieldErrors?.deadline}</FieldError>
@@ -183,7 +183,11 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
               defaultValue=""
               disabled={roleCategories.length === 0}
             >
-              <option value="">Not specified</option>
+              <option value="">
+                {roleCategories.length === 0
+                  ? "Select a sector first"
+                  : "Not specified"}
+              </option>
               {roleCategories.map((option) => (
                 <option key={option} value={option}>
                   {option}
@@ -195,7 +199,10 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
 
         <Field orientation="responsive">
           <Field data-invalid={!!state?.fieldErrors?.salaryMin}>
-            <FieldLabel htmlFor="salaryMin">Salary min</FieldLabel>
+            <FieldLabel htmlFor="salaryMin">
+              Salary min{" "}
+              <span className="text-muted-foreground">(optional)</span>
+            </FieldLabel>
             <Input
               id="salaryMin"
               name="salaryMin"
@@ -206,7 +213,10 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
             <FieldError>{state?.fieldErrors?.salaryMin}</FieldError>
           </Field>
           <Field data-invalid={!!state?.fieldErrors?.salaryMax}>
-            <FieldLabel htmlFor="salaryMax">Salary max</FieldLabel>
+            <FieldLabel htmlFor="salaryMax">
+              Salary max{" "}
+              <span className="text-muted-foreground">(optional)</span>
+            </FieldLabel>
             <Input
               id="salaryMax"
               name="salaryMax"
@@ -217,7 +227,12 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
             <FieldError>{state?.fieldErrors?.salaryMax}</FieldError>
           </Field>
           <Field data-invalid={!!state?.fieldErrors?.salaryCurrency}>
-            <FieldLabel htmlFor="salaryCurrency">Currency</FieldLabel>
+            <FieldLabel htmlFor="salaryCurrency">
+              Currency{" "}
+              <span className="text-muted-foreground">
+                (required if salary is set)
+              </span>
+            </FieldLabel>
             <Input
               id="salaryCurrency"
               name="salaryCurrency"

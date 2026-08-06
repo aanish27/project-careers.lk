@@ -5,6 +5,8 @@ import { CompanyLogoUpload } from "@web-app-features/company/components/company-
 import { CompanySetup } from "@web-app-features/company/components/company-setup";
 import { fetchMyCompanyRequest } from "@web-app-lib/web-user-client";
 import { verifyWebUserSession } from "@web-app-lib/web-user-session";
+import { Button } from "@ui/button";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function CompanyPage() {
@@ -37,7 +39,13 @@ export default async function CompanyPage() {
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-8 py-10">
       <div>
-        <h1 className="mb-4 text-xl font-semibold">Your company</h1>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h1 className="text-xl font-semibold">Your company</h1>
+          <Button
+            render={<Link href="/post-job">Post a job</Link>}
+            nativeButton={false}
+          />
+        </div>
         <CompanyLogoUpload
           logoUrl={company.logoUrl}
           companyName={company.name}

@@ -15,6 +15,8 @@ type PseoPageLayoutProps = {
   jobs: PublicJob[];
   relatedLinks: SeoRelatedLink[];
   breadcrumbs: BreadcrumbItem[];
+  /** Only set on company pages — renders a website link under the h1. */
+  websiteUrl?: string | null;
 };
 
 export default function PseoPageLayout({
@@ -22,6 +24,7 @@ export default function PseoPageLayout({
   jobs,
   relatedLinks,
   breadcrumbs,
+  websiteUrl,
 }: PseoPageLayoutProps) {
   const breadcrumbSchema = buildBreadcrumbListSchema(breadcrumbs);
   const collectionSchema = buildCollectionPageSchema({
@@ -53,7 +56,22 @@ export default function PseoPageLayout({
         ))}
       </nav>
 
-      <h1 className="mb-4 text-3xl font-bold text-foreground">{page.h1}</h1>
+      <h1
+        className={`text-3xl font-bold text-foreground ${websiteUrl ? "mb-1" : "mb-4"}`}
+      >
+        {page.h1}
+      </h1>
+
+      {websiteUrl && (
+        <a
+          href={websiteUrl}
+          target="_blank"
+          rel="noopener noreferrer nofollow"
+          className="mb-4 inline-block text-sm text-primary hover:underline"
+        >
+          {websiteUrl}
+        </a>
+      )}
 
       {page.introText && (
         <div

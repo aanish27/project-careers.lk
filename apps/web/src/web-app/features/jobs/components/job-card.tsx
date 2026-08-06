@@ -7,6 +7,7 @@ import {
   unsaveJob,
 } from "@web-app-features/jobs/api/saved-jobs.actions";
 import type { PublicJob } from "@web-app-features/jobs/types";
+import { shareJob } from "@web-app-features/jobs/utils/share-job";
 import { useRequireAuth } from "@jobboard/hooks/use-require-auth";
 import Link from "next/link";
 import { useState, useTransition } from "react";
@@ -28,9 +29,10 @@ const WORK_MODE_LABELS: Record<string, string> = {
 };
 
 function formatSalary(job: PublicJob): string | null {
-  if (job.salaryRaw) return job.salaryRaw;
+  const currencyPrefix = job.salaryCurrency ? `${job.salaryCurrency} ` : "";
+  if (job.salaryRaw) return `${currencyPrefix}${job.salaryRaw}`.trim();
   if (job.salaryMin && job.salaryMax) {
-    return `${job.salaryCurrency ?? ""} ${job.salaryMin.toLocaleString()} - ${job.salaryMax.toLocaleString()}`.trim();
+    return `${currencyPrefix}${job.salaryMin.toLocaleString()} - ${job.salaryMax.toLocaleString()}`.trim();
   }
   return null;
 }
@@ -76,6 +78,7 @@ const JobCard = ({ job, index }: { job: PublicJob; index: number }) => {
           />
         </button>
         <button
+          onClick={() => shareJob(job.title, `/jobs/${job.slug}`)}
           className="absolute top-5 right-12 z-10 rounded-lg"
           aria-label="Share this job"
         >

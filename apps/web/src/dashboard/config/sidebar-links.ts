@@ -86,6 +86,18 @@ export const sidebarLinks: SidebarLinks[] = [
             permission: PERMISSIONS.JOBS_READ,
           },
           {
+            label: "Posted Jobs",
+            icon: FileText,
+            href: "/admin/jobs?source=POSTED",
+            permission: PERMISSIONS.JOBS_READ,
+          },
+          {
+            label: "Scraped Jobs",
+            icon: Bot,
+            href: "/admin/jobs?source=SCRAPED",
+            permission: PERMISSIONS.JOBS_READ,
+          },
+          {
             label: "Keywords",
             icon: Tag,
             href: "/admin/jobs/keywords",
@@ -158,6 +170,12 @@ export const sidebarLinks: SidebarLinks[] = [
             icon: UserCheck,
             href: "/admin/company/claims",
             permission: PERMISSIONS.COMPANIES_CLAIMS_REVIEW,
+          },
+          {
+            label: "Trust Requests",
+            icon: ShieldCheck,
+            href: "/admin/company/trust-requests",
+            permission: PERMISSIONS.COMPANIES_TRUST,
           },
         ],
       },

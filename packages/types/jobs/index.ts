@@ -28,6 +28,7 @@ export interface Job {
   applyUrl: string | null;
   status: JobStatus;
   lastSeenAt: string;
+  deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
   source: JobSource;

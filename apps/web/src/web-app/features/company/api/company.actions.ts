@@ -118,6 +118,7 @@ export async function updateCompany(
 
   const parsed = updateWebUserCompanySchema.safeParse({
     name: optionalString(formData.get("name")),
+    websiteUrl: optionalString(formData.get("websiteUrl")),
     description: optionalString(formData.get("description")),
     linkedinUrl: optionalString(formData.get("linkedinUrl")),
     twitterUrl: optionalString(formData.get("twitterUrl")),

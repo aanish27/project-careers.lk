@@ -249,6 +249,16 @@ export async function withdrawJobRequest(
   });
 }
 
+export async function removeJobFromProfileRequest(
+  accessToken: string,
+  jobId: number,
+): Promise<void> {
+  await apiFetch(`/web-users/jobs/${jobId}/profile`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+}
+
 export async function fetchSavedJobsRequest(
   accessToken: string,
 ): Promise<SavedJobEntry[]> {

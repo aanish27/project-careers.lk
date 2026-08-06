@@ -32,7 +32,9 @@ export function LocationPicker({
   return (
     <>
       <Field>
-        <FieldLabel htmlFor="province">Province</FieldLabel>
+        <FieldLabel htmlFor="province" required>
+          Province
+        </FieldLabel>
         <select
           id="province"
           name="province"
@@ -55,7 +57,9 @@ export function LocationPicker({
         </select>
       </Field>
       <Field>
-        <FieldLabel htmlFor="district">District</FieldLabel>
+        <FieldLabel htmlFor="district" required>
+          District
+        </FieldLabel>
         <select
           key={province}
           id="district"
@@ -67,7 +71,9 @@ export function LocationPicker({
           disabled={districts.length === 0}
         >
           <option value="" disabled>
-            Select a district
+            {districts.length === 0
+              ? "Select a province first"
+              : "Select a district"}
           </option>
           {districts.map((option) => (
             <option key={option} value={option}>
@@ -88,7 +94,9 @@ export function LocationPicker({
           defaultValue={defaultCity}
           disabled={cities.length === 0}
         >
-          <option value="">Not specified</option>
+          <option value="">
+            {cities.length === 0 ? "Select a district first" : "Not specified"}
+          </option>
           {cities.map((option) => (
             <option key={option} value={option}>
               {option}

@@ -154,6 +154,7 @@ export class WebUserCompaniesService {
     const companyId = await this.requireOwnCompanyId(webUserId);
 
     await this.assertUrlsNotSsrf(
+      dto.websiteUrl,
       dto.careerUrl,
       dto.logoUrl,
       dto.linkedinUrl,

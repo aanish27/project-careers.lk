@@ -1,5 +1,6 @@
 "use client";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -51,6 +52,14 @@ export function CompanyDetail({ companyId }: { companyId: number }) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
+            <Avatar size="lg">
+              {company.logoUrl && (
+                <AvatarImage src={company.logoUrl} alt={company.name} />
+              )}
+              <AvatarFallback>
+                {company.name.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
             <IconBuildingSkyscraper className="text-primary size-4" />
             {company.name}
             <StatusPill
@@ -97,6 +106,72 @@ export function CompanyDetail({ companyId }: { companyId: number }) {
           <div>
             <div className="text-muted-foreground">Created</div>
             <div>{formatDate(company.createdAt)}</div>
+          </div>
+          <div className="col-span-2">
+            <div className="text-muted-foreground">Description</div>
+            <div className="whitespace-pre-line">
+              {company.description ?? "—"}
+            </div>
+          </div>
+          <div>
+            <div className="text-muted-foreground">LinkedIn</div>
+            {company.linkedinUrl ? (
+              <a
+                href={company.linkedinUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="underline"
+              >
+                {company.linkedinUrl}
+              </a>
+            ) : (
+              <div>—</div>
+            )}
+          </div>
+          <div>
+            <div className="text-muted-foreground">Twitter / X</div>
+            {company.twitterUrl ? (
+              <a
+                href={company.twitterUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="underline"
+              >
+                {company.twitterUrl}
+              </a>
+            ) : (
+              <div>—</div>
+            )}
+          </div>
+          <div>
+            <div className="text-muted-foreground">Facebook</div>
+            {company.facebookUrl ? (
+              <a
+                href={company.facebookUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="underline"
+              >
+                {company.facebookUrl}
+              </a>
+            ) : (
+              <div>—</div>
+            )}
+          </div>
+          <div>
+            <div className="text-muted-foreground">Instagram</div>
+            {company.instagramUrl ? (
+              <a
+                href={company.instagramUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="underline"
+              >
+                {company.instagramUrl}
+              </a>
+            ) : (
+              <div>—</div>
+            )}
           </div>
         </CardContent>
       </Card>

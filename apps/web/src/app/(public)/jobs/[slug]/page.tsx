@@ -1,6 +1,7 @@
 import { ApiError } from "@/lib/api-client";
 import StructuredData from "@web-app-components/structured-data";
 import { jobsApi } from "@web-app-features/jobs/api/api";
+import { JobDetailActions } from "@web-app-features/jobs/components/job-detail-actions";
 import type { PublicJobDetailResponse } from "@web-app-features/jobs/types";
 import PseoPageLayout from "@web-app-features/seo/components/pseo-page-layout";
 import { seoPagesApi } from "@web-app-features/seo/api/api";
@@ -197,6 +198,8 @@ async function JobDetailPage({ slug }: { slug: string }) {
         </div>
       </div>
 
+      <JobDetailActions jobId={job.id} title={job.title} url={canonicalUrl} />
+
       <div className="mb-6 flex flex-wrap gap-2">
         {job.location && (
           <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">
@@ -215,8 +218,9 @@ async function JobDetailPage({ slug }: { slug: string }) {
         )}
         {(job.salaryRaw || job.salaryMin) && (
           <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">
+            {job.salaryCurrency ? `${job.salaryCurrency} ` : ""}
             {job.salaryRaw ??
-              `${job.salaryCurrency ?? ""} ${job.salaryMin?.toLocaleString()} - ${job.salaryMax?.toLocaleString()}`}
+              `${job.salaryMin?.toLocaleString()} - ${job.salaryMax?.toLocaleString()}`}
           </span>
         )}
         {job.deadline && (
