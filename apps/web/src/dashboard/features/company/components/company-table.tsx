@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,15 +49,13 @@ function RowActions({ company }: { company: Company }) {
       <Tooltip>
         <TooltipTrigger
           render={
-            <Button
-              variant="info"
-              size="icon-xs"
+            <Link
+              href={`/admin/company/${company.id}`}
               aria-label="View detail"
-              render={<Link href={`/admin/company/${company.id}`}></Link>}
-              nativeButton={false}
+              className={buttonVariants({ variant: "info", size: "icon-xs" })}
             >
               <IconEye />
-            </Button>
+            </Link>
           }
         />
         <TooltipContent>View detail</TooltipContent>
@@ -65,15 +63,13 @@ function RowActions({ company }: { company: Company }) {
       <Tooltip>
         <TooltipTrigger
           render={
-            <Button
-              variant="info"
-              size="icon-xs"
+            <Link
+              href={`/admin/company/${company.id}/jobs`}
               aria-label="View jobs"
-              render={<Link href={`/admin/company/${company.id}/jobs`}></Link>}
-              nativeButton={false}
+              className={buttonVariants({ variant: "info", size: "icon-xs" })}
             >
               <IconBriefcase />
-            </Button>
+            </Link>
           }
         />
         <TooltipContent>View jobs</TooltipContent>

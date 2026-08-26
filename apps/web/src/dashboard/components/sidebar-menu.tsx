@@ -8,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@ui/accordion";
-import { Button } from "@ui/button";
+import { buttonVariants } from "@ui/button";
 import { cn } from "@utils/utils";
 import Link from "next/link";
 import { useState } from "react";
@@ -71,23 +71,22 @@ export function SidebarMenu({
                   </AccordionTrigger>
                   <AccordionContent>
                     {visibleItems.map(({ href, label, icon: Icon }) => (
-                      <Button
-                        variant="ghost"
+                      <Link
                         key={href}
-                        nativeButton={false}
-                        className={cn(
-                          "flex justify-start gap-2 rounded-md text-xs font-medium transition-all",
-                          activeItem === label
-                            ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
-                            : "text-foreground hover:bg-accent/50",
-                        )}
-                        render={
-                          <Link href={href}>
-                            <Icon className="h-4 w-4" />
-                            <span className="capitalize">{label}</span>
-                          </Link>
-                        }
-                      />
+                        href={href}
+                        className={buttonVariants({
+                          variant: "ghost",
+                          className: cn(
+                            "flex justify-start gap-2 rounded-md text-xs font-medium transition-all",
+                            activeItem === label
+                              ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+                              : "text-foreground hover:bg-accent/50",
+                          ),
+                        })}
+                      >
+                        <Icon className="h-4 w-4" />
+                        <span className="capitalize">{label}</span>
+                      </Link>
                     ))}
                   </AccordionContent>
                 </AccordionItem>

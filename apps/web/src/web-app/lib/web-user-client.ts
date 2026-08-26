@@ -9,7 +9,7 @@ import type {
   UpdateWebUserProfileInput,
 } from "@careerslk/types";
 import { ClaimStatus } from "@careerslk/types";
-import { apiFetch, ApiError, extractCookieValue } from "@lib/api-client";
+import { ApiError, apiFetch, extractCookieValue } from "@lib/api-client";
 import "server-only";
 
 export interface WebUser {
@@ -125,26 +125,6 @@ export async function fetchCurrentWebUser(
     headers: { Authorization: `Bearer ${accessToken}` },
   });
   return data;
-}
-
-export async function saveJobRequest(
-  accessToken: string,
-  jobId: number,
-): Promise<void> {
-  await apiFetch(`/web-users/jobs/${jobId}/save`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-}
-
-export async function unsaveJobRequest(
-  accessToken: string,
-  jobId: number,
-): Promise<void> {
-  await apiFetch(`/web-users/jobs/${jobId}/save`, {
-    method: "DELETE",
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
 }
 
 export async function updateWebUserProfileRequest(

@@ -1,3 +1,5 @@
+"use client";
+
 import { slugify } from "@careerslk/lib/slugify";
 import { SECTORS } from "@careerslk/types";
 import {
@@ -21,6 +23,7 @@ import {
   type Icon,
 } from "@tabler/icons-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const SECTOR_ICONS: Record<string, Icon> = {
   "IT & Software": IconCode,
@@ -50,21 +53,24 @@ const CATEGORIES = [
   })),
 ];
 
-type CategorySidebarProps = {
-  activeCategory: string;
-  headerHeight: number;
-};
+const CategorySidebar = () => {
+  const pathname = usePathname();
+  const sectorSlug = pathname.match(/^\/jobs\/sector\/([^/]+)/)?.[1];
+  const activeSector = sectorSlug
+    ? SECTORS.find((sector) => slugify(sector) === sectorSlug)
+    : undefined;
+  const activeCategory = activeSector ?? "All Jobs";
 
-const CategorySidebar = ({
-  activeCategory,
-  headerHeight,
-}: CategorySidebarProps) => {
   return (
-    <aside
-      className="sticky z-40 h-fit shrink-0 rounded-3xl border border-white/40 dark:border-white/10 bg-white/20 dark:bg-white/5 shadow-[0_1px_4px_rgba(31,38,135,0.15)] p-4"
-      style={{ top: `calc(1.25rem + ${headerHeight}px + 0.75rem)` }}
-    >
-      <h3 className="mb-4 text-lg font-bold text-foreground">Sectors</h3>
+    <aside className="w-full rounded-3xl min-h-0 h-fit border border-white/40 dark:border-white/10 bg-white/20 dark:bg-white/5 shadow-[0_1px_10px_rgba(31,38,135,0.15)] p-4">
+      <h3
+        className="mb-4 text-lg font-bold text-foreground"
+        data-debug-pathname={pathname}
+        data-debug-slug={sectorSlug}
+        data-debug-active={activeCategory}
+      >
+        Sectors
+      </h3>
       <div className="flex flex-col gap-3">
         {CATEGORIES.map(({ label, icon: Icon, href }) => {
           const isActive = activeCategory === label;

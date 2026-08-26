@@ -1,28 +1,27 @@
 import { apiFetch } from "@/lib/api-client";
-import type { PublicJobDetailResponse, PublicJobsListResponse } from "../types";
-
-export interface JobFilters {
-  location?: string;
-  province?: string;
-  district?: string;
-  sector?: string;
-  workMode?: string[];
-  employmentType?: string[];
-  keywords?: string[];
-  salaryMin?: number;
-  salaryMax?: number;
-  company?: string;
-  q?: string;
-  cursor?: string;
-  limit?: number;
-}
+import type {
+  JobFilters,
+  PublicJobDetailResponse,
+  PublicJobsListResponse,
+} from "../types";
 
 function buildQuery(filters: JobFilters): string {
   const params = new URLSearchParams();
+
+  if (filters.slug) params.set("slug", filters.slug);
+
+  if (filters.title) params.set("title", filters.title);
+
   if (filters.location) params.set("location", filters.location);
-  if (filters.province) params.set("province", filters.province);
-  if (filters.district) params.set("district", filters.district);
+
   if (filters.sector) params.set("sector", filters.sector);
+
+  if (filters.province?.length)
+    params.set("province", filters.province.join(","));
+
+  if (filters.district?.length)
+    params.set("district", filters.district.join(","));
+
   if (filters.workMode?.length)
     params.set("workMode", filters.workMode.join(","));
   if (filters.employmentType?.length) {
@@ -44,7 +43,10 @@ function buildQuery(filters: JobFilters): string {
 }
 
 export const jobsApi = {
-  async list(filters: JobFilters): Promise<PublicJobsListResponse> {
+  async list(
+    filters: JobFilters,
+    slug?: string,
+  ): Promise<PublicJobsListResponse> {
     const query = buildQuery(filters);
     const { data } = await apiFetch<PublicJobsListResponse>(
       `/public/jobs${query ? `?${query}` : ""}`,

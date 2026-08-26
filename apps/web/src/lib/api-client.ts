@@ -1,3 +1,5 @@
+import { ApiFetchOptions } from "@/types";
+import { getValidWebUserAccessToken } from "@/web-app/lib/web-user-session";
 import { PermissionKey } from "@careerslk/lib";
 import "server-only";
 
@@ -32,16 +34,32 @@ export class ApiError extends Error {
     this.name = "ApiError";
   }
 }
-
 export async function apiFetch<T>(
   path: string,
-  init?: RequestInit,
+  init?: ApiFetchOptions,
 ): Promise<{ data: T; setCookies: string[] }> {
+  let accessToken: string | null = null;
+
+  const { auth, ...requestInit } = init ?? {};
+
+  if (auth) {
+    accessToken = await getValidWebUserAccessToken();
+
+    if (!accessToken) {
+      throw new ApiError(401, "UNAUTHORIZED", "Authentication required");
+    }
+  }
+
   let res: Response;
+
   try {
     res = await fetch(`${process.env.API_URL}${path}`, {
-      ...init,
-      headers: { "Content-Type": "application/json", ...init?.headers },
+      ...requestInit,
+      headers: {
+        "Content-Type": "application/json",
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        ...requestInit.headers,
+      },
     });
   } catch {
     throw new ApiError(0, "NETWORK_ERROR", "Unable to reach the API server");
@@ -50,7 +68,10 @@ export async function apiFetch<T>(
   const body = (await res.json()) as ApiSuccessBody<T> | ApiErrorBody;
 
   if (body.success) {
-    return { data: body.data, setCookies: res.headers.getSetCookie() };
+    return {
+      data: body.data,
+      setCookies: res.headers.getSetCookie(),
+    };
   }
 
   throw new ApiError(
@@ -60,7 +81,6 @@ export async function apiFetch<T>(
     body.error.details,
   );
 }
-
 export function extractCookieValue(
   setCookies: string[],
   name: string,

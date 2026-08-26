@@ -1,6 +1,7 @@
 import { Public } from '@/common/decorators/public.decorator';
 import { SeoPageType } from '@careerslk/types';
-import { Controller, Get, NotFoundException, Query } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Query, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { SeoPagesService } from './seo-pages.service';
 
 // Slugs contain slashes (e.g. "jobs/software-engineer/in/colombo"), so the
@@ -17,8 +18,15 @@ export class SeoPagesController {
   }
 
   @Get('by-slug')
-  async findBySlug(@Query('slug') slug: string) {
+  async findBySlug(@Req() req: Request, @Query('slug') slug: string) {
     const result = await this.seoPagesService.findBySlug(slug);
+    if (!result) throw new NotFoundException('SEO page not found');
+    return result;
+  }
+
+  @Get('seo')
+  async getSeoContent(@Req() req: Request, @Query('slug') slug: string) {
+    const result = await this.seoPagesService.getSeoContent(slug);
     if (!result) throw new NotFoundException('SEO page not found');
     return result;
   }

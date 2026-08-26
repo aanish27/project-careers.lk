@@ -35,6 +35,11 @@ export interface SeoPageResponse {
   relatedLinks: SeoRelatedLink[];
 }
 
+export interface SeoContentResponse {
+  page: SeoPageData;
+  relatedLinks: SeoRelatedLink[];
+}
+
 export interface SeoPageListItem {
   slug: string;
   pageType: string;

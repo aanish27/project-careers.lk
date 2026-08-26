@@ -2,7 +2,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@ui/tooltip";
 import { cn } from "@utils/utils";
 import { FileText, Settings } from "lucide-react";
 import { sections } from "@dashboard-config/icon-sidebar-links";
-import { Button } from "@ui/button";
+import { Button, buttonVariants } from "@ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,19 +36,20 @@ export const IconSidebar = () => {
           <Tooltip key={href}>
             <TooltipTrigger
               render={
-                <Button
-                  variant="ghost"
-                  nativeButton={false}
-                  className={cn(
-                    "group relative flex h-9 w-9 items-center justify-center rounded-lg shadow-lg transition-all",
-                    activeSection === href
-                      ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md"
-                      : "text-foreground hover:bg-accent",
-                  )}
-                  render={
-                    <Link href={`/${href}`}>
-                      <Icon className="h-5 w-5" />
-                      {/* {notifications && (
+                <Link
+                  href={`/${href}`}
+                  className={buttonVariants({
+                    variant: "ghost",
+                    className: cn(
+                      "group relative flex h-9 w-9 items-center justify-center rounded-lg shadow-lg transition-all",
+                      activeSection === href
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md"
+                        : "text-foreground hover:bg-accent",
+                    ),
+                  })}
+                >
+                  <Icon className="h-5 w-5" />
+                  {/* {notifications && (
                     <Badge
                       variant="destructive"
                       className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center p-0 text-xs"
@@ -56,9 +57,7 @@ export const IconSidebar = () => {
                       {notifications}
                     </Badge>
                   )} */}
-                    </Link>
-                  }
-                ></Button>
+                </Link>
               }
             ></TooltipTrigger>
             <TooltipContent side="right">{label}</TooltipContent>

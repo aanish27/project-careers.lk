@@ -1,5 +1,11 @@
 import type { Company } from '../company';
-import type { JobApprovalStatus, JobSource, JobStatus } from '../enums';
+import type {
+  EmploymentType,
+  JobApprovalStatus,
+  JobSource,
+  JobStatus,
+  WorkMode,
+} from '../enums';
 import type { Keyword } from '../keywords';
 
 export * from './schemas';
@@ -14,8 +20,8 @@ export interface Job {
   province: string | null;
   district: string | null;
   city: string | null;
-  workMode: string | null;
-  employmentType: string | null;
+  workMode: WorkMode | null;
+  employmentType: EmploymentType | null;
   sector: string | null;
   roleCategory: string | null;
   salaryMin: number | null;

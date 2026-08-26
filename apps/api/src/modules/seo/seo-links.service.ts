@@ -39,6 +39,7 @@ export class SeoLinksService {
         return this.topRoleLinks();
       case SeoPageType.COMPANY:
       case SeoPageType.ALL_JOBS:
+      case SeoPageType.HOME:
       default:
         return [];
     }

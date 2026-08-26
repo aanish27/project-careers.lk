@@ -25,7 +25,7 @@ export class SeoPagesService {
     const [jobs, relatedLinks] = await Promise.all([
       this.prisma.job.findMany({
         where: buildJobWhereForPage({
-          pageType: page.pageType,
+          pageType: page.pageType as SeoPageType,
           sector: page.sector,
           roleId: page.roleId,
           location: page.location,
@@ -49,6 +49,30 @@ export class SeoPagesService {
     ]);
 
     return { page, jobs, relatedLinks };
+  }
+
+  async getSeoContent(slug: string) {
+    const page = await this.prisma.seoPage.findUnique({
+      where: { slug },
+      include: { location: { select: { name: true, level: true } } },
+    });
+    if (!page) return null;
+
+    const relatedSlugs = Array.isArray(page.relatedLinksJson)
+      ? (page.relatedLinksJson as unknown[]).filter(
+          (s): s is string => typeof s === 'string',
+        )
+      : [];
+
+    const relatedLinks =
+      relatedSlugs.length > 0
+        ? await this.prisma.seoPage.findMany({
+            where: { slug: { in: relatedSlugs }, isIndexable: true },
+            select: { slug: true, title: true, h1: true },
+          })
+        : [];
+
+    return { page, relatedLinks };
   }
 
   async isRetired(slug: string): Promise<boolean> {

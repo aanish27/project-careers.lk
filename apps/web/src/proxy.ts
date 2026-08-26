@@ -144,10 +144,11 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     "/admin/:path*",
+    // Covers /jobs/internship and /jobs/remote-jobs too — they moved under
+    // /jobs (from root-level /internships, /remote-jobs) so no longer need
+    // their own matcher entries.
     "/jobs/:path*",
     "/companies/:path*",
-    "/internships",
-    "/remote-jobs",
     "/profile/:path*",
     "/post-job/:path*",
     "/company/:path*",

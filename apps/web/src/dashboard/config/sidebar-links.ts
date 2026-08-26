@@ -1,10 +1,12 @@
 import type { PermissionKey } from "@careerslk/lib";
 import { PERMISSIONS } from "@careerslk/lib";
 import {
+  AlertTriangle,
   Bot,
   Briefcase,
   Building2,
   FileText,
+  Globe,
   History,
   Key,
   Layers,
@@ -15,6 +17,7 @@ import {
   Tag,
   UserCheck,
   Users,
+  UserSearch,
 } from "lucide-react";
 import { IconShieldExclamation } from "@tabler/icons-react";
 import type { ComponentType } from "react";
@@ -176,6 +179,46 @@ export const sidebarLinks: SidebarLinks[] = [
             icon: ShieldCheck,
             href: "/admin/company/trust-requests",
             permission: PERMISSIONS.COMPANIES_TRUST,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    moduleName: "seo",
+    sections: [
+      {
+        title: "Pages",
+        items: [
+          {
+            label: "Public Pages",
+            icon: Globe,
+            href: "/admin/seo?category=public",
+            permission: PERMISSIONS.SEO_READ,
+          },
+          {
+            label: "Jobs",
+            icon: Briefcase,
+            href: "/admin/seo?category=jobs",
+            permission: PERMISSIONS.SEO_READ,
+          },
+          {
+            label: "Companies",
+            icon: Building2,
+            href: "/admin/seo?category=companies",
+            permission: PERMISSIONS.SEO_READ,
+          },
+          {
+            label: "Freelance",
+            icon: UserSearch,
+            href: "/admin/seo?category=freelance",
+            permission: PERMISSIONS.SEO_READ,
+          },
+          {
+            label: "Needs Review",
+            icon: AlertTriangle,
+            href: "/admin/seo?needsReview=true",
+            permission: PERMISSIONS.SEO_READ,
           },
         ],
       },

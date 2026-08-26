@@ -2,12 +2,12 @@
 
 import { getCategoriesForSector, SECTORS } from "@careerslk/types";
 import { LocationPicker } from "@components/location-picker";
-import { useActionState, useState } from "react";
 import { Button } from "@ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@ui/field";
 import { Input } from "@ui/input";
 import { Textarea } from "@ui/textarea";
 import { postJob } from "@web-app-features/post-job/api/post-job.actions";
+import { useActionState, useState } from "react";
 
 const EMPLOYMENT_TYPES = [
   { value: "full_time", label: "Full time" },
@@ -294,7 +294,7 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
 
         <Field data-invalid={!!state?.error}>
           <FieldError>{state?.error}</FieldError>
-          <Button type="submit" disabled={isPending}>
+          <Button type="submit" disabled={isPending} className="w-10">
             {isPending ? "Submitting…" : "Submit job posting"}
           </Button>
         </Field>

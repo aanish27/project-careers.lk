@@ -1,15 +1,6 @@
-/** @deprecated superseded by the dynamic Role/Permission system in ./permissions.ts; retained only for the legacy RolesGuard on StorageController */
 export enum UserRole {
   SUPER_ADMIN = 'SUPER_ADMIN',
   ADMIN = 'ADMIN',
-}
-
-export enum EmploymentType {
-  FULL_TIME = 'full_time',
-  PART_TIME = 'part_time',
-  CONTRACT = 'contract',
-  INTERNSHIP = 'internship',
-  FREELANCE = 'freelance',
 }
 
 export enum ScrapeStatus {
@@ -42,9 +33,12 @@ export enum PackageType {
   SPONSORED_CARD = 'sponsored_card',
 }
 
-// Plain const+type (not a nominal `enum`) so Prisma-returned SeoPage.pageType
-// values — themselves a plain string-literal union in the generated client —
-// are directly assignable here without a cast, in either direction.
+// Plain const+type (not a nominal `enum`) for two reasons: (1) so
+// Prisma-returned SeoPage.pageType values — a plain `string` column, not a
+// DB enum (see schema.prisma) — are directly assignable here without a cast,
+// in either direction; (2) so the set of page types is purely an
+// application-level concern — adding one is a change here + the generation
+// service, never a schema migration.
 export const SeoPageType = {
   SECTOR: 'SECTOR',
   ROLE: 'ROLE',
@@ -55,6 +49,7 @@ export const SeoPageType = {
   REMOTE: 'REMOTE',
   INTERNSHIP: 'INTERNSHIP',
   ALL_JOBS: 'ALL_JOBS',
+  HOME: 'HOME',
 } as const;
 
 export type SeoPageType = (typeof SeoPageType)[keyof typeof SeoPageType];
@@ -170,3 +165,20 @@ export const AbuseReportStatus = {
 
 export type AbuseReportStatus =
   (typeof AbuseReportStatus)[keyof typeof AbuseReportStatus];
+
+export const EmploymentType = {
+  FULL_TIME: 'FULL_TIME',
+  PART_TIME: 'PART_TIME',
+  CONTRACT: 'CONTRACT',
+} as const;
+
+export type EmploymentType =
+  (typeof EmploymentType)[keyof typeof EmploymentType];
+
+export const WorkMode = {
+  HYBRID: 'HYBRID',
+  ONSITE: 'ONSITE',
+  REMOTE: 'REMOTE',
+} as const;
+
+export type WorkMode = (typeof WorkMode)[keyof typeof WorkMode];

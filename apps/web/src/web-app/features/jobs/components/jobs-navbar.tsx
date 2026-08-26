@@ -1,4 +1,6 @@
-import { Button } from "@/components/ui/button";
+"use client";
+
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +12,10 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { useRequireAuth } from "@/web-app/hooks/use-require-auth";
+import { useWebUser } from "@/web-app/providers/web-user-provider";
 import { IconCompass, IconSearch } from "@tabler/icons-react";
+import Link from "next/link";
 
 const NAV_LINKS = [
   {
@@ -37,6 +42,9 @@ const NAV_LINKS = [
 ];
 
 const JobsNavbar = () => {
+  const requireAuth = useRequireAuth();
+  const { isLoggedIn } = useWebUser();
+
   return (
     <nav className="relative w-full flex flex-row justify-between items-center rounded-3xl border border-white/40 dark:border-white/10 bg-white/20 dark:bg-white/5 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_8px_32px_rgba(31,38,135,0.15)] overflow-hidden before:pointer-events-none before:absolute before:inset-0 before:rounded-3xl before:bg-linear-to-b before:from-white/50 before:to-transparent before:opacity-40 dark:before:from-white/10">
       <div className="relative flex gap-1 rounded-2xl border border-white/30 dark:border-white/10 bg-white/10 dark:bg-black/20 backdrop-blur-md shadow-inner">
@@ -67,9 +75,24 @@ const JobsNavbar = () => {
           </DropdownMenu>
         ))}
         <div className="relative flex gap-5 p-1">
-          <Button className=" font-semibold backdrop-blur-sm bg-primary/90 hover:bg-primary rounded-2xl p-1 px-5">
-            Post Job
-          </Button>
+          {isLoggedIn ? (
+            <Link
+              href="/post-job"
+              className={buttonVariants({
+                className:
+                  " font-semibold backdrop-blur-sm bg-primary/90 hover:bg-primary rounded-2xl p-1 px-5",
+              })}
+            >
+              Post a Job
+            </Link>
+          ) : (
+            <Button
+              className=" font-semibold backdrop-blur-sm bg-primary/90 hover:bg-primary rounded-2xl p-1 px-5"
+              onClick={() => requireAuth(() => {})}
+            >
+              Post a Job
+            </Button>
+          )}
         </div>
       </div>
     </nav>

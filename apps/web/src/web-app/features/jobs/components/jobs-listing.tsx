@@ -1,125 +1,112 @@
 "use client";
 
-import Poster from "@web-app-components/poster";
-import { PrimaryNavbar } from "@web-app-components/primary-navbar";
-import CategorySidebar from "@web-app-features/jobs/components/category-sidebar";
+import { Spinner } from "@/components/ui/spinner";
 import JobCard from "@web-app-features/jobs/components/job-card";
 import JobFilterBar from "@web-app-features/jobs/components/job-filter-bar";
-import JobsNavbar from "@web-app-features/jobs/components/jobs-navbar";
-import type { PublicJob } from "@web-app-features/jobs/types";
-import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import type { PublicJobsListResponse } from "@web-app-features/jobs/types";
+import { IBreadcrumbItem } from "@web-app-features/ui/types";
+import { useQueryStates } from "nuqs";
+import { useEffect, useRef } from "react";
+import { useDebouncedCallback } from "use-debounce";
+import { jobFiltersParsers } from "../hooks/job-filters-search-params";
+import { useJobsQuery } from "../hooks/use-jobs-query";
 
 type JobsListingProps = {
-  jobs: PublicJob[];
-  activeCategory: string;
-  province: string;
-  district: string;
-  workMode: string;
-  employmentType: string;
+  pageTitle: string;
+  pageDescription: string | null;
+  initialPage: PublicJobsListResponse;
+  slug: string;
+  breadcrumbs?: IBreadcrumbItem[];
 };
 
-interface NavigateParams {
-  province: string;
-  district: string;
-  workMode: string;
-  employmentType: string;
-}
-
-type FilterUpdate = Partial<NavigateParams>;
-
 const JobsListing = ({
-  jobs,
-  activeCategory,
-  province,
-  district,
-  workMode,
-  employmentType,
+  pageTitle,
+  pageDescription,
+  initialPage,
+  slug,
+  breadcrumbs,
 }: JobsListingProps) => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const headerRef = useRef<HTMLDivElement>(null);
-  const [headerHeight, setHeaderHeight] = useState(0);
+  const [filters, setFilters] = useQueryStates(jobFiltersParsers, {
+    shallow: true, // update the URL without a server round-trip
+    clearOnDefault: true, // drop empty [] params from the URL
+  });
+  const { data, isFetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useJobsQuery({ ...filters, slug }, initialPage);
 
-  useLayoutEffect(() => {
-    const node = headerRef.current;
+  const jobItems = data.pages.flatMap((page) => page.items);
+
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  const debouncedFetchNext = useDebouncedCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+  }, 300);
+
+  useEffect(() => {
+    const node = sentinelRef.current;
     if (!node) return;
 
-    const observer = new ResizeObserver(([entry]) => {
-      setHeaderHeight(entry.contentRect.height);
-    });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) debouncedFetchNext();
+      },
+      { rootMargin: "200px" },
+    );
+
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
-
-  const navigate = useCallback(
-    (merged: NavigateParams) => {
-      const params = new URLSearchParams();
-      if (merged.province !== "all") params.set("province", merged.province);
-      if (merged.district !== "all") params.set("district", merged.district);
-      if (merged.workMode !== "all") params.set("workMode", merged.workMode);
-      if (merged.employmentType !== "all")
-        params.set("employmentType", merged.employmentType);
-
-      const query = params.toString();
-      router.replace(query ? `${pathname}?${query}` : pathname, {
-        scroll: false,
-      });
-    },
-    [pathname, router],
-  );
-
-  const updateFilters = useCallback(
-    (update: FilterUpdate) => {
-      navigate({
-        province: update.province ?? province,
-        district: update.district ?? district,
-        workMode: update.workMode ?? workMode,
-        employmentType: update.employmentType ?? employmentType,
-      });
-    },
-    [province, district, workMode, employmentType, navigate],
-  );
+  }, [debouncedFetchNext]);
 
   return (
-    <div className="relative flex min-h-screen flex-col">
-      <div ref={headerRef} className="sticky top-5 z-50 flex flex-col gap-3">
-        <PrimaryNavbar />
-        <JobsNavbar />
+    <>
+      <div className="flex flex-col py-3">
+        <h1 className="text-xl font-bold text-foreground">
+          {pageTitle}
+          <span className="text-xs font-normal text-muted-foreground">
+            ({jobItems.length})
+          </span>
+        </h1>
+        {pageDescription && <div className="text-md">{pageDescription}</div>}
       </div>
 
-      <div className="flex flex-1 gap-8 py-8">
-        <CategorySidebar
-          activeCategory={activeCategory}
-          headerHeight={headerHeight}
-        />
-        <div className="flex flex-1 flex-col">
-          <JobFilterBar
-            resultCount={jobs.length}
-            province={province}
-            onProvinceChange={(value) =>
-              updateFilters({ province: value, district: "all" })
-            }
-            district={district}
-            onDistrictChange={(value) => updateFilters({ district: value })}
-            workMode={workMode}
-            onWorkModeChange={(value) => updateFilters({ workMode: value })}
-            employmentType={employmentType}
-            onEmploymentTypeChange={(value) =>
-              updateFilters({ employmentType: value })
-            }
-          />
+      <JobFilterBar
+        province={filters.province}
+        onProvinceChange={(value) =>
+          setFilters({ province: value, district: [] })
+        }
+        district={filters.district}
+        onDistrictChange={(value) => setFilters({ district: value })}
+        workMode={filters.workMode}
+        onWorkModeChange={(value) => setFilters({ workMode: value })}
+        employmentType={filters.employmentType}
+        onEmploymentTypeChange={(value) =>
+          setFilters({ employmentType: value })
+        }
+        breadcrumbs={breadcrumbs}
+      />
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {jobs.map((job, index) => (
-              <JobCard key={job.id} job={job} index={index} />
-            ))}
-          </div>
+      <div
+        className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 transition-opacity"
+        style={{ opacity: isFetching && !isFetchingNextPage ? 0.6 : 1 }}
+      >
+        {jobItems.map((job, index) => (
+          <JobCard key={job.id} job={job} index={index} />
+        ))}
+      </div>
+
+      <div ref={sentinelRef} className="h-1" />
+
+      {isFetchingNextPage && (
+        <div className="flex justify-center py-6">
+          <Spinner className="size-6" />
         </div>
-      </div>
+      )}
 
-      <Poster />
-    </div>
+      {!hasNextPage && jobItems.length > 0 && (
+        <p className="py-6 text-center text-sm text-muted-foreground">
+          No more jobs
+        </p>
+      )}
+    </>
   );
 };
 

@@ -31,7 +31,7 @@ const PAGE_TYPES_BY_BUCKET: Record<
   "role-location": ["ROLE_LOCATION"],
   skills: ["SKILL"],
   companies: ["COMPANY"],
-  misc: ["REMOTE", "INTERNSHIP", "ALL_JOBS"],
+  misc: ["REMOTE", "INTERNSHIP", "ALL_JOBS", "HOME"],
 };
 
 function absoluteUrl(path: string): string {

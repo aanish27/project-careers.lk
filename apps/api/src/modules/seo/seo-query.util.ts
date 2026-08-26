@@ -1,5 +1,10 @@
 import type { JobWhereInput } from '@careerslk/database';
-import { JobStatus, LocationLevel, SeoPageType } from '@careerslk/types';
+import {
+  JobApprovalStatus,
+  JobStatus,
+  LocationLevel,
+  SeoPageType,
+} from '@careerslk/types';
 
 export interface SeoPageDimensions {
   pageType: SeoPageType;
@@ -22,7 +27,11 @@ export interface SeoPageDimensions {
  * columns instead.
  */
 export function buildJobWhereForPage(dims: SeoPageDimensions): JobWhereInput {
-  const where: JobWhereInput = { status: JobStatus.ACTIVE, deletedAt: null };
+  const where: JobWhereInput = {
+    status: JobStatus.ACTIVE,
+    deletedAt: null,
+    approvalStatus: JobApprovalStatus.APPROVED,
+  };
 
   if (dims.sector) where.sector = dims.sector;
   if (dims.roleId) where.seoRoleId = dims.roleId;

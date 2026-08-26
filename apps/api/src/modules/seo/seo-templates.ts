@@ -297,12 +297,24 @@ const TEMPLATES_BY_PAGE_TYPE: Record<
   [SeoPageType.COMPANY]: companyTemplates,
   [SeoPageType.REMOTE]: remoteTemplates,
   [SeoPageType.INTERNSHIP]: internshipTemplates,
-  // ALL_JOBS is always manualOverride and never auto-templated (decision #10).
+  // ALL_JOBS/HOME are singleton pages with static default copy — an admin
+  // can still override title/intro/bottom/FAQ via manualOverride, same as
+  // every other page type.
   [SeoPageType.ALL_JOBS]: () => [
     {
       title: 'Browse Jobs in Sri Lanka',
       metaDescription: 'Explore the latest job openings across Sri Lanka.',
       h1: 'Jobs in Sri Lanka',
+      introText: '',
+      bottomText: '',
+    },
+  ],
+  [SeoPageType.HOME]: () => [
+    {
+      title: 'Jobswala — Find Your Next Role in Sri Lanka',
+      metaDescription:
+        'Jobswala aggregates the latest job openings from companies across Sri Lanka — search by role, location, or company and apply directly.',
+      h1: 'Find Your Next Role in Sri Lanka',
       introText: '',
       bottomText: '',
     },

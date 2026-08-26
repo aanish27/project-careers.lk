@@ -1,5 +1,6 @@
 import { Public } from '@/common/decorators/public.decorator';
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { FilterPublicJobsDto } from './dto/filter-public-jobs.dto';
 import { PublicJobsService } from './public-jobs.service';
 
@@ -14,7 +15,8 @@ export class PublicJobsController {
   constructor(private readonly publicJobsService: PublicJobsService) {}
 
   @Get()
-  findAll(@Query() filters: FilterPublicJobsDto) {
+  findAll(@Req() req: Request, @Query() filters: FilterPublicJobsDto) {
+    console.log(filters.slug);
     return this.publicJobsService.findAll(filters);
   }
 
@@ -27,6 +29,7 @@ export class PublicJobsController {
 
   @Get(':slug')
   findBySlug(@Param('slug') slug: string) {
+    console.log(slug);
     return this.publicJobsService.findBySlug(slug);
   }
 

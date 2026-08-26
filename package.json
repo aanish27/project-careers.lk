@@ -29,7 +29,7 @@
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.3",
     "tsdown": "^0.22.4",
-    "typescript-eslint": "^8.59.0"
+    "typescript-eslint": "^8.67.0"
   },
   "lint-staged": {
     "apps/web/**/*.{js,jsx,mjs,cjs,ts,tsx}": [

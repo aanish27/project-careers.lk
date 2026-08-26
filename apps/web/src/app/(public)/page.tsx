@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
+import JobsSearchBar from "@/web-app/components/jobs-searchbar";
 import {
   IconBriefcase,
   IconCalculator,
   IconChartBar,
   IconCode,
   IconHeadset,
-  IconMapPin,
   IconPencil,
   IconRocket,
   IconScale,
@@ -14,12 +14,33 @@ import {
 } from "@tabler/icons-react";
 import LandingGradient from "@web-app-components/landing-gradient";
 import { PrimaryNavbar } from "@web-app-components/primary-navbar";
+import StructuredData from "@web-app-components/structured-data";
+import { jobsApi } from "@web-app-features/jobs/api/api";
 import CategoryCard from "@web-app-features/jobs/components/category/category-card";
 import JobCard from "@web-app-features/jobs/components/job-card";
 import JobsNavbar from "@web-app-features/jobs/components/jobs-navbar";
-import { jobsApi } from "@web-app-features/jobs/api/api";
+import { seoPagesApi } from "@web-app-features/seo/api/api";
+import { buildFaqPageSchema } from "@web-app-lib/structured-data";
+import type { Metadata } from "next";
 
 const RECENT_JOBS_LIMIT = 8;
+
+const DEFAULT_TITLE = "Jobswala — Find Your Next Role in Sri Lanka";
+const DEFAULT_DESCRIPTION =
+  "Jobswala aggregates the latest job openings from companies across Sri Lanka — search by role, location, or company and apply directly.";
+
+// The HOME SeoPage row (pageType=HOME, slug="") is a singleton, same
+// pattern as ALL_JOBS's "jobs" row — see seo-generation.service.ts.
+export async function generateMetadata(): Promise<Metadata> {
+  const homePage = await seoPagesApi.getBySlug("");
+  const content = homePage?.page;
+
+  return {
+    title: content?.title ?? DEFAULT_TITLE,
+    description: content?.metaDescription ?? DEFAULT_DESCRIPTION,
+    alternates: { canonical: "/" },
+  };
+}
 
 const CATEGORIES = [
   { label: "Engineering", icon: IconCode, count: 312 },
@@ -35,9 +56,15 @@ const CATEGORIES = [
 ];
 
 export default async function HomePage() {
-  const { items: recentJobs } = await jobsApi.list({
-    limit: RECENT_JOBS_LIMIT,
-  });
+  const [{ items: recentJobs }, homePage] = await Promise.all([
+    jobsApi.list({ limit: RECENT_JOBS_LIMIT }),
+    seoPagesApi.getBySlug(""),
+  ]);
+
+  const contentPage = homePage?.page;
+  const faqSchema = contentPage
+    ? buildFaqPageSchema(contentPage.faqJson ?? [])
+    : null;
 
   return (
     <div className="relative flex min-h-screen flex-col ">
@@ -53,23 +80,7 @@ export default async function HomePage() {
         <div className="mb-8 text-lg text-muted-foreground">
           Aggregated from high-growth tech sources, curated for precision.
         </div>
-        <div className="flex w-full max-w-3xl items-center gap-px rounded-xl bg-white p-2">
-          <div className="flex flex-1 items-center gap-2 px-4 py-3">
-            <IconBriefcase className="size-5 text-muted-foreground" />
-            <span className="text-base text-muted-foreground">
-              Job title or company
-            </span>
-          </div>
-          <div className="flex flex-1 items-center gap-2 border-l border-border px-4 py-3">
-            <IconMapPin className="size-5 text-muted-foreground" />
-            <span className="text-base text-muted-foreground">
-              City or remote
-            </span>
-          </div>
-          <Button size="lg" className="font-bold">
-            Search Jobs
-          </Button>
-        </div>
+        <JobsSearchBar />
         <div className="mt-6 flex items-center gap-3">
           <div className="flex">
             <span className="flex size-6 items-center justify-center rounded-full border-2 border-background bg-primary text-[10px] font-bold text-primary-foreground">
@@ -124,6 +135,39 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {contentPage && (
+        <section className="mx-auto max-w-6xl px-4 pb-16">
+          {faqSchema && <StructuredData data={faqSchema} />}
+          {contentPage.introText && (
+            <div
+              className="typeset mb-8"
+              dangerouslySetInnerHTML={{ __html: contentPage.introText }}
+            />
+          )}
+          {contentPage.bottomText && (
+            <div
+              className="typeset mb-8"
+              dangerouslySetInnerHTML={{ __html: contentPage.bottomText }}
+            />
+          )}
+          {contentPage.faqJson && contentPage.faqJson.length > 0 && (
+            <section>
+              <h2 className="mb-4 text-lg font-bold">
+                Frequently asked questions
+              </h2>
+              <div className="flex flex-col gap-4">
+                {contentPage.faqJson.map((item) => (
+                  <div key={item.question}>
+                    <h3 className="font-semibold">{item.question}</h3>
+                    <p className="text-muted-foreground">{item.answer}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </section>
+      )}
     </div>
   );
 }

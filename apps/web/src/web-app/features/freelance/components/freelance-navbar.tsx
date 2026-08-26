@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -91,15 +91,17 @@ const FreelanceNavbar = () => {
         >
           <IconSearch className="size-4.5" />
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full text-foreground/70 hover:bg-white/40 hover:text-foreground dark:hover:bg-white/10"
-          render={<Link href="/freelance/messages" />}
-          nativeButton={false}
+        <Link
+          href="/freelance/messages"
+          className={buttonVariants({
+            variant: "ghost",
+            size: "icon",
+            className:
+              "rounded-full text-foreground/70 hover:bg-white/40 hover:text-foreground dark:hover:bg-white/10",
+          })}
         >
           <IconMessageCircle className="size-4.5" />
-        </Button>
+        </Link>
         <Button
           variant="ghost"
           size="icon"

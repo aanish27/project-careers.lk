@@ -141,11 +141,11 @@ export const CLAUDE_SCHEMA_COMPANY_JOBS = {
                   {
                     type: 'string',
                     enum: [
-                      'Full-time',
-                      'Part-time',
-                      'Contract',
-                      'Internship',
-                      'Freelance',
+                      'full_time',
+                      'part_time',
+                      'contract',
+                      'internship',
+                      'freelance',
                     ],
                   },
                   { type: 'null' },
@@ -203,11 +203,11 @@ export const CLAUDE_SCHEMA_JOBS = {
                   {
                     type: 'string',
                     enum: [
-                      'Full-time',
-                      'Part-time',
-                      'Contract',
-                      'Internship',
-                      'Freelance',
+                      'full-time',
+                      'part-time',
+                      'contract',
+                      'internship',
+                      'freelance',
                     ],
                   },
                   { type: 'null' },

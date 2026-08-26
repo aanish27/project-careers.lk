@@ -1,11 +1,27 @@
-import { apiFetch, ApiError } from "@/lib/api-client";
-import type { SeoPageListItem, SeoPageResponse } from "../types";
+import { ApiError, apiFetch } from "@/lib/api-client";
+import type {
+  SeoContentResponse,
+  SeoPageListItem,
+  SeoPageResponse,
+} from "../types";
 
 export const seoPagesApi = {
   async getBySlug(slug: string): Promise<SeoPageResponse | null> {
     try {
       const { data } = await apiFetch<SeoPageResponse>(
         `/seo-pages/by-slug?slug=${encodeURIComponent(slug)}`,
+      );
+      return data;
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 404) return null;
+      throw error;
+    }
+  },
+
+  async getSeoContent(slug: string): Promise<SeoContentResponse | null> {
+    try {
+      const { data } = await apiFetch<SeoContentResponse>(
+        `/seo-pages/seo?slug=${encodeURIComponent(slug)}`,
       );
       return data;
     } catch (error) {

@@ -1,4 +1,4 @@
-import { EmploymentType } from '@careerslk/types';
+import { EmploymentType, WorkMode } from '@careerslk/types';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
@@ -24,20 +24,40 @@ const toArray = ({ value }: { value: unknown }): unknown => {
 };
 
 export class FilterPublicJobsDto {
+  @ApiPropertyOptional({ description: 'Seo slug' })
+  @IsOptional()
+  @IsString()
+  slug?: string;
+
+  @ApiPropertyOptional({ description: 'Free-text Title Match' })
+  @IsOptional()
+  @IsString()
+  title?: string;
+
   @ApiPropertyOptional({ description: 'Free-text location match' })
   @IsOptional()
   @IsString()
   location?: string;
 
-  @ApiPropertyOptional({ description: 'Province, e.g. "Central Province"' })
+  @ApiPropertyOptional({
+    description: 'Province, e.g. "Central Province"',
+    type: [String],
+  })
   @IsOptional()
-  @IsString()
-  province?: string;
+  @Transform(toArray)
+  @IsArray()
+  @IsString({ each: true })
+  province?: string[];
 
-  @ApiPropertyOptional({ description: 'District, e.g. "Kandy"' })
+  @ApiPropertyOptional({
+    description: 'District, e.g. "Kandy"',
+    type: [String],
+  })
   @IsOptional()
-  @IsString()
-  district?: string;
+  @Transform(toArray)
+  @IsArray()
+  @IsString({ each: true })
+  district?: string[];
 
   @ApiPropertyOptional({ description: 'City, e.g. "Kandy City"' })
   @IsOptional()
@@ -57,7 +77,7 @@ export class FilterPublicJobsDto {
   @Transform(toArray)
   @IsArray()
   @IsString({ each: true })
-  workMode?: string[];
+  workMode?: WorkMode[];
 
   @ApiPropertyOptional({ enum: EmploymentType, isArray: true })
   @IsOptional()

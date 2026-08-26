@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -18,15 +18,13 @@ function RowActions({ job }: { job: JobWithCompany }) {
     <Tooltip>
       <TooltipTrigger
         render={
-          <Button
-            variant="info"
-            size="icon-xs"
+          <Link
+            href={`/admin/jobs/${job.id}`}
             aria-label="View detail"
-            render={<Link href={`/admin/jobs/${job.id}`}></Link>}
-            nativeButton={false}
+            className={buttonVariants({ variant: "info", size: "icon-xs" })}
           >
             <IconEye />
-          </Button>
+          </Link>
         }
       />
       <TooltipContent>View detail</TooltipContent>

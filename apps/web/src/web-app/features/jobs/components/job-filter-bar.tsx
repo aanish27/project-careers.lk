@@ -1,33 +1,35 @@
 "use client";
 
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { getDistrictsForProvince, PROVINCES } from "@careerslk/types";
+  MultiSelect,
+  MultiSelectContent,
+  MultiSelectGroup,
+  MultiSelectItem,
+  MultiSelectTrigger,
+  MultiSelectValue,
+} from "@/components/ui/multi-select";
 import {
-  IconBriefcase,
-  IconBuildingSkyscraper,
-  IconMapPin,
-} from "@tabler/icons-react";
+  EmploymentType,
+  getDistrictsForProvince,
+  PROVINCES,
+  WorkMode,
+} from "@careerslk/types";
+import { IconBuildingSkyscraper } from "@tabler/icons-react";
+import { useMemo } from "react";
+import { JobFilters } from "../types";
+import { JobsBreadcrumb } from "./breadcrumb";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { IBreadcrumbItem } from "@web-app-features/ui/types";
 
 type JobFilterBarProps = {
-  resultCount: number;
-  province: string;
-  onProvinceChange: (value: string) => void;
-  district: string;
-  onDistrictChange: (value: string) => void;
-  workMode: string;
-  onWorkModeChange: (value: string) => void;
-  employmentType: string;
-  onEmploymentTypeChange: (value: string) => void;
-};
+  breadcrumbs?: IBreadcrumbItem[];
+  onProvinceChange: (value: string[]) => void;
+  onDistrictChange: (value: string[]) => void;
+  onWorkModeChange: (value: WorkMode[]) => void;
+  onEmploymentTypeChange: (value: EmploymentType[]) => void;
+} & Pick<JobFilters, "province" | "district" | "workMode" | "employmentType">;
 
 const JobFilterBar = ({
-  resultCount,
   province,
   onProvinceChange,
   district,
@@ -36,92 +38,114 @@ const JobFilterBar = ({
   onWorkModeChange,
   employmentType,
   onEmploymentTypeChange,
+  breadcrumbs,
 }: JobFilterBarProps) => {
-  const districts = getDistrictsForProvince(
-    province !== "all" ? province : undefined,
+  let districts = undefined;
+
+  if (province?.length == 1) {
+    districts = getDistrictsForProvince(province[0]);
+  }
+
+  const workModeOptions = useMemo(() => Object.values(WorkMode), []);
+  const employmentTypeOptions = useMemo(
+    () => Object.values(EmploymentType),
+    [],
   );
+  const provinceOptions = useMemo(() => Object.values(PROVINCES), []);
 
   return (
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-      <h2 className="text-xl font-bold text-foreground">
-        Jobs{" "}
-        <span className="text-xs font-normal text-muted-foreground">
-          ({resultCount})
-        </span>
-      </h2>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <Select
-          value={province}
-          onValueChange={(value) => onProvinceChange(value ?? "all")}
+    <div className="mb-4 flex items-center justify-between gap-4">
+      <JobsBreadcrumb breadcrumbs={breadcrumbs} />
+      <div className="flex items-center gap-3 ">
+        <MultiSelect
+          values={province ? province : undefined}
+          onValuesChange={(values) => onProvinceChange(values as string[])}
         >
-          <SelectTrigger className="gap-2 rounded-full border-border bg-white px-4">
-            <IconMapPin className="size-4 text-muted-foreground" />
-            <SelectValue placeholder="Province" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Provinces</SelectItem>
-            {PROVINCES.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <MultiSelectTrigger className="max-w-40.5 rounded-full">
+            <IconBuildingSkyscraper size="15" />
+            <MultiSelectValue
+              placeholder="Province"
+              overflowBehavior="cutoff"
+            />
+          </MultiSelectTrigger>
+          <MultiSelectContent>
+            <MultiSelectGroup>
+              {provinceOptions.map((province, index) => (
+                <MultiSelectItem key={index} value={province}>
+                  {province}
+                </MultiSelectItem>
+              ))}
+            </MultiSelectGroup>
+          </MultiSelectContent>
+        </MultiSelect>
 
-        <Select
-          value={district}
-          onValueChange={(value) => onDistrictChange(value ?? "all")}
+        <MultiSelect
+          values={district ? district : undefined}
+          onValuesChange={(values) => onDistrictChange(values as string[])}
         >
-          <SelectTrigger
-            className="gap-2 rounded-full border-border bg-white px-4"
-            disabled={province === "all"}
+          <MultiSelectTrigger
+            className="max-w-40.5 rounded-full"
+            disabled={districts ? false : true}
           >
-            <IconMapPin className="size-4 text-muted-foreground" />
-            <SelectValue placeholder="District" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Districts</SelectItem>
-            {districts.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+            <IconBuildingSkyscraper size="15" />
+            <MultiSelectValue
+              placeholder="District"
+              overflowBehavior="cutoff"
+            />
+          </MultiSelectTrigger>
+          <MultiSelectContent>
+            <MultiSelectGroup>
+              {districts?.map((district, index) => (
+                <MultiSelectItem key={index} value={district}>
+                  {district}
+                </MultiSelectItem>
+              ))}
+            </MultiSelectGroup>
+          </MultiSelectContent>
+        </MultiSelect>
 
-        <Select
-          value={workMode}
-          onValueChange={(value) => onWorkModeChange(value ?? "all")}
+        <MultiSelect
+          values={workMode ? workMode : undefined}
+          onValuesChange={(values) => onWorkModeChange(values as WorkMode[])}
         >
-          <SelectTrigger className="gap-2 rounded-full border-border bg-white px-4">
-            <IconBuildingSkyscraper className="size-4 text-muted-foreground" />
-            <SelectValue placeholder="Work Mode" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Work Modes</SelectItem>
-            <SelectItem value="onsite">On-Site</SelectItem>
-            <SelectItem value="remote">Remote</SelectItem>
-            <SelectItem value="hybrid">Hybrid</SelectItem>
-          </SelectContent>
-        </Select>
+          <MultiSelectTrigger className="max-w-40.5 rounded-full">
+            <IconBuildingSkyscraper size="15" />
+            <MultiSelectValue
+              placeholder="Work mode"
+              overflowBehavior="cutoff"
+            />
+          </MultiSelectTrigger>
+          <MultiSelectContent>
+            <MultiSelectGroup>
+              {workModeOptions.map((mode, index) => (
+                <MultiSelectItem key={index} value={mode}>
+                  {mode}
+                </MultiSelectItem>
+              ))}
+            </MultiSelectGroup>
+          </MultiSelectContent>
+        </MultiSelect>
 
-        <Select
-          value={employmentType}
-          onValueChange={(value) => onEmploymentTypeChange(value ?? "all")}
+        <MultiSelect
+          values={employmentType ? employmentType : undefined}
+          onValuesChange={(values) =>
+            onEmploymentTypeChange(values as EmploymentType[])
+          }
         >
-          <SelectTrigger className="gap-2 rounded-full border-border bg-white px-4">
-            <IconBriefcase className="size-4 text-muted-foreground" />
-            <SelectValue placeholder="Employment Type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="full_time">Full-Time</SelectItem>
-            <SelectItem value="part_time">Part-Time</SelectItem>
-            <SelectItem value="contract">Contract</SelectItem>
-            <SelectItem value="internship">Internship</SelectItem>
-          </SelectContent>
-        </Select>
+          <MultiSelectTrigger className="max-w-40.5 rounded-full">
+            <IconBuildingSkyscraper size="15" />
+            <MultiSelectValue placeholder="Type" overflowBehavior="cutoff" />
+          </MultiSelectTrigger>
+          <MultiSelectContent>
+            <MultiSelectGroup>
+              {employmentTypeOptions.map((mode, index) => (
+                <MultiSelectItem key={index} value={mode}>
+                  {mode.replace("_", " ")}
+                </MultiSelectItem>
+              ))}
+            </MultiSelectGroup>
+          </MultiSelectContent>
+        </MultiSelect>
       </div>
     </div>
   );

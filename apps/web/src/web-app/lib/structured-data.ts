@@ -1,4 +1,6 @@
 import type { PublicJobDetail } from "@web-app-features/jobs/types";
+import { seoPagesApi } from "../features/seo/api/api";
+import { IBreadcrumbItem } from "../features/ui/types";
 
 /**
  * SRS 12.6.4: only populate schema fields backed by actual data, never
@@ -63,13 +65,8 @@ export function buildJobPostingSchema(
   return schema;
 }
 
-export interface BreadcrumbItem {
-  name: string;
-  url: string;
-}
-
 export function buildBreadcrumbListSchema(
-  items: BreadcrumbItem[],
+  items: IBreadcrumbItem[],
 ): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
@@ -204,5 +201,37 @@ export function buildFaqPageSchema(
         text: item.answer,
       },
     })),
+  };
+}
+
+// SRS 12.8.1: every parameterized/filtered URL canonicalizes to the base
+// clean page. SRS 12.2.3: salary-filtered URLs specifically must never be
+// indexed (an explicit "never index" example).
+
+export async function buildMetaData() {
+  const result = await seoPagesApi.getSeoContent("jobs");
+  if (!result || result.page.retiredAt) return {};
+  const { page } = result;
+
+  return {
+    title: page.title,
+    description: page.metaDescription,
+    alternates: { canonical: page.canonicalUrl },
+    robots: page.isIndexable ? undefined : { index: false, follow: true },
+    openGraph: {
+      type: "website",
+      title: page.title,
+      description: page.metaDescription,
+      url: page.canonicalUrl,
+      images: [
+        { url: "/jobswala-logo.png", width: 360, height: 360, alt: "Jobswala" },
+      ],
+    },
+    twitter: {
+      card: "summary",
+      title: page.title,
+      description: page.metaDescription,
+      images: ["/jobswala-logo.png"],
+    },
   };
 }

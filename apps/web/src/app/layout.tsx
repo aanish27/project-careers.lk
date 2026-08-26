@@ -2,6 +2,7 @@ import { TooltipProvider } from "@ui/tooltip";
 import { cn } from "@utils/utils";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import "./globals.css";
 
 const interHeading = Inter({ subsets: ["latin"], variable: "--font-heading" });
@@ -49,7 +50,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         {/* <StoreProvider> */}
-        <TooltipProvider>{children}</TooltipProvider>
+        <NuqsAdapter>
+          <TooltipProvider>{children}</TooltipProvider>
+        </NuqsAdapter>
         {/* </StoreProvider> */}
       </body>
     </html>

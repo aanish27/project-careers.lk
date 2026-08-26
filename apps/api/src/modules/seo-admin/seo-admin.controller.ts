@@ -10,7 +10,11 @@ import { AuditContext, AuditService } from '@/modules/audit/audit.service';
 import { SeoGenerationService } from '@/modules/seo/seo-generation.service';
 import type { AuthenticatedPrincipal } from '@/modules/auth/interfaces/jwt-payload.interface';
 import { PERMISSIONS } from '@careerslk/lib';
-import { UpdateSeoPageInput, updateSeoPageSchema } from '@careerslk/types';
+import {
+  SeoPageType,
+  UpdateSeoPageInput,
+  updateSeoPageSchema,
+} from '@careerslk/types';
 import {
   Body,
   Controller,
@@ -50,9 +54,15 @@ export class SeoAdminController {
   @Get()
   @RequirePermissions(PERMISSIONS.SEO_READ)
   findAll(@Query() filters: FilterSeoPagesDto) {
+    const pageTypeIn = filters.pageTypes
+      ?.split(',')
+      .filter((value): value is SeoPageType =>
+        Object.values(SeoPageType).includes(value as SeoPageType),
+      );
+
     return this.prisma.seoPage.findMany({
       where: {
-        pageType: filters.pageType,
+        pageType: pageTypeIn ? { in: pageTypeIn } : filters.pageType,
         needsReview: filters.needsReview,
         manualOverride: filters.manualOverride,
       },

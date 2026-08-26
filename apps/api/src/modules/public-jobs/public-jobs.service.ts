@@ -4,8 +4,10 @@ import {
   JobApprovalStatus,
   JobStatus,
   SEO_RETIREMENT_DAYS,
+  SeoPageType,
 } from '@careerslk/types';
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { buildJobWhereForPage } from '../seo/seo-query.util';
 import { FilterPublicJobsDto } from './dto/filter-public-jobs.dto';
 
 interface JobCursor {
@@ -35,25 +37,58 @@ export class PublicJobsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(filters: FilterPublicJobsDto) {
-    const and: JobWhereInput[] = [
-      {
-        status: JobStatus.ACTIVE,
-        approvalStatus: JobApprovalStatus.APPROVED,
-        deletedAt: null,
-      },
-    ];
+    const and: JobWhereInput[] = [];
+
+    if (filters.slug) {
+      const page = await this.prisma.seoPage.findUniqueOrThrow({
+        where: { slug: filters.slug },
+        include: { location: { select: { name: true, level: true } } },
+      });
+
+      and.push(
+        buildJobWhereForPage({
+          pageType: page.pageType as SeoPageType,
+          sector: page.sector,
+          roleId: page.roleId,
+          location: page.location,
+          companyId: page.companyId,
+          skillId: page.skillId,
+        }),
+      );
+    }
+
+    if (filters.title) {
+      and.push({ title: { contains: filters.title, mode: 'insensitive' } });
+    }
 
     if (filters.location) {
       and.push({
-        location: { contains: filters.location, mode: 'insensitive' },
+        OR: [
+          { district: { contains: filters.location, mode: 'insensitive' } },
+          { province: { contains: filters.location, mode: 'insensitive' } },
+          { city: { contains: filters.city, mode: 'insensitive' } },
+        ],
       });
     }
-    if (filters.province) {
-      and.push({ province: { equals: filters.province, mode: 'insensitive' } });
+
+    if (filters.province?.length) {
+      and.push({
+        province: { in: filters.province, mode: 'insensitive' },
+      });
     }
-    if (filters.district) {
-      and.push({ district: { equals: filters.district, mode: 'insensitive' } });
+
+    if (filters.district?.length) {
+      and.push({
+        district: { in: filters.district, mode: 'insensitive' },
+      });
     }
+
+    if (filters.district?.length) {
+      and.push({
+        district: { in: filters.district, mode: 'insensitive' },
+      });
+    }
+
     if (filters.city) {
       and.push({ city: { equals: filters.city, mode: 'insensitive' } });
     }

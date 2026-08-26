@@ -7,6 +7,8 @@ import { api } from "@dashboard-lib/axios";
 
 export interface SeoPageFilters {
   pageType?: string;
+  /** Comma-separated list of page types — see FilterSeoPagesDto on the API. */
+  pageTypes?: string;
   needsReview?: boolean;
   manualOverride?: boolean;
 }

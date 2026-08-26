@@ -1,19 +1,15 @@
 "use server";
 
-import { saveJobRequest, unsaveJobRequest } from "@web-app-lib/web-user-client";
-import { getValidWebUserAccessToken } from "@web-app-lib/web-user-session";
+import { apiFetch } from "@/lib/api-client";
 
-export type SaveJobResult =
-  | { ok: true }
-  | { requiresAuth: true }
-  | { error: string };
+export type SaveJobResult = { ok: true } | { error: string };
 
 export async function saveJob(jobId: number): Promise<SaveJobResult> {
-  const accessToken = await getValidWebUserAccessToken();
-  if (!accessToken) return { requiresAuth: true };
-
   try {
-    await saveJobRequest(accessToken, jobId);
+    await apiFetch(`/web-users/jobs/${jobId}/save`, {
+      method: "POST",
+      auth: true,
+    });
     return { ok: true };
   } catch {
     return { error: "Something went wrong. Please try again." };
@@ -21,11 +17,11 @@ export async function saveJob(jobId: number): Promise<SaveJobResult> {
 }
 
 export async function unsaveJob(jobId: number): Promise<SaveJobResult> {
-  const accessToken = await getValidWebUserAccessToken();
-  if (!accessToken) return { requiresAuth: true };
-
   try {
-    await unsaveJobRequest(accessToken, jobId);
+    await apiFetch(`/web-users/jobs/${jobId}/save`, {
+      method: "DELETE",
+      auth: true,
+    });
     return { ok: true };
   } catch {
     return { error: "Something went wrong. Please try again." };

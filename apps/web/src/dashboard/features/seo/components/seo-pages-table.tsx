@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -11,6 +11,7 @@ import { IconEye, IconRefresh } from "@tabler/icons-react";
 import { DataTable, useDataTable } from "@ui/data-table";
 import Link from "next/link";
 import { useGenerateAllSeoPages } from "../hooks/use-seo-page-actions";
+import type { SeoPageFilters } from "../api/api";
 import { useSeoPages } from "../hooks/use-seo-pages";
 import { columns } from "./columns";
 
@@ -19,15 +20,13 @@ function RowActions({ page }: { page: SeoPageSummary }) {
     <Tooltip>
       <TooltipTrigger
         render={
-          <Button
-            variant="outline"
-            size="icon-xs"
+          <Link
+            href={`/admin/seo/${page.id}`}
             aria-label="View detail"
-            render={<Link href={`/admin/seo/${page.id}`}></Link>}
-            nativeButton={false}
+            className={buttonVariants({ variant: "outline", size: "icon-xs" })}
           >
             <IconEye />
-          </Button>
+          </Link>
         }
       />
       <TooltipContent>View detail</TooltipContent>
@@ -35,15 +34,21 @@ function RowActions({ page }: { page: SeoPageSummary }) {
   );
 }
 
-export function SeoPagesTable() {
-  const { data } = useSeoPages();
+export function SeoPagesTable({
+  filters,
+  title = "SEO Pages",
+}: {
+  filters?: SeoPageFilters;
+  title?: string;
+} = {}) {
+  const { data } = useSeoPages(filters);
   const generateAll = useGenerateAllSeoPages();
 
   const table = useDataTable({
     columns,
     data: data ?? [],
     getRowId: (row) => String(row.id),
-    title: "SEO Pages",
+    title,
     enableColumnResizing: true,
     enableGrouping: true,
     renderRowActions: ({ row }) => <RowActions page={row.original} />,

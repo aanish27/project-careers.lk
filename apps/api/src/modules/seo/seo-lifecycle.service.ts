@@ -36,9 +36,11 @@ export class SeoLifecycleService {
     const graceThreshold = daysAgo(SEO_DEACTIVATION_GRACE_DAYS);
     const retirementThreshold = daysAgo(SEO_RETIREMENT_DAYS);
 
-    // ALL_JOBS is always indexable by definition (decision #10) — exempt.
+    // ALL_JOBS/HOME are always indexable by definition (decision #10) — exempt.
     const pages = await this.prisma.seoPage.findMany({
-      where: { pageType: { not: SeoPageType.ALL_JOBS } },
+      where: {
+        pageType: { notIn: [SeoPageType.ALL_JOBS, SeoPageType.HOME] },
+      },
     });
 
     const summary: SeoLifecycleSummary = {
@@ -48,7 +50,7 @@ export class SeoLifecycleService {
     };
 
     for (const page of pages) {
-      const threshold = SEO_PAGE_THRESHOLDS[page.pageType];
+      const threshold = SEO_PAGE_THRESHOLDS[page.pageType as SeoPageType];
       const belowThreshold = page.jobCount < threshold;
 
       if (belowThreshold) {

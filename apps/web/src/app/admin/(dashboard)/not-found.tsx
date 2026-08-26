@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { FileQuestion } from "lucide-react";
-import { Button } from "@ui/button";
+import { buttonVariants } from "@ui/button";
 
 export default function DashboardNotFound() {
   return (
@@ -16,10 +16,9 @@ export default function DashboardNotFound() {
           This page doesn&apos;t exist, or you don&apos;t have access to it.
         </p>
       </div>
-      <Button
-        render={<Link href="/admin">Back to dashboard</Link>}
-        nativeButton={false}
-      />
+      <Link href="/admin" className={buttonVariants()}>
+        Back to dashboard
+      </Link>
     </div>
   );
 }

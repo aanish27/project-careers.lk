@@ -1,3 +1,5 @@
+import { EmploymentType, WorkMode } from "@careerslk/types";
+
 export interface PublicJobCompany {
   id: number;
   name: string;
@@ -15,8 +17,8 @@ export interface PublicJob {
   title: string;
   slug: string;
   location: string | null;
-  workMode: string | null;
-  employmentType: string | null;
+  workMode: WorkMode | null;
+  employmentType: EmploymentType | null;
   sector: string | null;
   roleCategory: string | null;
   salaryMin: number | null;
@@ -66,4 +68,22 @@ export interface PublicJobDetailResponse {
     sameCompany: RelatedJobSummary[];
     sameRole: RelatedJobWithCompany[];
   };
+}
+
+export interface JobFilters {
+  title?: string;
+  slug?: string;
+  location?: string;
+  province?: string[];
+  district?: string[];
+  sector?: string;
+  workMode?: WorkMode[];
+  employmentType?: EmploymentType[];
+  keywords?: string[];
+  salaryMin?: number;
+  salaryMax?: number;
+  company?: string;
+  q?: string;
+  cursor?: string;
+  limit?: number;
 }

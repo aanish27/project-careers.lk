@@ -1,6 +1,7 @@
 "use client";
 
-import { BubbleMenu, type Editor } from "@tiptap/react";
+import { BubbleMenu } from "@tiptap/react/menus";
+import type { Editor } from "@tiptap/react";
 import { BoldToolbar } from "../toolbars/bold";
 import { ItalicToolbar } from "../toolbars/italic";
 import { UnderlineToolbar } from "../toolbars/underline";
@@ -24,13 +25,13 @@ export function FloatingToolbar({ editor }: { editor: Editor | null }) {
 
   // Prevent default context menu on mobile
   useEffect(() => {
-    if (!editor?.options.element || !isMobile) return;
+    if (!editor?.view || !isMobile) return;
 
     const handleContextMenu = (e: Event) => {
       e.preventDefault();
     };
 
-    const el = editor.options.element;
+    const el = editor.view.dom;
     el.addEventListener("contextmenu", handleContextMenu);
 
     return () => el.removeEventListener("contextmenu", handleContextMenu);
@@ -42,10 +43,9 @@ export function FloatingToolbar({ editor }: { editor: Editor | null }) {
     return (
       <TooltipProvider>
         <BubbleMenu
-          tippyOptions={{
-            duration: 100,
+          options={{
             placement: "bottom",
-            offset: [0, 10],
+            offset: { mainAxis: 10, crossAxis: 0 },
           }}
           shouldShow={() => {
             // Show toolbar when editor is focused and has selection

@@ -9,7 +9,7 @@ import {
 } from "@web-app-lib/web-user-client";
 import { fetchMyFreelanceProfileRequest } from "@web-app-lib/freelance-client";
 import { verifyWebUserSession } from "@web-app-lib/web-user-session";
-import { Button } from "@ui/button";
+import { Button, buttonVariants } from "@ui/button";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -56,16 +56,16 @@ export default async function ProfilePage() {
       <div>
         <h2 className="mb-2 text-lg font-semibold">Company</h2>
         {user.companyId ? (
-          <Button
-            variant="outline"
-            render={<Link href="/company">Manage your company</Link>}
-            nativeButton={false}
-          />
+          <Link
+            href="/company"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Manage your company
+          </Link>
         ) : (
-          <Button
-            render={<Link href="/company">Set up your company</Link>}
-            nativeButton={false}
-          />
+          <Link href="/company" className={buttonVariants()}>
+            Set up your company
+          </Link>
         )}
       </div>
 
@@ -73,40 +73,32 @@ export default async function ProfilePage() {
         <h2 className="mb-2 text-lg font-semibold">Freelance</h2>
         <div className="flex flex-wrap gap-2">
           {freelanceProfile ? (
-            <Button
-              variant="outline"
-              render={
-                <Link href="/freelance/profile/edit">
-                  Manage your freelance profile
-                </Link>
-              }
-              nativeButton={false}
-            />
+            <Link
+              href="/freelance/profile/edit"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              Manage your freelance profile
+            </Link>
           ) : (
-            <Button
-              variant="outline"
-              render={
-                <Link href="/freelance/profile/edit">
-                  Set up your freelance profile
-                </Link>
-              }
-              nativeButton={false}
-            />
+            <Link
+              href="/freelance/profile/edit"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              Set up your freelance profile
+            </Link>
           )}
-          <Button
-            render={<Link href="/freelance/gigs/new">Post a gig</Link>}
-            nativeButton={false}
-          />
+          <Link href="/freelance/gigs/new" className={buttonVariants()}>
+            Post a gig
+          </Link>
         </div>
       </div>
 
       <div>
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold">My job postings</h2>
-          <Button
-            render={<Link href="/post-job">Post a job</Link>}
-            nativeButton={false}
-          />
+          <Link href="/post-job" className={buttonVariants()}>
+            Post a job
+          </Link>
         </div>
         <MyJobsList jobs={myJobs} />
       </div>

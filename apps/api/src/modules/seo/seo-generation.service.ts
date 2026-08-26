@@ -222,14 +222,23 @@ export class SeoGenerationService {
       );
     }
     await this.generateOne(
-      { pageType: SeoPageType.REMOTE, slug: 'remote-jobs' },
+      { pageType: SeoPageType.REMOTE, slug: 'jobs/remote-jobs' },
       summary,
     );
 
     await this.generateOne(
-      { pageType: SeoPageType.INTERNSHIP, slug: 'internships' },
+      { pageType: SeoPageType.INTERNSHIP, slug: 'jobs/internship' },
       summary,
     );
+
+    // Singleton pages — one row each, threshold 0 (always indexable),
+    // content stays static template copy until an admin sets
+    // manualOverride via a normal edit (same mechanism as every other type).
+    await this.generateOne(
+      { pageType: SeoPageType.ALL_JOBS, slug: 'jobs' },
+      summary,
+    );
+    await this.generateOne({ pageType: SeoPageType.HOME, slug: '' }, summary);
 
     this.logger.log(`SEO generation complete: ${JSON.stringify(summary)}`);
     return summary;
@@ -273,7 +282,7 @@ export class SeoGenerationService {
 
     await this.generateOne(
       {
-        pageType: page.pageType,
+        pageType: page.pageType as SeoPageType,
         slug: page.slug,
         sector: page.sector ?? undefined,
         role: role ?? undefined,

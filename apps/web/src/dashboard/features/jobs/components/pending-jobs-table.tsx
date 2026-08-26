@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -25,15 +25,16 @@ function RowActions({ job }: { job: JobWithCompany }) {
       <Tooltip>
         <TooltipTrigger
           render={
-            <Button
-              variant="outline"
-              size="icon-xs"
+            <Link
+              href={`/admin/jobs/${job.id}`}
               aria-label="View detail"
-              render={<Link href={`/admin/jobs/${job.id}`}></Link>}
-              nativeButton={false}
+              className={buttonVariants({
+                variant: "outline",
+                size: "icon-xs",
+              })}
             >
               <IconEye />
-            </Button>
+            </Link>
           }
         />
         <TooltipContent>View detail</TooltipContent>

@@ -39,7 +39,7 @@ export default async function RemoteRolePage({ params }: RemoteRolePageProps) {
       relatedLinks={relatedLinks}
       breadcrumbs={[
         { name: "Home", url: "/" },
-        { name: "Remote Jobs", url: "/remote-jobs" },
+        { name: "Remote Jobs", url: "/jobs/remote-jobs" },
         { name: page.h1, url: `/jobs/remote/${role}` },
       ]}
     />

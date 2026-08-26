@@ -14,6 +14,7 @@ export const SEO_PAGE_THRESHOLDS: Record<SeoPageType, number> = {
   INTERNSHIP: 5,
   // Always indexable — a single static page, not a generated aggregate.
   ALL_JOBS: 0,
+  HOME: 0,
 } as const;
 
 /** SRS 12.13.3 — grace period before an under-threshold page deactivates. */

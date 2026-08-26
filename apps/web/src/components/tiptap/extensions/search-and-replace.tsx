@@ -36,6 +36,10 @@ declare module "@tiptap/core" {
       setCaseSensitive: (caseSensitive: boolean) => ReturnType;
     };
   }
+
+  interface Storage {
+    searchAndReplace: SearchAndReplaceStorage;
+  }
 }
 
 interface TextNodeWithPosition {
@@ -191,7 +195,7 @@ const replaceAll = (
     }
   }
 
-  dispatch(tr);
+  dispatch?.(tr);
 };
 
 const selectNext = (editor: CoreEditor) => {
