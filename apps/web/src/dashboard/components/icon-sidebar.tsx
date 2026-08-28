@@ -6,6 +6,7 @@ import { Button, buttonVariants } from "@ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -83,16 +84,20 @@ export const IconSidebar = () => {
             <TooltipContent side="right">Settings</TooltipContent>
           </Tooltip>
           <DropdownMenuContent side="right" align="end" className="w-48">
-            <DropdownMenuLabel className="text-xs">Settings</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer text-xs">
-              <Settings className="mr-2 h-3 w-3" />
-              Preferences
-            </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer text-xs">
-              <FileText className="mr-2 h-3 w-3" />
-              Help & Support
-            </DropdownMenuItem>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="text-xs">
+                Settings
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="cursor-pointer text-xs">
+                <Settings className="mr-2 h-3 w-3" />
+                Preferences
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer text-xs">
+                <FileText className="mr-2 h-3 w-3" />
+                Help & Support
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

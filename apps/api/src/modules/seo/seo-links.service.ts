@@ -36,6 +36,7 @@ export class SeoLinksService {
           ? this.roleLinks(params.role.id, params.role.name, true)
           : this.topRoleLinks();
       case SeoPageType.INTERNSHIP:
+      case SeoPageType.TALENT_POOL:
         return this.topRoleLinks();
       case SeoPageType.COMPANY:
       case SeoPageType.ALL_JOBS:

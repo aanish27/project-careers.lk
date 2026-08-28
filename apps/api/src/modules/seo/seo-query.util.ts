@@ -33,6 +33,14 @@ export function buildJobWhereForPage(dims: SeoPageDimensions): JobWhereInput {
     approvalStatus: JobApprovalStatus.APPROVED,
   };
 
+  // Talent-pool postings aren't open roles — keep them off every page
+  // except their own dedicated hub.
+  if (dims.pageType !== SeoPageType.TALENT_POOL) {
+    where.NOT = {
+      employmentType: { equals: 'talent_pool', mode: 'insensitive' },
+    };
+  }
+
   if (dims.sector) where.sector = dims.sector;
   if (dims.roleId) where.seoRoleId = dims.roleId;
   if (dims.location) {
@@ -58,6 +66,9 @@ export function buildJobWhereForPage(dims: SeoPageDimensions): JobWhereInput {
   }
   if (dims.pageType === SeoPageType.INTERNSHIP) {
     where.employmentType = { equals: 'internship', mode: 'insensitive' };
+  }
+  if (dims.pageType === SeoPageType.TALENT_POOL) {
+    where.employmentType = { equals: 'talent_pool', mode: 'insensitive' };
   }
 
   return where;

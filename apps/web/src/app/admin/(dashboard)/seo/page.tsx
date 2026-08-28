@@ -17,6 +17,7 @@ const JOBS_PAGE_TYPES = [
   SeoPageType.SKILL, // jobs/skills/...
   SeoPageType.REMOTE, // jobs/remote/..., jobs/remote-jobs
   SeoPageType.INTERNSHIP, // jobs/internship
+  SeoPageType.TALENT_POOL, // jobs/talent-pools
   SeoPageType.ALL_JOBS, // jobs
 ].join(",");
 

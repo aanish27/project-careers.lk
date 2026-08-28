@@ -231,6 +231,11 @@ export class SeoGenerationService {
       summary,
     );
 
+    await this.generateOne(
+      { pageType: SeoPageType.TALENT_POOL, slug: 'jobs/talent-pools' },
+      summary,
+    );
+
     // Singleton pages — one row each, threshold 0 (always indexable),
     // content stays static template copy until an admin sets
     // manualOverride via a normal edit (same mechanism as every other type).

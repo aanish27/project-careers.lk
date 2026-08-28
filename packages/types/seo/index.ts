@@ -12,6 +12,7 @@ export const SEO_PAGE_THRESHOLDS: Record<SeoPageType, number> = {
   COMPANY: 3,
   REMOTE: 5,
   INTERNSHIP: 5,
+  TALENT_POOL: 5,
   // Always indexable — a single static page, not a generated aggregate.
   ALL_JOBS: 0,
   HOME: 0,

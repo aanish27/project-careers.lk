@@ -45,3 +45,11 @@ export interface SeoPageListItem {
   pageType: string;
   lastmod: string;
 }
+
+export interface PseoSearchParams {
+  province?: string;
+  district?: string;
+  workMode?: string;
+  employmentType?: string;
+  [key: string]: string | string[] | undefined;
+}

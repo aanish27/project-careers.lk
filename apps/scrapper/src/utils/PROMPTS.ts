@@ -165,7 +165,7 @@ OUTPUT SCHEMA:
       "location": string | null,
       ${CITY_SCHEMA_LINE}
       "work_mode": "hybrid" | "remote" | "onsite",
-      "employment_type": "full_time" | "part_time" | "contract" | "internship" | "Freelance" | null,
+      "employment_type": "full_time" | "part_time" | "contract" | "internship" | "Freelance" | "talent_pool" | null,
       ${ROLE_CATEGORY_SCHEMA_LINE}
       "description": string | null,
       "apply_url": string,
@@ -268,7 +268,8 @@ work_mode
 
 employment_type
 - Map any variation to the closest enum value.
-- Examples: "Permanent" → "Full-fime_, "Freelance contract" p_"Freelance", "Graduate crogram" → "internship"
+- Examples: "Permanent" → "full_time", "Freelance contract" → "Freelance", "Graduate program" → "internship".
+- "Join our talent pool", "talent community", "register your interest for future roles" (a general interest/CV-bank listing not tied to one specific role) → "talent_pool".
 - null if completely absent or ambiguous.
 
 ${ROLE_CATEGORY_FIELD_RULES}
@@ -322,7 +323,7 @@ OUTPUT SCHEMA — each object in the array must follow this exact structure:
   "location": string | null,
   ${CITY_SCHEMA_LINE}
   "work_mode": "hybrid" | "remote" | "onsite",
-  "employment_type": "full_time" | "part_time" | "contract" | "internship" | "Freelance" | null,
+  "employment_type": "full_time" | "part_time" | "contract" | "internship" | "Freelance" | "talent_pool" | null,
   ${ROLE_CATEGORY_SCHEMA_LINE}
   "description": string | null,
   "apply_url": string,
@@ -352,7 +353,8 @@ work_mode
 
 employment_type
 - Map any variation to the closest enum value.
-- Examples: "Permanent" → "Full-fime_, "Freelance contract" p_"Freelance", "Graduate crogram" → "internship"
+- Examples: "Permanent" → "full_time", "Freelance contract" → "Freelance", "Graduate program" → "internship".
+- "Join our talent pool", "talent community", "register your interest for future roles" (a general interest/CV-bank listing not tied to one specific role) → "talent_pool".
 - null if completely absent or ambiguous.
 
 ${ROLE_CATEGORY_FIELD_RULES}

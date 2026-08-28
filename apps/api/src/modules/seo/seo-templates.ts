@@ -285,6 +285,34 @@ function internshipTemplates(input: SeoInputObject): SeoTemplateOutput[] {
   ];
 }
 
+function talentPoolTemplates(input: SeoInputObject): SeoTemplateOutput[] {
+  return [
+    {
+      title: 'Talent Pools in Sri Lanka',
+      metaDescription: `Join talent pools from top companies in Sri Lanka and get considered for future openings. ${input.jobCount} talent pools currently open.`,
+      h1: 'Talent Pools',
+      introText: `Browse ${input.jobCount} talent pools across ${input.companyCount} companies in Sri Lanka. Register your interest and get considered as new roles open up.`,
+      bottomText: `Talent pools let employers keep promising candidates on file for roles that aren't open yet, spanning ${joinList(input.workModes)} work modes and skills such as ${joinList(input.topSkills)}.`,
+    },
+    {
+      title: 'Join a Talent Pool — Sri Lanka',
+      metaDescription:
+        'Register your interest with employers across Sri Lanka building talent pools for upcoming roles.',
+      h1: 'Talent Pool Openings',
+      introText: `Explore ${input.jobCount} talent pool openings from ${input.companyCount} employers hiring across Sri Lanka.`,
+      bottomText: `Candidates can join talent pools to be considered for future roles, most commonly requiring exposure to ${joinList(input.topSkills)}.`,
+    },
+    {
+      title: 'Talent Pool Programs in Sri Lanka',
+      metaDescription:
+        'Discover talent pool programs across multiple industries and company types in Sri Lanka.',
+      h1: 'Talent Pool Programs',
+      introText: `Discover ${input.jobCount} talent pool programs across ${input.companyCount} companies in Sri Lanka.`,
+      bottomText: `Talent pool programs currently listed span multiple industries, with common exposure to ${joinList(input.topSkills)}.`,
+    },
+  ];
+}
+
 const TEMPLATES_BY_PAGE_TYPE: Record<
   SeoPageType,
   (input: SeoInputObject) => SeoTemplateOutput[]
@@ -297,6 +325,7 @@ const TEMPLATES_BY_PAGE_TYPE: Record<
   [SeoPageType.COMPANY]: companyTemplates,
   [SeoPageType.REMOTE]: remoteTemplates,
   [SeoPageType.INTERNSHIP]: internshipTemplates,
+  [SeoPageType.TALENT_POOL]: talentPoolTemplates,
   // ALL_JOBS/HOME are singleton pages with static default copy — an admin
   // can still override title/intro/bottom/FAQ via manualOverride, same as
   // every other page type.

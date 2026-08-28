@@ -208,8 +208,8 @@ export function buildFaqPageSchema(
 // clean page. SRS 12.2.3: salary-filtered URLs specifically must never be
 // indexed (an explicit "never index" example).
 
-export async function buildMetaData() {
-  const result = await seoPagesApi.getSeoContent("jobs");
+export async function buildMetaData(slug: string) {
+  const result = await seoPagesApi.getSeoContent(slug);
   if (!result || result.page.retiredAt) return {};
   const { page } = result;
 

@@ -21,7 +21,7 @@ type JobsPageProps = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  return buildMetaData();
+  return buildMetaData("jobs");
 }
 
 export default async function JobsPage({ searchParams }: JobsPageProps) {

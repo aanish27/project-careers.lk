@@ -1,27 +1,51 @@
+import { buttonVariants } from "@/components/ui/button";
 import {
+  IconArrowRight,
   IconBrandFacebook,
   IconBrandInstagram,
   IconBrandLinkedin,
   IconBrandX,
 } from "@tabler/icons-react";
 import Image from "next/image";
+import Link from "next/link";
 
-const FOOTER_LINKS = [
+const FOOTER_LINKS: {
+  heading: string;
+  links: { label: string; href: string }[];
+}[] = [
   {
     heading: "For Candidates",
-    links: ["Browse Jobs", "Browse Categories", "Career Advice", "Saved Jobs"],
+    links: [
+      { label: "Browse Jobs", href: "/jobs" },
+      { label: "Browse Freelance Gigs", href: "/freelance" },
+      { label: "Find Freelancers", href: "/freelance/freelancers" },
+      { label: "My Profile", href: "/profile" },
+    ],
   },
   {
     heading: "For Employers",
-    links: ["Post a Job", "Pricing", "Employer Dashboard", "Talent Search"],
+    links: [
+      { label: "Post a Job", href: "/post-job" },
+      { label: "Employer Dashboard", href: "/company" },
+      { label: "Talent Search", href: "/freelance/freelancers" },
+    ],
   },
   {
     heading: "Company",
-    links: ["About Us", "Careers", "Blog", "Contact"],
+    links: [
+      { label: "About Us", href: "#" },
+      { label: "Careers", href: "#" },
+      { label: "Blog", href: "#" },
+      { label: "Contact", href: "#" },
+    ],
   },
   {
     heading: "Legal",
-    links: ["Terms of Service", "Privacy Policy", "Cookie Policy"],
+    links: [
+      { label: "Terms of Service", href: "#" },
+      { label: "Privacy Policy", href: "#" },
+      { label: "Cookie Policy", href: "#" },
+    ],
   },
 ];
 
@@ -34,33 +58,79 @@ const SOCIAL_LINKS = [
 
 export function Footer() {
   return (
-    <footer className="mt-24 border-t border-border pb-10 pt-12">
-      <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-5">
+    <footer className="mt-24 pb-10">
+      <div className="mb-16 flex flex-col items-center justify-between gap-6 rounded-3xl border border-primary/15 bg-primary/5 p-8 text-center sm:flex-row sm:text-left">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">
+            Your next opportunity starts here.
+          </h2>
+          <p className="mt-1 text-muted-foreground">
+            Fresh roles added daily from companies across Sri Lanka.
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-3">
+          <Link
+            href="/jobs"
+            className={buttonVariants({
+              size: "lg",
+              className: "rounded-lg font-semibold",
+            })}
+          >
+            Browse jobs <IconArrowRight className="size-4" />
+          </Link>
+          <Link
+            href="/post-job"
+            className={buttonVariants({
+              size: "lg",
+              variant: "outline",
+              className: "rounded-lg font-semibold",
+            })}
+          >
+            Post a job
+          </Link>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-10 border-t border-border pt-12 sm:grid-cols-2 lg:grid-cols-5">
         <div className="lg:col-span-1">
-          <Image
-            src="/jobswala-logo.png"
-            alt="logo"
-            width={100}
-            height={100}
-            className="h-auto w-15"
-          />
+          <Link href="/">
+            <Image
+              src="/jobswala-logo.png"
+              alt="Jobswala logo"
+              width={100}
+              height={100}
+              className="h-auto w-15"
+            />
+          </Link>
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">
             Aggregated tech jobs from high-growth sources, curated for
             precision.
           </p>
+          <div className="mt-5 flex items-center gap-3">
+            {SOCIAL_LINKS.map(({ icon: Icon, label }) => (
+              <a
+                key={label}
+                href="#"
+                aria-label={label}
+                className="flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              >
+                <Icon className="size-4" />
+              </a>
+            ))}
+          </div>
         </div>
         {FOOTER_LINKS.map(({ heading, links }) => (
           <div key={heading}>
             <p className="mb-4 font-semibold text-foreground">{heading}</p>
             <ul className="flex flex-col gap-3">
-              {links.map((link) => (
-                <li key={link}>
-                  <a
-                    href="#"
+              {links.map(({ label, href }) => (
+                <li key={label}>
+                  <Link
+                    href={href}
                     className="text-sm text-muted-foreground hover:text-foreground"
                   >
-                    {link}
-                  </a>
+                    {label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -72,18 +142,9 @@ export function Footer() {
         <p className="text-sm text-muted-foreground">
           © {new Date().getFullYear()} Jobswala. All rights reserved.
         </p>
-        <div className="flex items-center gap-4">
-          {SOCIAL_LINKS.map(({ icon: Icon, label }) => (
-            <a
-              key={label}
-              href="#"
-              aria-label={label}
-              className="flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
-            >
-              <Icon className="size-4" />
-            </a>
-          ))}
-        </div>
+        <p className="text-sm text-muted-foreground">
+          Made for job seekers and employers in Sri Lanka.
+        </p>
       </div>
     </footer>
   );

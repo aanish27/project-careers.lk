@@ -34,12 +34,16 @@ async function loadSeoLookupMaps(prisma: PrismaClient): Promise<SeoLookupMaps> {
   };
 }
 
-const EMPLOYMENT_TYPES = [
-  'full_time',
-  'part_time',
-  'contract',
-  'internship',
-  'freelance',
+// Talent-pool postings are rare in practice (a company collecting general
+// interest, not hiring for a specific role), so they get a much lower
+// weight than the other employment types rather than an even split.
+const EMPLOYMENT_TYPE_WEIGHTS = [
+  { value: 'full_time', weight: 5 },
+  { value: 'part_time', weight: 2 },
+  { value: 'contract', weight: 2 },
+  { value: 'internship', weight: 2 },
+  { value: 'freelance', weight: 2 },
+  { value: 'talent_pool', weight: 1 },
 ];
 
 const WORK_MODES = ['hybrid', 'remote', 'onsite'];
@@ -111,7 +115,9 @@ async function seedJobForCompany(
       district,
       city,
       workMode: faker.helpers.arrayElement(WORK_MODES),
-      employmentType: faker.helpers.arrayElement(EMPLOYMENT_TYPES),
+      employmentType: faker.helpers.weightedArrayElement(
+        EMPLOYMENT_TYPE_WEIGHTS,
+      ),
       roleCategory,
       sector: getSectorForCategory(roleCategory),
       seoRoleId,

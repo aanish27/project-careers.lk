@@ -1,13 +1,18 @@
 import { ApiError } from "@/lib/api-client";
+import { loadJobFilters } from "@/web-app/features/jobs/hooks/job-filters-search-params";
 import StructuredData from "@web-app-components/structured-data";
 import { jobsApi } from "@web-app-features/jobs/api/api";
 import { JobDetailActions } from "@web-app-features/jobs/components/job-detail-actions";
+import JobsListing from "@web-app-features/jobs/components/jobs-listing";
 import type { PublicJobDetailResponse } from "@web-app-features/jobs/types";
 import PseoPageLayout from "@web-app-features/seo/components/pseo-page-layout";
 import { seoPagesApi } from "@web-app-features/seo/api/api";
+import type { PseoSearchParams } from "@web-app-features/seo/types";
+import { IBreadcrumbItem } from "@web-app-features/ui/types";
 import {
   buildBreadcrumbListSchema,
   buildJobPostingSchema,
+  buildMetaData,
 } from "@web-app-lib/structured-data";
 import { IconExternalLink } from "@tabler/icons-react";
 import type { Metadata } from "next";
@@ -36,10 +41,12 @@ const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
   contract: "Contract",
   internship: "Internship",
   freelance: "Freelance",
+  talent_pool: "Talent Pool",
 };
 
 type SlugPageProps = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<PseoSearchParams>;
 };
 
 async function loadJob(slug: string): Promise<PublicJobDetailResponse | null> {
@@ -86,45 +93,51 @@ async function generateJobMetadata(slug: string): Promise<Metadata> {
   };
 }
 
-async function generateRoleMetadata(slug: string): Promise<Metadata> {
-  const result = await seoPagesApi.getBySlug(`jobs/${slug}`);
-  if (!result || result.page.retiredAt) return {};
-
-  const { page } = result;
-  return {
-    title: page.title,
-    description: page.metaDescription,
-    alternates: { canonical: page.canonicalUrl },
-    robots: page.isIndexable ? undefined : { index: false, follow: true },
-  };
-}
-
 export async function generateMetadata({
   params,
 }: SlugPageProps): Promise<Metadata> {
   const { slug } = await params;
   return isJobSlug(slug)
     ? generateJobMetadata(slug)
-    : generateRoleMetadata(slug);
+    : buildMetaData(`jobs/${slug}`);
 }
 
-async function RolePage({ slug }: { slug: string }) {
-  const result = await seoPagesApi.getBySlug(`jobs/${slug}`);
-  if (!result || result.page.retiredAt) notFound();
+async function RolePage({
+  slug,
+  searchParams,
+}: {
+  slug: string;
+  searchParams: SlugPageProps["searchParams"];
+}) {
+  const pageSlug = `jobs/${slug}`;
+  const filters = await loadJobFilters(searchParams);
 
-  const { page, jobs, relatedLinks } = result;
+  const [firstPage, seoContent] = await Promise.all([
+    jobsApi.list({ ...filters, slug: pageSlug }),
+    seoPagesApi.getSeoContent(pageSlug),
+  ]);
+
+  if (!seoContent || seoContent.page.retiredAt) notFound();
+
+  const { page, relatedLinks } = seoContent;
+  const breadcrumbs: IBreadcrumbItem[] = [
+    { name: "Jobs", url: "/jobs" },
+    { name: page.h1, url: `/${pageSlug}` },
+  ];
 
   return (
     <PseoPageLayout
       page={page}
-      jobs={jobs}
       relatedLinks={relatedLinks}
-      breadcrumbs={[
-        { name: "Home", url: "/" },
-        { name: "Jobs", url: "/jobs" },
-        { name: page.h1, url: `/jobs/${slug}` },
-      ]}
-    />
+      breadcrumbs={breadcrumbs}
+    >
+      <JobsListing
+        pageTitle={page.h1}
+        pageDescription={page.metaDescription}
+        initialPage={firstPage}
+        slug={pageSlug}
+      />
+    </PseoPageLayout>
   );
 }
 
@@ -345,11 +358,14 @@ async function JobDetailPage({ slug }: { slug: string }) {
   );
 }
 
-export default async function JobsSlugPage({ params }: SlugPageProps) {
+export default async function JobsSlugPage({
+  params,
+  searchParams,
+}: SlugPageProps) {
   const { slug } = await params;
   return isJobSlug(slug) ? (
     <JobDetailPage slug={slug} />
   ) : (
-    <RolePage slug={slug} />
+    <RolePage slug={slug} searchParams={searchParams} />
   );
 }

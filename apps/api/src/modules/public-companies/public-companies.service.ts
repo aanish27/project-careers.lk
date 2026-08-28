@@ -26,6 +26,7 @@ export class PublicCompaniesService {
         companyId: company.id,
         status: JobStatus.ACTIVE,
         deletedAt: null,
+        NOT: { employmentType: { equals: 'talent_pool', mode: 'insensitive' } },
       },
     });
 
@@ -44,6 +45,7 @@ export class PublicCompaniesService {
         companyId: company.id,
         status: JobStatus.ACTIVE,
         deletedAt: null,
+        NOT: { employmentType: { equals: 'talent_pool', mode: 'insensitive' } },
       },
       include: { skills: { select: { name: true, type: true } } },
       orderBy: { lastSeenAt: 'desc' },

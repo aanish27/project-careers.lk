@@ -48,6 +48,7 @@ export const SeoPageType = {
   SKILL: 'SKILL',
   REMOTE: 'REMOTE',
   INTERNSHIP: 'INTERNSHIP',
+  TALENT_POOL: 'TALENT_POOL',
   ALL_JOBS: 'ALL_JOBS',
   HOME: 'HOME',
 } as const;

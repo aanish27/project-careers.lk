@@ -5,40 +5,30 @@ import { jobsApi } from "@web-app-features/jobs/api/api";
 import JobsListing from "@web-app-features/jobs/components/jobs-listing";
 import { seoPagesApi } from "@web-app-features/seo/api/api";
 import type { PseoSearchParams } from "@web-app-features/seo/types";
-import { resolveSectorFromSlug } from "@web-app-features/jobs/utils/sector";
 import { buildMetaData } from "@web-app-lib/structured-data";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-export const revalidate = 86400; // ISR — changes with scrape runs
+export const revalidate = 86400;
 
-type SectorPageProps = {
-  params: Promise<{ sector: string }>;
+const SLUG = "jobs/remote-jobs";
+
+type RemoteJobsPageProps = {
   searchParams: Promise<PseoSearchParams>;
 };
 
-export async function generateMetadata({
-  params,
-}: SectorPageProps): Promise<Metadata> {
-  const { sector: sectorSlug } = await params;
-  if (!resolveSectorFromSlug(sectorSlug)) return {};
-
-  return buildMetaData(`jobs/sector/${sectorSlug}`);
+export async function generateMetadata(): Promise<Metadata> {
+  return buildMetaData(SLUG);
 }
 
-export default async function SectorPage({
-  params,
+export default async function RemoteJobsPage({
   searchParams,
-}: SectorPageProps) {
-  const { sector: sectorSlug } = await params;
-  if (!resolveSectorFromSlug(sectorSlug)) notFound();
-
-  const slug = `jobs/sector/${sectorSlug}`;
+}: RemoteJobsPageProps) {
   const filters = await loadJobFilters(searchParams);
 
   const [firstPage, seoContent] = await Promise.all([
-    jobsApi.list({ ...filters, slug }),
-    seoPagesApi.getSeoContent(slug),
+    jobsApi.list({ ...filters, slug: SLUG }),
+    seoPagesApi.getSeoContent(SLUG),
   ]);
 
   if (!seoContent || seoContent.page.retiredAt) notFound();
@@ -46,7 +36,7 @@ export default async function SectorPage({
   const { page, relatedLinks } = seoContent;
   const breadcrumbs: IBreadcrumbItem[] = [
     { name: "Jobs", url: "/jobs" },
-    { name: page.h1, url: `/${slug}` },
+    { name: page.h1, url: `/${SLUG}` },
   ];
 
   return (
@@ -59,7 +49,7 @@ export default async function SectorPage({
         pageTitle={page.h1}
         pageDescription={page.metaDescription}
         initialPage={firstPage}
-        slug={slug}
+        slug={SLUG}
       />
     </PseoPageLayout>
   );

@@ -1,5 +1,6 @@
 import { Public } from '@/common/decorators/public.decorator';
 import { Controller, Get, Param, Query, Req } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { Request } from 'express';
 import { FilterPublicJobsDto } from './dto/filter-public-jobs.dto';
 import { PublicJobsService } from './public-jobs.service';
@@ -9,8 +10,13 @@ import { PublicJobsService } from './public-jobs.service';
 // API is called server-side during page render, so an HTTP redirect at this
 // layer wouldn't reach the browser. The actual 308 to the canonical slug is
 // issued by the Next.js page component (Phase 4) once it sees the flag.
+//
+// SkipThrottle: read-only and hit on every public job page's SSR render —
+// the global 10req/60s default (app.module.ts) exists for sensitive/mutating
+// endpoints, not this.
 @Controller('public/jobs')
 @Public()
+@SkipThrottle()
 export class PublicJobsController {
   constructor(private readonly publicJobsService: PublicJobsService) {}
 

@@ -55,6 +55,13 @@ export class PublicJobsService {
           skillId: page.skillId,
         }),
       );
+    } else {
+      // No page context at all — default to the same exclusion every other
+      // page type gets via buildJobWhereForPage (talent pools only ever show
+      // on their own jobs/talent-pools hub).
+      and.push({
+        NOT: { employmentType: { equals: 'talent_pool', mode: 'insensitive' } },
+      });
     }
 
     if (filters.title) {
@@ -254,6 +261,9 @@ export class PublicJobsService {
           status: JobStatus.ACTIVE,
           approvalStatus: JobApprovalStatus.APPROVED,
           deletedAt: null,
+          NOT: {
+            employmentType: { equals: 'talent_pool', mode: 'insensitive' },
+          },
         },
         take: RELATED_JOBS_LIMIT,
         orderBy: { lastSeenAt: 'desc' },
@@ -267,6 +277,9 @@ export class PublicJobsService {
               status: JobStatus.ACTIVE,
               approvalStatus: JobApprovalStatus.APPROVED,
               deletedAt: null,
+              NOT: {
+                employmentType: { equals: 'talent_pool', mode: 'insensitive' },
+              },
             },
             take: RELATED_JOBS_LIMIT,
             orderBy: { lastSeenAt: 'desc' },
