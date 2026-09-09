@@ -183,3 +183,11 @@ export const WorkMode = {
 } as const;
 
 export type WorkMode = (typeof WorkMode)[keyof typeof WorkMode];
+
+export const AppType = {
+  JOBS: 'JOBS',
+  FREELANCE: 'FREELANCE',
+  TALENTS: 'TALENTS',
+} as const;
+
+export type AppType = (typeof AppType)[keyof typeof AppType];

@@ -1,11 +1,26 @@
 import { ApiError, apiFetch } from "@/lib/api-client";
+import { AppType } from "@careerslk/types";
 import type {
   SeoContentResponse,
+  SeoJobsPublic,
   SeoPageListItem,
   SeoPageResponse,
 } from "../types";
 
 export const seoPagesApi = {
+  async getPublic(type: AppType): Promise<SeoJobsPublic | null> {
+    try {
+      const { data } = await apiFetch<SeoJobsPublic>(
+        `/seo-pages/public?appType=${encodeURIComponent(type)}`,
+        { next: { revalidate: 86400 } },
+      );
+      return data;
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 404) return null;
+      throw error;
+    }
+  },
+
   async getBySlug(slug: string): Promise<SeoPageResponse | null> {
     try {
       const { data } = await apiFetch<SeoPageResponse>(

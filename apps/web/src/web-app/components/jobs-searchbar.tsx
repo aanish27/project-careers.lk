@@ -9,7 +9,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { IconBriefcase, IconMapPin } from "@tabler/icons-react";
+import { IconBriefcase, IconMapPin, IconSearch } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 
 const JobsSearchBar = () => {
@@ -34,7 +34,7 @@ const JobsSearchBar = () => {
 
   return (
     <form
-      className="flex w-full max-w-3xl items-center rounded-xl bg-white p-2 text-3xl "
+      className="flex w-full max-w-3xl items-center rounded-full bg-background p-2 text-3xl border-2"
       onSubmit={handleSubmit}
     >
       <FieldGroup className="flex flex-row items-center gap-1">
@@ -54,7 +54,7 @@ const JobsSearchBar = () => {
         <Field>
           <InputGroup
             className="border-0 rounded-none shadow-none flex flex-1 items-center gap-2
-                has-[[data-slot=input-group-control]:focus-visible]:ring-0!string
+                has-[[data-slot=input-group-control]:focus-visible]:ring-0!
                 has-[[data-slot=input-group-control]:focus-visible]:border-ring/0!"
           >
             <InputGroupInput
@@ -67,8 +67,8 @@ const JobsSearchBar = () => {
             </InputGroupAddon>
           </InputGroup>
         </Field>
-        <Button type="submit" size="lg" className="font-bold">
-          Search Jobs
+        <Button type="submit" size="icon" className="font-bold rounded-full">
+          <IconSearch />
         </Button>
       </FieldGroup>
     </form>

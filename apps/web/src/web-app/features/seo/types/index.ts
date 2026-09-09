@@ -53,3 +53,24 @@ export interface PseoSearchParams {
   employmentType?: string;
   [key: string]: string | string[] | undefined;
 }
+
+export interface SeoSectorStat {
+  sector: string;
+  count: number;
+}
+
+export interface SeoLocationStat {
+  district: string;
+  count: number;
+}
+
+export interface SeoPublicStats {
+  totalJobs: number;
+  totalCompanies: number;
+  bySector: SeoSectorStat[];
+  byLocation: SeoLocationStat[];
+}
+
+export interface SeoJobsPublic {
+  stats: SeoPublicStats;
+}

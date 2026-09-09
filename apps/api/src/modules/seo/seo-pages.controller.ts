@@ -1,5 +1,5 @@
 import { Public } from '@/common/decorators/public.decorator';
-import { SeoPageType } from '@careerslk/types';
+import { AppType, SeoPageType } from '@careerslk/types';
 import { Controller, Get, NotFoundException, Query, Req } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
 import { Request } from 'express';
@@ -17,6 +17,11 @@ import { SeoPagesService } from './seo-pages.service';
 @SkipThrottle()
 export class SeoPagesController {
   constructor(private readonly seoPagesService: SeoPagesService) {}
+
+  @Get('public')
+  getPublic(@Query('appType') appType: AppType) {
+    return this.seoPagesService.getPublic(appType);
+  }
 
   @Get()
   list(@Query('pageType') pageType?: SeoPageType) {

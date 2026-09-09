@@ -2,7 +2,6 @@
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useRequireAuth } from "@jobboard/hooks/use-require-auth";
 import { useWebUser } from "@jobboard/providers/web-user-provider";
 import { IconUser } from "@tabler/icons-react";
 import Image from "next/image";

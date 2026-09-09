@@ -1,6 +1,4 @@
-import { buttonVariants } from "@/components/ui/button";
 import {
-  IconArrowRight,
   IconBrandFacebook,
   IconBrandInstagram,
   IconBrandLinkedin,
@@ -58,39 +56,7 @@ const SOCIAL_LINKS = [
 
 export function Footer() {
   return (
-    <footer className="mt-24 pb-10">
-      <div className="mb-16 flex flex-col items-center justify-between gap-6 rounded-3xl border border-primary/15 bg-primary/5 p-8 text-center sm:flex-row sm:text-left">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-foreground">
-            Your next opportunity starts here.
-          </h2>
-          <p className="mt-1 text-muted-foreground">
-            Fresh roles added daily from companies across Sri Lanka.
-          </p>
-        </div>
-        <div className="flex shrink-0 items-center gap-3">
-          <Link
-            href="/jobs"
-            className={buttonVariants({
-              size: "lg",
-              className: "rounded-lg font-semibold",
-            })}
-          >
-            Browse jobs <IconArrowRight className="size-4" />
-          </Link>
-          <Link
-            href="/account/post-job"
-            className={buttonVariants({
-              size: "lg",
-              variant: "outline",
-              className: "rounded-lg font-semibold",
-            })}
-          >
-            Post a job
-          </Link>
-        </div>
-      </div>
-
+    <footer className="pb-10">
       <div className="grid grid-cols-1 gap-10 border-t border-border pt-12 sm:grid-cols-2 lg:grid-cols-5">
         <div className="lg:col-span-1">
           <Link href="/">
@@ -103,8 +69,8 @@ export function Footer() {
             />
           </Link>
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">
-            Aggregated tech jobs from high-growth sources, curated for
-            precision.
+            Jobs across every industry, updated daily from official employer
+            sources.
           </p>
           <div className="mt-5 flex items-center gap-3">
             {SOCIAL_LINKS.map(({ icon: Icon, label }) => (

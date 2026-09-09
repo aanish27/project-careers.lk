@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from '@/database/prisma.service';
 import { StorageService } from '@/shared/storage/storage.service';
+import { WebRevalidationService } from '@/modules/web-revalidation/web-revalidation.service';
 import { slugify } from '@careerslk/lib/slugify';
 import {
   CreateWebUserJobInput,
@@ -28,6 +29,7 @@ export class WebUserJobsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly webRevalidation: WebRevalidationService,
   ) {}
 
   async submit(webUserId: number, dto: CreateWebUserJobInput) {
@@ -44,7 +46,7 @@ export class WebUserJobsService {
       where: { id: webUser.companyId },
     });
 
-    return await this.prisma.$transaction(async (tx) => {
+    const job = await this.prisma.$transaction(async (tx) => {
       const fingerprint = `web:${randomUUID()}`;
       const location = dto.city ? `${dto.city}, ${dto.district}` : dto.district;
       const locationSlug = locationSlugFor(dto.district, dto.city);
@@ -79,6 +81,10 @@ export class WebUserJobsService {
         },
       });
     });
+
+    void this.webRevalidation.revalidateTags(['pseo-jobs']);
+
+    return job;
   }
 
   async findMine(webUserId: number) {
@@ -94,7 +100,7 @@ export class WebUserJobsService {
   // Editing an already-approved job re-enters review (unless the company is
   // trusted) so a poster can't bait-and-switch content after approval.
   async update(webUserId: number, jobId: number, dto: UpdateWebUserJobInput) {
-    return await this.prisma.$transaction(async (tx) => {
+    const job = await this.prisma.$transaction(async (tx) => {
       const job = await tx.job.findFirst({
         where: { id: jobId, postedByWebUserId: webUserId, deletedAt: null },
       });
@@ -137,6 +143,10 @@ export class WebUserJobsService {
         },
       });
     });
+
+    void this.webRevalidation.revalidateTags(['pseo-jobs']);
+
+    return job;
   }
 
   async uploadImage(
@@ -163,13 +173,17 @@ export class WebUserJobsService {
     });
     if (!job) throw new NotFoundException('Job not found');
 
-    return this.prisma.$transaction(async (tx) => {
+    const withdrawn = await this.prisma.$transaction(async (tx) => {
       await tx.savedJob.deleteMany({ where: { jobId } });
       return tx.job.update({
         where: { id: jobId },
         data: { deletedAt: new Date() },
       });
     });
+
+    void this.webRevalidation.revalidateTags(['pseo-jobs']);
+
+    return withdrawn;
   }
 
   // Only for a job the poster has already withdrawn — permanently drops it
