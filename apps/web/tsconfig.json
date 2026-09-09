@@ -46,7 +46,11 @@
       "@dashboard-stores/*": ["./src/dashboard/stores/*"],
       "@dashboard-types/*": ["./src/dashboard/types/*"],
       "@dashboard-utils/*": ["./src/dashboard/utils/*"],
-      "@dashboard-features/*": ["./src/dashboard/features/*"]
+      "@dashboard-features/*": ["./src/dashboard/features/*"],
+      "@account/*": ["./src/account/*"],
+      "@account-components/*": ["./src/account/components/*"],
+      "@account-config/*": ["./src/account/config/*"],
+      "@account-hooks/*": ["./src/account/hooks/*"]
     }
   },
   "include": [

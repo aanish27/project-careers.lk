@@ -106,7 +106,7 @@ export async function createCompany(
     return { error: "Something went wrong. Please try again." };
   }
 
-  redirect("/company");
+  redirect("/account/company");
 }
 
 export async function updateCompany(
@@ -137,7 +137,7 @@ export async function updateCompany(
     return { error: "Something went wrong. Please try again." };
   }
 
-  redirect("/company");
+  redirect("/account/company");
 }
 
 export type LogoUploadResult =

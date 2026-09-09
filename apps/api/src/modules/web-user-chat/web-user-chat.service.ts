@@ -247,7 +247,7 @@ export class WebUserChatService {
       recipient.firstName ?? 'there',
       sender.firstName ?? 'A careers.lk user',
       body,
-      `${frontendUrl}/freelance/messages/${conversationId}`,
+      `${frontendUrl}/account/freelance/messages/${conversationId}`,
     );
   }
 }

@@ -84,7 +84,7 @@ export async function createFreelanceProfile(
     return { error: "Something went wrong. Please try again." };
   }
 
-  redirect("/freelance/profile/edit");
+  redirect("/account/freelance/profile/edit");
 }
 
 export async function updateFreelanceProfile(
@@ -108,7 +108,7 @@ export async function updateFreelanceProfile(
     return { error: "Something went wrong. Please try again." };
   }
 
-  redirect("/freelance/profile/edit");
+  redirect("/account/freelance/profile/edit");
 }
 
 export async function withdrawFreelanceProfile(): Promise<void> {

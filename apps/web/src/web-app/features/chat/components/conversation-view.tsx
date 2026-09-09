@@ -31,7 +31,7 @@ export function ConversationView({
       <div className="flex items-center justify-between gap-2">
         <div>
           <Link
-            href="/freelance/messages"
+            href="/account/freelance/messages"
             className="text-xs text-muted-foreground hover:underline"
           >
             ← All conversations

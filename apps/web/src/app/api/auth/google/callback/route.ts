@@ -79,7 +79,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   // Re-validate `next` here rather than trusting the round-tripped cookie
   // value implicitly — it started as attacker-influenceable query input.
   const next =
-    storedNext && isSafeRedirectPath(storedNext) ? storedNext : "/profile";
+    storedNext && isSafeRedirectPath(storedNext) ? storedNext : "/account";
 
   const response = NextResponse.redirect(new URL(next, request.url));
   clearGoogleOauthCookies(response);

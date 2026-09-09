@@ -23,7 +23,7 @@ const NAV_LINKS: { label: string; items: NavItem[] }[] = [
     label: "Find Freelancers",
     items: [
       { label: "Browse Freelancers", href: "/freelance/freelancers" },
-      { label: "Post a Gig", href: "/freelance/gigs/new" },
+      { label: "Post a Gig", href: "/account/freelance/gigs/new" },
       { label: "Freelancer Marketplace", href: "/freelance/freelancers" },
       { label: "Project Catalog" },
     ],
@@ -32,7 +32,7 @@ const NAV_LINKS: { label: string; items: NavItem[] }[] = [
     label: "Find Work",
     items: [
       { label: "Browse Gigs", href: "/freelance/gigs" },
-      { label: "My Profile", href: "/freelance/profile/edit" },
+      { label: "My Profile", href: "/account/freelance/profile/edit" },
       { label: "My Proposals" },
     ],
   },
@@ -92,7 +92,7 @@ const FreelanceNavbar = () => {
           <IconSearch className="size-4.5" />
         </Button>
         <Link
-          href="/freelance/messages"
+          href="/account/freelance/messages"
           className={buttonVariants({
             variant: "ghost",
             size: "icon",

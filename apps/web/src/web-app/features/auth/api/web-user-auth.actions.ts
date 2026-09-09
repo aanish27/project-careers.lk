@@ -108,7 +108,7 @@ export const verifyEmailOtp = async (
   });
 
   const target =
-    typeof next === "string" && isSafeRedirectPath(next) ? next : "/profile";
+    typeof next === "string" && isSafeRedirectPath(next) ? next : "/account";
 
   redirect(target);
 };

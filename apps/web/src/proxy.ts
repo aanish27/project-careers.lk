@@ -131,11 +131,7 @@ export async function proxy(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/admin")) {
     return handleAdminAuth(request);
   }
-  if (
-    request.nextUrl.pathname.startsWith("/profile") ||
-    request.nextUrl.pathname.startsWith("/post-job") ||
-    request.nextUrl.pathname.startsWith("/company")
-  ) {
+  if (request.nextUrl.pathname.startsWith("/account")) {
     return handleWebUserAuth(request);
   }
   return handleRetirementCheck(request);
@@ -149,8 +145,6 @@ export const config = {
     // their own matcher entries.
     "/jobs/:path*",
     "/companies/:path*",
-    "/profile/:path*",
-    "/post-job/:path*",
-    "/company/:path*",
+    "/account/:path*",
   ],
 };

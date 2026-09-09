@@ -19,14 +19,14 @@ const FOOTER_LINKS: {
       { label: "Browse Jobs", href: "/jobs" },
       { label: "Browse Freelance Gigs", href: "/freelance" },
       { label: "Find Freelancers", href: "/freelance/freelancers" },
-      { label: "My Profile", href: "/profile" },
+      { label: "My Profile", href: "/account" },
     ],
   },
   {
     heading: "For Employers",
     links: [
-      { label: "Post a Job", href: "/post-job" },
-      { label: "Employer Dashboard", href: "/company" },
+      { label: "Post a Job", href: "/account/post-job" },
+      { label: "Employer Dashboard", href: "/account/company" },
       { label: "Talent Search", href: "/freelance/freelancers" },
     ],
   },
@@ -79,7 +79,7 @@ export function Footer() {
             Browse jobs <IconArrowRight className="size-4" />
           </Link>
           <Link
-            href="/post-job"
+            href="/account/post-job"
             className={buttonVariants({
               size: "lg",
               variant: "outline",

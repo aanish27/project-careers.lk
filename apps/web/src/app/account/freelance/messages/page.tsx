@@ -12,7 +12,7 @@ export default async function MessagesPage() {
   await verifyWebUserSession();
 
   return (
-    <div className="mx-auto max-w-2xl py-10">
+    <div>
       <h1 className="mb-6 text-2xl font-bold text-foreground">Messages</h1>
       <ConversationList />
       <BlockedUsersList />

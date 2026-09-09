@@ -21,7 +21,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const next =
     requestedNext && isSafeRedirectPath(requestedNext)
       ? requestedNext
-      : "/profile";
+      : "/account";
 
   const state = generateState();
   const codeVerifier = generateCodeVerifier();

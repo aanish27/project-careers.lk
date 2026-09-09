@@ -5,7 +5,7 @@ export default async function PostJobPage() {
   const session = await verifyWebUserSession();
 
   return (
-    <div className="mx-auto max-w-2xl py-10">
+    <div>
       <h1 className="mb-6 text-xl font-semibold">Post a job</h1>
       <PostJobForm hasCompany={!!session.user.companyId} />
     </div>

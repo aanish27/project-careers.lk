@@ -19,14 +19,14 @@ export default async function CompanyPage() {
     company = await fetchMyCompanyRequest(session.accessToken);
   } catch (err) {
     if (err instanceof ApiError && err.status === 401) {
-      redirect(`/login?from=${encodeURIComponent("/company")}`);
+      redirect(`/login?from=${encodeURIComponent("/account/company")}`);
     }
     throw err;
   }
 
   if (!company) {
     return (
-      <div className="mx-auto max-w-2xl py-10">
+      <div>
         <h1 className="mb-2 text-xl font-semibold">Set up your company</h1>
         <p className="mb-6 text-sm text-muted-foreground">
           Link an existing company or create a new one before you can post jobs.
@@ -37,11 +37,11 @@ export default async function CompanyPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-8 py-10">
+    <div className="flex flex-col gap-8">
       <div>
         <div className="mb-4 flex items-center justify-between gap-3">
           <h1 className="text-xl font-semibold">Your company</h1>
-          <Link href="/post-job" className={buttonVariants()}>
+          <Link href="/account/post-job" className={buttonVariants()}>
             Post a job
           </Link>
         </div>

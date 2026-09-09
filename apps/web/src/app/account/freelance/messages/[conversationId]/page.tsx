@@ -16,7 +16,7 @@ export default async function ConversationPage({
   const { conversationId } = await params;
 
   return (
-    <div className="mx-auto max-w-2xl py-10">
+    <div>
       <ConversationView conversationId={Number(conversationId)} />
     </div>
   );

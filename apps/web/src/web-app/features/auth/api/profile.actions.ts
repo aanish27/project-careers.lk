@@ -52,7 +52,7 @@ export async function updateProfile(
     return { error: "Something went wrong. Please try again." };
   }
 
-  redirect("/profile");
+  redirect("/account");
 }
 
 export type WithdrawJobResult =

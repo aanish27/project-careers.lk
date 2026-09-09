@@ -120,5 +120,5 @@ export const postJob = async (
     await uploadJobImageRequest(accessToken, jobId, image).catch(() => {});
   }
 
-  redirect("/profile");
+  redirect("/account");
 };

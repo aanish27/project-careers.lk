@@ -52,7 +52,7 @@ export const PrimaryNavbar = () => {
       </div>
       <div className="flex items-center gap-2">
         {isLoggedIn ? (
-          <Link href="/profile" className={buttonVariants()}>
+          <Link href="/account" className={buttonVariants()}>
             <IconUser />
           </Link>
         ) : (

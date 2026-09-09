@@ -41,7 +41,7 @@ export function ConversationList() {
         return (
           <Link
             key={conversation.id}
-            href={`/freelance/messages/${conversation.id}`}
+            href={`/account/freelance/messages/${conversation.id}`}
             className="rounded-xl border border-border bg-white p-3 shadow-sm transition-colors hover:border-primary/40 hover:bg-primary/5"
           >
             <Message align="start">

@@ -29,7 +29,7 @@ export function MessageButton({
         { otherWebUserId, gigId, freelanceProfileId },
         {
           onSuccess: (conversation) => {
-            router.push(`/freelance/messages/${conversation.id}`);
+            router.push(`/account/freelance/messages/${conversation.id}`);
           },
           onError: (err) => {
             if (err.message === "REQUIRES_AUTH") openLoginModal();

@@ -15,7 +15,7 @@ export default async function EditFreelancerProfilePage() {
   const profile = await fetchMyFreelanceProfile();
 
   return (
-    <div className="mx-auto max-w-2xl py-10">
+    <div>
       <h1 className="mb-6 text-2xl font-bold text-foreground">
         Your freelance profile
       </h1>
