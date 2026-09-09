@@ -5,7 +5,7 @@ import {
   createWebUserCompanySchema,
   updateWebUserCompanySchema,
 } from "@careerslk/types";
-import { ApiError } from "@lib/api-client";
+import { toActionErrorMessage } from "@lib/api-client";
 import {
   claimCompanyRequest,
   type ClaimCompanyResult,
@@ -67,8 +67,12 @@ export async function claimCompany(
     }
     return { ok: true, result };
   } catch (err) {
-    if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    return {
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
+    };
   }
 }
 
@@ -102,8 +106,12 @@ export async function createCompany(
     const user = await fetchCurrentWebUser(accessToken);
     await updateWebUserSessionUser(user);
   } catch (err) {
-    if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    return {
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
+    };
   }
 
   redirect("/account/company");
@@ -133,8 +141,12 @@ export async function updateCompany(
   try {
     await updateMyCompanyRequest(accessToken, input);
   } catch (err) {
-    if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    return {
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
+    };
   }
 
   redirect("/account/company");
@@ -153,8 +165,12 @@ export async function uploadCompanyLogo(file: File): Promise<LogoUploadResult> {
     const company = await uploadCompanyLogoRequest(accessToken, file);
     return { ok: true, logoUrl: company.logoUrl };
   } catch (err) {
-    if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    return {
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
+    };
   }
 }
 
@@ -171,7 +187,11 @@ export async function requestAutoApproval(): Promise<AutoApprovalActionResult> {
     const company = await requestCompanyAutoApprovalRequest(accessToken);
     return { ok: true, status: company.autoApprovalStatus };
   } catch (err) {
-    if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    return {
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
+    };
   }
 }

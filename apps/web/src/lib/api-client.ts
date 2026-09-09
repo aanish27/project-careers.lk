@@ -2,6 +2,7 @@ import { ApiFetchOptions } from "@/types";
 import { getValidWebUserAccessToken } from "@/web-app/lib/web-user-session";
 import { PermissionKey } from "@careerslk/lib";
 import "server-only";
+import { RATE_LIMIT_MESSAGE } from "@lib/messages";
 
 export interface AuthUser {
   id: number;
@@ -34,6 +35,21 @@ export class ApiError extends Error {
     this.name = "ApiError";
   }
 }
+
+// Server Actions call this in their catch blocks instead of reading
+// `err.message` directly. A 429 from `@nestjs/throttler`'s ThrottlerGuard
+// carries the raw internal exception-class string ("ThrottlerException: Too
+// Many Requests") as its message — that's an implementation detail, not
+// something to show a user, so it's swapped for a friendly one here. Any
+// other status keeps its message as-is (e.g. the web-user OTP endpoints
+// already throw hand-written, user-facing 429 text of their own).
+export function toActionErrorMessage(err: unknown, fallback: string): string {
+  if (err instanceof ApiError) {
+    return err.status === 429 ? RATE_LIMIT_MESSAGE : err.message;
+  }
+  return fallback;
+}
+
 export async function apiFetch<T>(
   path: string,
   init?: ApiFetchOptions,

@@ -1,7 +1,7 @@
 "use server";
 
 import type { AbuseReport, FileReportInput } from "@careerslk/types";
-import { ApiError } from "@lib/api-client";
+import { toActionErrorMessage } from "@lib/api-client";
 import { fileReportRequest } from "@web-app-lib/reports-client";
 import { getValidWebUserAccessToken } from "@web-app-lib/web-user-session";
 
@@ -20,7 +20,11 @@ export async function fileReport(
     const data = await fileReportRequest(accessToken, input);
     return { ok: true, data };
   } catch (err) {
-    if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    return {
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
+    };
   }
 }

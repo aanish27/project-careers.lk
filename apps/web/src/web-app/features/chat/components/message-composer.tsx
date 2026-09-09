@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { dismissRateLimited } from "@lib/messages";
 import { useState } from "react";
 import { useSendMessage } from "../hooks/use-send-message";
 
@@ -43,8 +44,10 @@ export function MessageComposer({
           }
         }}
       />
-      {sendMessage.isError && (
-        <p className="text-destructive text-sm">{sendMessage.error.message}</p>
+      {sendMessage.isError && dismissRateLimited(sendMessage.error.message) && (
+        <p className="text-destructive text-sm">
+          {dismissRateLimited(sendMessage.error.message)}
+        </p>
       )}
       <Button
         onClick={onSend}

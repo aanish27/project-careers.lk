@@ -4,7 +4,7 @@ import {
   createWebUserCompanySchema,
   createWebUserJobSchema,
 } from "@careerslk/types";
-import { ApiError } from "@lib/api-client";
+import { toActionErrorMessage } from "@lib/api-client";
 import {
   createCompanyRequest,
   fetchCurrentWebUser,
@@ -96,10 +96,11 @@ export const postJob = async (
       const user = await fetchCurrentWebUser(accessToken);
       await updateWebUserSessionUser(user);
     } catch (err) {
-      if (err instanceof ApiError) return { error: err.message };
       return {
-        error:
+        error: toActionErrorMessage(
+          err,
           "Something went wrong setting up your company. Please try again.",
+        ),
       };
     }
   }
@@ -109,8 +110,12 @@ export const postJob = async (
     const job = await submitJobRequest(accessToken, input);
     jobId = job.id;
   } catch (err) {
-    if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    return {
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
+    };
   }
 
   // The job is already posted at this point — a failed image upload

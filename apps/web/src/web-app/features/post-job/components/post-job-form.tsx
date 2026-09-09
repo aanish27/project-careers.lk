@@ -7,6 +7,8 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@ui/field";
 import { Input } from "@ui/input";
 import { Textarea } from "@ui/textarea";
 import { postJob } from "@web-app-features/post-job/api/post-job.actions";
+import { useRateLimitToast } from "@web-app-lib/use-rate-limit-toast";
+import { dismissRateLimited } from "@lib/messages";
 import { useActionState, useState } from "react";
 
 const EMPLOYMENT_TYPES = [
@@ -31,6 +33,8 @@ const selectClassName =
 
 export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
   const [state, formAction, isPending] = useActionState(postJob, undefined);
+
+  useRateLimitToast(state?.error);
   const [sector, setSector] = useState("");
   const roleCategories = getCategoriesForSector(sector || undefined);
 
@@ -292,8 +296,8 @@ export function PostJobForm({ hasCompany }: { hasCompany: boolean }) {
           />
         </Field>
 
-        <Field data-invalid={!!state?.error}>
-          <FieldError>{state?.error}</FieldError>
+        <Field data-invalid={!!dismissRateLimited(state?.error)}>
+          <FieldError>{dismissRateLimited(state?.error)}</FieldError>
           <Button type="submit" disabled={isPending} className="w-10">
             {isPending ? "Submitting…" : "Submit job posting"}
           </Button>

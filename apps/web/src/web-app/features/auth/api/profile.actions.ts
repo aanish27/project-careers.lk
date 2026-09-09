@@ -1,7 +1,7 @@
 "use server";
 
 import { updateWebUserProfileSchema } from "@careerslk/types";
-import { ApiError } from "@lib/api-client";
+import { toActionErrorMessage } from "@lib/api-client";
 import {
   removeJobFromProfileRequest,
   updateWebUserProfileRequest,
@@ -48,8 +48,12 @@ export async function updateProfile(
     const user = await updateWebUserProfileRequest(accessToken, parsed.data);
     await updateWebUserSessionUser(user);
   } catch (err) {
-    if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    return {
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
+    };
   }
 
   redirect("/account");

@@ -82,14 +82,16 @@ export class WebUserAuthController {
   // InternalOnlyGuard is defense-in-depth here (only the Next.js server
   // should be able to reach this at all), but it does NOT provide the real
   // anti-abuse property — the actual per-recipient-email rate gate and
-  // resend cooldown live inside WebUserEmailOtpService.generate(), since
-  // this endpoint is reached through the legitimate browser → Next.js
-  // Server Action → API path on every real user's request, using the same
-  // internal key every time. @Throttle's per-IP limiting is only a coarse
-  // second layer, not the actual defense.
+  // resend cooldown live inside WebUserEmailOtpService.generate(). This
+  // endpoint is reached through the legitimate browser → Next.js Server
+  // Action → API path on every real user's request, using the same
+  // Next.js-server IP every time, so a per-IP @Throttle here would key on
+  // one shared bucket across all users — it can't distinguish abuse from
+  // normal traffic, and at real volume would start rejecting legitimate
+  // requests before it ever slowed an attacker. Deliberately not throttled
+  // by IP; rely on WebUserEmailOtpService's email-keyed gate instead.
   @Public()
   @UseGuards(InternalOnlyGuard)
-  @Throttle({ default: { ttl: 60000, limit: 5 } })
   @Post('email/otp/request')
   @ApiOperation({ summary: 'Send a sign-in code to an email address' })
   @ApiResponse({ status: 200, type: RequestEmailOtpResponseDto })

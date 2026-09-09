@@ -7,7 +7,7 @@ import {
   type Gig,
   updateFreelanceProfileSchema,
 } from "@careerslk/types";
-import { ApiError } from "@lib/api-client";
+import { toActionErrorMessage } from "@lib/api-client";
 import {
   createFreelanceProfileRequest,
   fetchMyFreelanceProfileRequest,
@@ -80,8 +80,12 @@ export async function createFreelanceProfile(
   try {
     await createFreelanceProfileRequest(accessToken, parsed.data);
   } catch (err) {
-    if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    return {
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
+    };
   }
 
   redirect("/account/freelance/profile/edit");
@@ -104,8 +108,12 @@ export async function updateFreelanceProfile(
   try {
     await updateMyFreelanceProfileRequest(accessToken, parsed.data);
   } catch (err) {
-    if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    return {
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
+    };
   }
 
   redirect("/account/freelance/profile/edit");
@@ -131,8 +139,12 @@ export async function uploadCv(file: File): Promise<FileUploadResult> {
     const profile = await uploadCvRequest(accessToken, file);
     return { ok: true, profile };
   } catch (err) {
-    if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    return {
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
+    };
   }
 }
 
@@ -146,8 +158,12 @@ export async function uploadPortfolioFiles(
     const profile = await uploadPortfolioFilesRequest(accessToken, files);
     return { ok: true, profile };
   } catch (err) {
-    if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    return {
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
+    };
   }
 }
 
@@ -179,8 +195,12 @@ export async function submitGig(
   try {
     gig = await submitGigRequest(accessToken, parsed.data);
   } catch (err) {
-    if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    return {
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
+    };
   }
 
   redirect(`/freelance/gigs/${gig.slug}`);

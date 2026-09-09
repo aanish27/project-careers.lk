@@ -5,11 +5,15 @@ import { Button } from "@ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@ui/field";
 import { Input } from "@ui/input";
 import { Textarea } from "@ui/textarea";
+import { dismissRateLimited } from "@lib/messages";
+import { useRateLimitToast } from "@web-app-lib/use-rate-limit-toast";
 import { useActionState } from "react";
 import { submitGig } from "../api/freelance.actions";
 
 export function GigForm() {
   const [state, formAction, isPending] = useActionState(submitGig, undefined);
+
+  useRateLimitToast(state?.error);
 
   return (
     <form action={formAction}>
@@ -105,8 +109,8 @@ export function GigForm() {
           </Field>
         </Field>
 
-        <Field data-invalid={!!state?.error}>
-          <FieldError>{state?.error}</FieldError>
+        <Field data-invalid={!!dismissRateLimited(state?.error)}>
+          <FieldError>{dismissRateLimited(state?.error)}</FieldError>
           <Button type="submit" disabled={isPending}>
             {isPending ? "Submitting…" : "Submit gig"}
           </Button>

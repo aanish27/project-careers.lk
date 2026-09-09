@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ApiError } from "@dashboard-lib/api-error";
 import { resyncSessionAction } from "@dashboard-lib/session-actions";
+import { toMessage } from "@dashboard/utils/to-message";
 import { usersApi } from "../api/api";
 import type {
   CreateUserInput,
@@ -10,9 +10,6 @@ import type {
   UpdateUserProfileInput,
 } from "../types/user.types";
 import { usersQueryKey } from "./query-keys";
-
-const toMessage = (error: unknown, fallback: string) =>
-  error instanceof ApiError ? error.message : fallback;
 
 export function useUsers() {
   return useQuery({

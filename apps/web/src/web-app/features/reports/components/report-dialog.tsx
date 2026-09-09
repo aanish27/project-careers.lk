@@ -16,6 +16,7 @@ import type {
   AbuseReportCategory,
   AbuseReportEntityType,
 } from "@careerslk/types";
+import { dismissRateLimited } from "@lib/messages";
 import { useState } from "react";
 import { useFileReport } from "../hooks/use-file-report";
 
@@ -106,8 +107,10 @@ export function ReportDialog({
             placeholder="Anything else admins should know"
           />
         </div>
-        {fileReport.isError && (
-          <p className="text-destructive text-sm">{fileReport.error.message}</p>
+        {fileReport.isError && dismissRateLimited(fileReport.error.message) && (
+          <p className="text-destructive text-sm">
+            {dismissRateLimited(fileReport.error.message)}
+          </p>
         )}
         <DialogFooter>
           <DialogClose render={<Button variant="outline" />}>

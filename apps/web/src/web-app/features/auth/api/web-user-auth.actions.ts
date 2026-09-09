@@ -2,7 +2,7 @@
 
 import { requestEmailOtpSchema, verifyEmailOtpSchema } from "@careerslk/types";
 import { redirect } from "next/navigation";
-import { ApiError } from "@lib/api-client";
+import { ApiError, toActionErrorMessage } from "@lib/api-client";
 import { isSafeRedirectPath } from "@utils/utils";
 import { WEB_USER_ACCESS_TOKEN_TTL_MS } from "@web-app-config/constants";
 import {
@@ -90,13 +90,13 @@ export const verifyEmailOtp = async (
   try {
     result = await verifyEmailOtpRequest(email, code);
   } catch (err) {
-    if (err instanceof ApiError) {
-      return { step: "code", email, error: err.message };
-    }
     return {
       step: "code",
       email,
-      error: "Something went wrong. Please try again.",
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
     };
   }
 

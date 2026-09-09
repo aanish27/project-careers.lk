@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ApiError } from "@dashboard-lib/api-error";
 import { resyncSessionAction } from "@dashboard-lib/session-actions";
+import { toMessage } from "@dashboard/utils/to-message";
 import { rolesApi } from "../api/api";
 import type {
   CreateRoleInput,
@@ -9,9 +9,6 @@ import type {
   UpdateRoleInput,
 } from "../types/role.types";
 import { rolesQueryKey } from "./query-keys";
-
-const toMessage = (error: unknown, fallback: string) =>
-  error instanceof ApiError ? error.message : fallback;
 
 export function useRoles() {
   return useQuery({

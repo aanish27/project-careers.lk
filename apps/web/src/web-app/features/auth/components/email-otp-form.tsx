@@ -8,6 +8,8 @@ import {
   requestEmailOtp,
   verifyEmailOtp,
 } from "@web-app-features/auth/api/web-user-auth.actions";
+import { useRateLimitToast } from "@web-app-lib/use-rate-limit-toast";
+import { dismissRateLimited } from "@lib/messages";
 
 export function EmailOtpForm({ next }: { next?: string }) {
   const [requestState, requestAction, requesting] = useActionState(
@@ -18,6 +20,8 @@ export function EmailOtpForm({ next }: { next?: string }) {
     verifyEmailOtp,
     undefined,
   );
+
+  useRateLimitToast(verifyState?.error);
 
   const step = verifyState?.step ?? requestState?.step ?? "email";
   const email =
@@ -35,7 +39,8 @@ export function EmailOtpForm({ next }: { next?: string }) {
           {next && <input type="hidden" name="next" value={next} />}
           <Field
             data-invalid={
-              !!verifyState?.error || !!verifyState?.fieldErrors?.code
+              !!dismissRateLimited(verifyState?.error) ||
+              !!verifyState?.fieldErrors?.code
             }
           >
             <FieldLabel htmlFor="code">
@@ -49,13 +54,15 @@ export function EmailOtpForm({ next }: { next?: string }) {
               maxLength={6}
               placeholder="123456"
               aria-invalid={
-                !!verifyState?.error || !!verifyState?.fieldErrors?.code
+                !!dismissRateLimited(verifyState?.error) ||
+                !!verifyState?.fieldErrors?.code
               }
               required
               autoFocus
             />
             <FieldError>
-              {verifyState?.error ?? verifyState?.fieldErrors?.code}
+              {dismissRateLimited(verifyState?.error) ??
+                verifyState?.fieldErrors?.code}
             </FieldError>
           </Field>
           <Field>

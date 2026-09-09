@@ -1,4 +1,6 @@
+import { RATE_LIMIT_MESSAGE } from "@lib/messages";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { sendMessage } from "../api/chat.actions";
 import { chatKeys } from "./query-keys";
 
@@ -13,6 +15,9 @@ export function useSendMessage(conversationId: number) {
       }
       if ("error" in result) throw new Error(result.error);
       return result.data;
+    },
+    onError: (error) => {
+      if (error.message === RATE_LIMIT_MESSAGE) toast.error(error.message);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

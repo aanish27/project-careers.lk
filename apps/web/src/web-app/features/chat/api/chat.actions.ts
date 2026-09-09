@@ -7,7 +7,7 @@ import type {
   SendMessageInput,
   StartConversationInput,
 } from "@careerslk/types";
-import { ApiError } from "@lib/api-client";
+import { toActionErrorMessage } from "@lib/api-client";
 import {
   blockUserRequest,
   getConversationRequest,
@@ -73,8 +73,12 @@ export async function startConversation(
     const data = await startConversationRequest(accessToken, input);
     return { ok: true, data };
   } catch (err) {
-    if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    return {
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
+    };
   }
 }
 
@@ -89,8 +93,12 @@ export async function sendMessage(
     const data = await sendMessageRequest(accessToken, conversationId, input);
     return { ok: true, data };
   } catch (err) {
-    if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    return {
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
+    };
   }
 }
 
@@ -104,8 +112,12 @@ export async function blockUser(
     await blockUserRequest(accessToken, input);
     return { ok: true, data: null };
   } catch (err) {
-    if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    return {
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
+    };
   }
 }
 
@@ -119,7 +131,11 @@ export async function unblockUser(
     await unblockUserRequest(accessToken, blockedWebUserId);
     return { ok: true, data: null };
   } catch (err) {
-    if (err instanceof ApiError) return { error: err.message };
-    return { error: "Something went wrong. Please try again." };
+    return {
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
+    };
   }
 }
