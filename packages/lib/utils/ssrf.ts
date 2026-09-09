@@ -13,18 +13,30 @@ const BLOCKED_PATTERNS = [
   /^fe80:/i, // IPv6 link-local
 ];
 
+export class SsrfValidationError extends Error {}
+
 export async function assertNotSsrf(rawUrl: string): Promise<void> {
   let hostname: string;
   try {
     hostname = new URL(rawUrl).hostname;
   } catch {
-    throw new Error(`Invalid URL: ${rawUrl}`);
+    throw new SsrfValidationError(`Invalid URL: ${rawUrl}`);
   }
 
-  const { address } = await dns.lookup(hostname);
+  // The DNS-based private-IP check needs a resolvable domain and real
+  // network access, which dev environments don't reliably have — skip it
+  // outside production so local/staging URLs with flaky DNS don't 500.
+  if (process.env.NODE_ENV !== 'production') return;
+
+  let address: string;
+  try {
+    ({ address } = await dns.lookup(hostname));
+  } catch {
+    throw new SsrfValidationError(`Could not resolve host: ${hostname}`);
+  }
 
   if (BLOCKED_PATTERNS.some((pattern) => pattern.test(address))) {
-    throw new Error(
+    throw new SsrfValidationError(
       `SSRF blocked: ${rawUrl} resolves to private address ${address}`,
     );
   }

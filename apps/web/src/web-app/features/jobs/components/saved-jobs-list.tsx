@@ -11,7 +11,7 @@ export function SavedJobsList({ savedJobs }: { savedJobs: SavedJobEntry[] }) {
       {savedJobs.map((entry) => (
         <li key={entry.id}>
           <Link
-            href={`/jobs/${entry.job.slug}`}
+            href={`/job/${entry.job.slug}`}
             className="flex items-center justify-between gap-3 rounded-md border border-border p-3 hover:bg-muted"
           >
             <div className="min-w-0">

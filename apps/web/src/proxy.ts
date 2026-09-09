@@ -108,7 +108,7 @@ async function handleRetirementCheck(request: NextRequest) {
 
   try {
     const isJobDetailPath =
-      segments[0] === "jobs" &&
+      (segments[0] === "jobs" || segments[0] === "job") &&
       segments.length === 2 &&
       JOB_SLUG_PATTERN.test(segments[1]);
 
@@ -144,6 +144,9 @@ export const config = {
     // /jobs (from root-level /internships, /remote-jobs) so no longer need
     // their own matcher entries.
     "/jobs/:path*",
+    // Singular job-detail route (job-card.tsx links here) — same
+    // retirement check as /jobs/:path* above, just a different prefix.
+    "/job/:path*",
     "/companies/:path*",
     "/account/:path*",
   ],

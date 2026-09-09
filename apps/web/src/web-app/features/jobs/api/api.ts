@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api-client";
+import type { ApiFetchOptions } from "@/types";
 import type {
   JobFilters,
   PublicJobDetailResponse,
@@ -45,11 +46,12 @@ function buildQuery(filters: JobFilters): string {
 export const jobsApi = {
   async list(
     filters: JobFilters,
-    slug?: string,
+    options?: ApiFetchOptions,
   ): Promise<PublicJobsListResponse> {
     const query = buildQuery(filters);
     const { data } = await apiFetch<PublicJobsListResponse>(
       `/public/jobs${query ? `?${query}` : ""}`,
+      options,
     );
     return data;
   },

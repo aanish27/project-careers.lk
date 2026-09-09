@@ -1,10 +1,8 @@
-import { loadJobFilters } from "@/web-app/features/jobs/hooks/job-filters-search-params";
 import PseoPageLayout from "@web-app-features/seo/components/pseo-page-layout";
 import { IBreadcrumbItem } from "@web-app-features/ui/types";
 import { jobsApi } from "@web-app-features/jobs/api/api";
 import JobsListing from "@web-app-features/jobs/components/jobs-listing";
 import { seoPagesApi } from "@web-app-features/seo/api/api";
-import type { PseoSearchParams } from "@web-app-features/seo/types";
 import { resolveSectorFromSlug } from "@web-app-features/jobs/utils/sector";
 import { buildMetaData } from "@web-app-lib/structured-data";
 import type { Metadata } from "next";
@@ -14,7 +12,6 @@ export const revalidate = 86400; // ISR — changes with scrape runs
 
 type SectorPageProps = {
   params: Promise<{ sector: string }>;
-  searchParams: Promise<PseoSearchParams>;
 };
 
 export async function generateMetadata({
@@ -26,18 +23,14 @@ export async function generateMetadata({
   return buildMetaData(`jobs/sector/${sectorSlug}`);
 }
 
-export default async function SectorPage({
-  params,
-  searchParams,
-}: SectorPageProps) {
+export default async function SectorPage({ params }: SectorPageProps) {
   const { sector: sectorSlug } = await params;
   if (!resolveSectorFromSlug(sectorSlug)) notFound();
 
   const slug = `jobs/sector/${sectorSlug}`;
-  const filters = await loadJobFilters(searchParams);
 
   const [firstPage, seoContent] = await Promise.all([
-    jobsApi.list({ ...filters, slug }),
+    jobsApi.list({ slug }, { next: { tags: ["pseo-jobs"] } }),
     seoPagesApi.getSeoContent(slug),
   ]);
 

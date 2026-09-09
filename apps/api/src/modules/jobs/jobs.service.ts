@@ -1,6 +1,7 @@
 import { PrismaService } from '@/database/prisma.service';
 import { AUDIT_ACTIONS } from '@/modules/audit/audit.constant';
 import { AuditContext, AuditService } from '@/modules/audit/audit.service';
+import { WebRevalidationService } from '@/modules/web-revalidation/web-revalidation.service';
 import {
   getCitySlug,
   getDistrictSlug,
@@ -26,6 +27,7 @@ export class JobsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly webRevalidation: WebRevalidationService,
   ) {}
 
   async findAll(filters: JobFilters) {
@@ -64,7 +66,7 @@ export class JobsService {
   }
 
   async update(id: number, dto: UpdateJobInput, context: AuditContext) {
-    return await this.prisma.$transaction(async (tx) => {
+    const job = await this.prisma.$transaction(async (tx) => {
       const before = await tx.job.findFirstOrThrow({
         where: { id, deletedAt: null },
       });
@@ -104,10 +106,14 @@ export class JobsService {
 
       return job;
     });
+
+    void this.webRevalidation.revalidateTags(['pseo-jobs']);
+
+    return job;
   }
 
   async softDelete(id: number, context: AuditContext) {
-    return await this.prisma.$transaction(async (tx) => {
+    const job = await this.prisma.$transaction(async (tx) => {
       const job = await tx.job.update({
         where: { id },
         data: { deletedAt: new Date() },
@@ -126,10 +132,14 @@ export class JobsService {
 
       return job;
     });
+
+    void this.webRevalidation.revalidateTags(['pseo-jobs']);
+
+    return job;
   }
 
   async approve(id: number, adminUserId: number, context: AuditContext) {
-    return await this.prisma.$transaction(async (tx) => {
+    const job = await this.prisma.$transaction(async (tx) => {
       const before = await tx.job.findFirstOrThrow({
         where: { id, deletedAt: null },
       });
@@ -158,10 +168,14 @@ export class JobsService {
 
       return job;
     });
+
+    void this.webRevalidation.revalidateTags(['pseo-jobs']);
+
+    return job;
   }
 
   async reject(id: number, dto: RejectJobInput, context: AuditContext) {
-    return await this.prisma.$transaction(async (tx) => {
+    const job = await this.prisma.$transaction(async (tx) => {
       const before = await tx.job.findFirstOrThrow({
         where: { id, deletedAt: null },
       });
@@ -190,5 +204,9 @@ export class JobsService {
 
       return job;
     });
+
+    void this.webRevalidation.revalidateTags(['pseo-jobs']);
+
+    return job;
   }
 }

@@ -29,12 +29,12 @@ export function buildJobPostingSchema(
   if (job.employmentType) {
     schema.employmentType = job.employmentType.toUpperCase();
   }
-  if (job.location) {
+  if (job.district) {
     schema.jobLocation = {
       "@type": "Place",
       address: {
         "@type": "PostalAddress",
-        addressLocality: job.location,
+        addressLocality: `${job.district}${job.city ? `, ${job.city}` : ""}`,
         addressCountry: "LK",
       },
     };

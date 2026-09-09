@@ -1,4 +1,5 @@
 import { PrismaService } from '@/database/prisma.service';
+import { WebRevalidationService } from '@/modules/web-revalidation/web-revalidation.service';
 import { JobStatus } from '@careerslk/types';
 import { Injectable, Logger } from '@nestjs/common';
 
@@ -8,7 +9,10 @@ const EXPIRY_THRESHOLD_DAYS = 14;
 export class SeoExpiryService {
   private readonly logger = new Logger(SeoExpiryService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly webRevalidation: WebRevalidationService,
+  ) {}
 
   async flipExpiredJobs(): Promise<number> {
     const threshold = new Date();
@@ -36,6 +40,11 @@ export class SeoExpiryService {
     this.logger.log(
       `Flipped ${count} job(s) to EXPIRED (${staleCount} stale, ${deadlineCount} past deadline)`,
     );
+
+    if (count > 0) {
+      void this.webRevalidation.revalidateTags(['pseo-jobs']);
+    }
+
     return count;
   }
 }

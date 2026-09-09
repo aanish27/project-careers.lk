@@ -43,9 +43,12 @@ export interface SeoGenerationSummary {
 }
 
 /**
- * SRS 12.11.2 generation flow orchestrator. Triggered by the scrape-
- * completion hook (decision #7) or an admin on-demand request — not an
- * independent timer.
+ * SRS 12.11.2 generation flow orchestrator. A true event-driven trigger off
+ * scrape completion (decision #7) was considered but simplified to a daily
+ * cron offset after the scraper's own run (see seo.scheduler.ts) — the
+ * scraper only runs once a day, so freshness is the same in practice. Also
+ * reachable on demand via an admin request (`POST /admin/seo/pages/generate`
+ * or the per-page `regenerate` endpoint).
  */
 @Injectable()
 export class SeoGenerationService {

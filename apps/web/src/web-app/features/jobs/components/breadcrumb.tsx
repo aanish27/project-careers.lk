@@ -18,14 +18,18 @@ export const JobsBreadcrumb = ({
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        <BreadcrumbLink
-          render={
-            <Link href={"/jobs"} className="hover:underline">
-              /
-            </Link>
-          }
-        />
-        {breadcrumbs && <BreadcrumbSeparator />}
+        {breadcrumbs && breadcrumbs.length > 0 && (
+          <>
+            <BreadcrumbLink
+              render={
+                <Link href={"/jobs"} className="hover:underline">
+                  /
+                </Link>
+              }
+            />
+            <BreadcrumbSeparator />
+          </>
+        )}
         {breadcrumbs?.map((crumb, index) => (
           <Fragment key={crumb.url}>
             <BreadcrumbItem>

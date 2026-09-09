@@ -3,7 +3,7 @@ import { AUDIT_ACTIONS } from '@/modules/audit/audit.constant';
 import { AuditContext, AuditService } from '@/modules/audit/audit.service';
 import { MailService } from '@/shared/mail/mail.service';
 import { generateUniqueSlug } from '@careerslk/database';
-import { assertNotSsrf } from '@careerslk/lib/ssrf';
+import { assertNotSsrf, SsrfValidationError } from '@careerslk/lib/ssrf';
 import { slugify } from '@careerslk/lib/slugify';
 import {
   ClaimStatus,
@@ -12,7 +12,11 @@ import {
   CreateCompanyInput,
   UpdateCompanyInput,
 } from '@careerslk/types';
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 
 interface LatestScrapeLogRow {
   companyId: number;
@@ -109,10 +113,17 @@ export class CompaniesService {
     });
   }
 
-  private assertUrlsNotSsrf(...urls: (string | undefined)[]) {
-    return Promise.all(
-      urls.filter((url): url is string => !!url).map(assertNotSsrf),
-    );
+  private async assertUrlsNotSsrf(...urls: (string | undefined)[]) {
+    try {
+      await Promise.all(
+        urls.filter((url): url is string => !!url).map(assertNotSsrf),
+      );
+    } catch (error) {
+      if (error instanceof SsrfValidationError) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
   }
 
   async create(dto: CreateCompanyInput, context: AuditContext) {

@@ -3,6 +3,7 @@ import {
   SEO_GENERATION_QUEUE,
   SEO_LIFECYCLE_QUEUE,
 } from '@careerslk/types';
+import { WebRevalidationModule } from '@/modules/web-revalidation/web-revalidation.module';
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { SeoExpiryProcessor } from './processors/seo-expiry.processor';
@@ -32,6 +33,7 @@ import { SeoScheduler } from './seo.scheduler';
       { name: SEO_GENERATION_QUEUE },
       { name: SEO_LIFECYCLE_QUEUE },
     ),
+    WebRevalidationModule,
   ],
   controllers: [SeoPagesController],
   providers: [

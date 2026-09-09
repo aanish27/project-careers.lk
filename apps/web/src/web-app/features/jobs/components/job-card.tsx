@@ -1,6 +1,10 @@
 "use client";
 
 import { buttonVariants } from "@/components/ui/button";
+import {
+  formatEnumLabel,
+  formatLocation,
+} from "@/web-app/utils/job-formatters";
 import { useRequireAuth } from "@jobboard/hooks/use-require-auth";
 import { IconBookmark, IconExternalLink, IconShare } from "@tabler/icons-react";
 import {
@@ -8,21 +12,14 @@ import {
   unsaveJob,
 } from "@web-app-features/jobs/api/saved-jobs.actions";
 import type { PublicJob } from "@web-app-features/jobs/types";
-import { shareJob } from "@web-app-features/jobs/utils/share-job";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { getJobCardColors } from "./job-card-palette";
 import LocationPinIcon from "./location-pin-icon";
+import { ShareMenu } from "./share-menu";
 
 // Enum values are SCREAMING_SNAKE_CASE (e.g. "FULL_TIME") — turn them into
 // display text ("Full Time") instead of maintaining a separate label map.
-function formatEnumLabel(value: string): string {
-  return value
-    .toLowerCase()
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
 
 const JobCard = ({ job, index }: { job: PublicJob; index: number }) => {
   const [saved, setSaved] = useState(false);
@@ -69,26 +66,32 @@ const JobCard = ({ job, index }: { job: PublicJob; index: number }) => {
                 }`}
               />
             </button>
-            <button
-              onClick={() => shareJob(job.title, `/jobs/${job.slug}`)}
-              className="rounded-lg"
-              aria-label="Share this job"
-            >
-              <IconShare className="h-5 w-5 text-neutral-400 transition-colors" />
-            </button>
+            <ShareMenu
+              title={job.title}
+              url={`/job/${job.slug}`}
+              trigger={
+                <button
+                  type="button"
+                  className="rounded-lg"
+                  aria-label="Share this job"
+                >
+                  <IconShare className="h-5 w-5 text-neutral-400 transition-colors" />
+                </button>
+              }
+            />
           </div>
         </div>
 
         <p className={`mb-2 font-semibold ${text} hover:underline`}>
-          <Link href={`/companies/${job.company.slug}`}>
+          <Link href={`/companies/${job.company.slug}/jobs`}>
             {job.company.name}
           </Link>
         </p>
 
-        {job.location && (
+        {job.district && (
           <p className="mb-4 flex items-center gap-1 text-sm text-neutral-600">
             <LocationPinIcon className="h-4 w-4 shrink-0" />
-            {job.location}
+            {formatLocation(job)}
           </p>
         )}
         {job.description && (
@@ -114,7 +117,7 @@ const JobCard = ({ job, index }: { job: PublicJob; index: number }) => {
       <div className="flex gap-3">
         {isPosted ? (
           <Link
-            href={`/jobs/${job.slug}`}
+            href={`/job/${job.slug}`}
             target="_blank"
             rel="noopener noreferrer"
             className={buttonVariants({ className: "flex-1 rounded-lg h-10" })}
@@ -135,7 +138,7 @@ const JobCard = ({ job, index }: { job: PublicJob; index: number }) => {
           </a>
         ) : (
           <Link
-            href={`/jobs/${job.slug}`}
+            href={`/job/${job.slug}`}
             className={buttonVariants({ className: "flex-1 rounded-lg h-10" })}
           >
             View Details

@@ -53,7 +53,7 @@ export default async function sitemap({
   if (bucketId === "job-detail") {
     const entries = await jobsApi.sitemapEntries();
     return entries.map((entry) => ({
-      url: absoluteUrl(`jobs/${entry.slug}`),
+      url: absoluteUrl(`job/${entry.slug}`),
       lastModified: entry.updatedAt,
     }));
   }
@@ -79,8 +79,12 @@ export default async function sitemap({
     pageTypes.map((pageType) => seoPagesApi.list(pageType)),
   );
 
+  // Company pSEO pages live at /companies/[slug]/jobs — the bare
+  // /companies/[slug] route is a 404/noindex stub.
   return results.flat().map((page) => ({
-    url: absoluteUrl(page.slug),
+    url: absoluteUrl(
+      bucketId === "companies" ? `${page.slug}/jobs` : page.slug,
+    ),
     lastModified: page.lastmod,
   }));
 }

@@ -1,7 +1,7 @@
 import { PrismaService } from '@/database/prisma.service';
 import { StorageService } from '@/shared/storage/storage.service';
 import { generateUniqueSlug } from '@careerslk/database';
-import { assertNotSsrf } from '@careerslk/lib/ssrf';
+import { assertNotSsrf, SsrfValidationError } from '@careerslk/lib/ssrf';
 import { slugify } from '@careerslk/lib/slugify';
 import {
   ClaimStatus,
@@ -11,6 +11,7 @@ import {
   UpdateWebUserCompanyInput,
 } from '@careerslk/types';
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -23,10 +24,17 @@ export class WebUserCompaniesService {
     private readonly storage: StorageService,
   ) {}
 
-  private assertUrlsNotSsrf(...urls: (string | undefined)[]) {
-    return Promise.all(
-      urls.filter((url): url is string => !!url).map(assertNotSsrf),
-    );
+  private async assertUrlsNotSsrf(...urls: (string | undefined)[]) {
+    try {
+      await Promise.all(
+        urls.filter((url): url is string => !!url).map(assertNotSsrf),
+      );
+    } catch (error) {
+      if (error instanceof SsrfValidationError) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
   }
 
   private hostnameOf(url: string | null): string {

@@ -17,6 +17,11 @@ export class PublicCompaniesService {
         slug: true,
         logoUrl: true,
         websiteUrl: true,
+        description: true,
+        linkedinUrl: true,
+        twitterUrl: true,
+        facebookUrl: true,
+        instagramUrl: true,
       },
     });
     if (!company) throw new NotFoundException('Company not found');
@@ -36,7 +41,18 @@ export class PublicCompaniesService {
   async findJobsBySlug(slug: string) {
     const company = await this.prisma.company.findFirst({
       where: { slug, status: CompanyStatus.ACTIVE, deletedAt: null },
-      select: { id: true, name: true, slug: true, logoUrl: true },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        logoUrl: true,
+        websiteUrl: true,
+        description: true,
+        linkedinUrl: true,
+        twitterUrl: true,
+        facebookUrl: true,
+        instagramUrl: true,
+      },
     });
     if (!company) throw new NotFoundException('Company not found');
 
@@ -52,6 +68,8 @@ export class PublicCompaniesService {
       take: COMPANY_JOBS_LIMIT,
     });
 
-    return { company, jobs };
+    // Every job here belongs to the same company already fetched above —
+    // reuse it instead of joining it onto each row.
+    return { company, jobs: jobs.map((job) => ({ ...job, company })) };
   }
 }

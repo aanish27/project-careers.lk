@@ -16,7 +16,6 @@ export interface Job {
   batchId: string | null;
   title: string;
   slug: string;
-  location: string | null;
   province: string | null;
   district: string | null;
   city: string | null;

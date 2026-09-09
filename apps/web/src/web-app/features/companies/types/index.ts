@@ -6,6 +6,11 @@ export interface PublicCompany {
   slug: string;
   logoUrl: string | null;
   websiteUrl: string;
+  description: string | null;
+  linkedinUrl: string | null;
+  twitterUrl: string | null;
+  facebookUrl: string | null;
+  instagramUrl: string | null;
 }
 
 export interface PublicCompanyResponse {
@@ -14,6 +19,18 @@ export interface PublicCompanyResponse {
 }
 
 export interface PublicCompanyJobsResponse {
-  company: Pick<PublicCompany, "id" | "name" | "slug" | "logoUrl">;
+  company: Pick<
+    PublicCompany,
+    | "id"
+    | "name"
+    | "slug"
+    | "logoUrl"
+    | "websiteUrl"
+    | "description"
+    | "linkedinUrl"
+    | "twitterUrl"
+    | "facebookUrl"
+    | "instagramUrl"
+  >;
   jobs: PublicJob[];
 }

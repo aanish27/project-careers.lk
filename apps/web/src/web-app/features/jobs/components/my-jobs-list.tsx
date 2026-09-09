@@ -6,21 +6,26 @@ import {
   withdrawJob,
 } from "@web-app-features/auth/api/profile.actions";
 import { useWebUser } from "@jobboard/providers/web-user-provider";
-import { Badge } from "@ui/badge";
-import { Button } from "@ui/button";
+import { Badge, badgeVariants } from "@ui/badge";
+import { Button, buttonVariants } from "@ui/button";
 import { ConfirmDialog } from "@ui/confirm-dialog";
+import type { VariantProps } from "class-variance-authority";
+import { ExternalLink } from "lucide-react";
+import Link from "next/link";
 import { useState, useTransition } from "react";
 
-const STATUS_VARIANT: Record<
+type BadgeVariant = NonNullable<VariantProps<typeof badgeVariants>["variant"]>;
+
+export const STATUS_VARIANT: Record<
   JobWithCompany["approvalStatus"],
-  "default" | "outline" | "destructive"
+  BadgeVariant
 > = {
-  PENDING: "outline",
-  APPROVED: "default",
+  PENDING: "warning",
+  APPROVED: "success",
   REJECTED: "destructive",
 };
 
-const STATUS_LABEL: Record<JobWithCompany["approvalStatus"], string> = {
+export const STATUS_LABEL: Record<JobWithCompany["approvalStatus"], string> = {
   PENDING: "Pending review",
   APPROVED: "Approved",
   REJECTED: "Rejected",
@@ -98,8 +103,10 @@ export function MyJobsList({ jobs }: { jobs: JobWithCompany[] }) {
                 {isWithdrawn ? (
                   <Badge variant="outline">Withdrawn</Badge>
                 ) : (
-                  <Badge variant={STATUS_VARIANT[job.approvalStatus]}>
-                    {STATUS_LABEL[job.approvalStatus]}
+                  <Badge
+                    variant={STATUS_VARIANT[job.approvalStatus] ?? "outline"}
+                  >
+                    {STATUS_LABEL[job.approvalStatus] ?? job.approvalStatus}
                   </Badge>
                 )}
               </div>
@@ -110,7 +117,20 @@ export function MyJobsList({ jobs }: { jobs: JobWithCompany[] }) {
                     {job.rejectionReason}
                   </p>
                 )}
-              <div className="mt-3">
+              <div className="mt-3 flex items-center gap-2">
+                {!isWithdrawn && job.approvalStatus === "APPROVED" && (
+                  <Link
+                    href={`/job/${job.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={buttonVariants({
+                      variant: "outline",
+                      size: "sm",
+                    })}
+                  >
+                    View job <ExternalLink className="size-3.5" />
+                  </Link>
+                )}
                 {isWithdrawn ? (
                   <Button
                     type="button"

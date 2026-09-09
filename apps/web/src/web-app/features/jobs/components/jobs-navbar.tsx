@@ -2,43 +2,20 @@
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { useRequireAuth } from "@/web-app/hooks/use-require-auth";
 import { useWebUser } from "@/web-app/providers/web-user-provider";
-import { IconCompass, IconSearch } from "@tabler/icons-react";
+import { IconSearch } from "@tabler/icons-react";
 import Link from "next/link";
 
 const NAV_LINKS = [
-  {
-    label: "Explore",
-    icon: IconCompass,
-    items: ["Browse Jobs", "Companies", "Categories"],
-  },
-  {
-    label: "Company",
-    items: ["About", "Careers", "Blog"],
-  },
-  {
-    label: "Jobs",
-    items: ["Full-time", "Part-time", "Remote"],
-  },
-  {
-    label: "Roles",
-    items: ["Engineering", "Design", "Marketing"],
-  },
-  {
-    label: "About Us",
-    items: ["Our Story", "Team", "Press"],
-  },
+  { label: "Browse", href: "/jobs" },
+  { label: "Remote Jobs", href: "/jobs/remote-jobs" },
+  { label: "Internships", href: "/jobs/internship" },
+  { label: "Talent Pools", href: "/jobs/talent-pools" },
 ];
 
 const JobsNavbar = () => {
@@ -56,28 +33,20 @@ const JobsNavbar = () => {
         </InputGroup>
       </div>
       <div className="flex items-center gap-5">
-        {NAV_LINKS.map(({ label, items }) => (
-          <DropdownMenu key={label}>
-            <DropdownMenuTrigger
-              openOnHover
-              className="group/nav-item flex items-center gap-1.5 text-sm font-medium text-foreground/80 outline-none hover:text-foreground data-popup-open:text-foreground"
-            >
-              <span className="relative">
-                {label}
-                <span className="absolute inset-x-0 -bottom-1 h-0.5 origin-left scale-x-0 rounded-full bg-primary transition-transform duration-200 group-hover/nav-item:scale-x-100 group-data-popup-open/nav-item:scale-x-100" />
-              </span>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {items.map((item) => (
-                <DropdownMenuItem key={item}>{item}</DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+        {NAV_LINKS.map(({ label, href }) => (
+          <Link
+            key={label}
+            href={href}
+            className="group/nav-item relative text-sm font-medium text-foreground/80 outline-none hover:text-foreground"
+          >
+            {label}
+            <span className="absolute inset-x-0 -bottom-1 h-0.5 origin-left scale-x-0 rounded-full bg-primary transition-transform duration-200 group-hover/nav-item:scale-x-100" />
+          </Link>
         ))}
         <div className="relative flex gap-5 p-1">
           {isLoggedIn ? (
             <Link
-              href="/post-job"
+              href="/account/post-job"
               className={buttonVariants({
                 className:
                   " font-semibold backdrop-blur-sm bg-primary/90 hover:bg-primary rounded-2xl p-1 px-5",

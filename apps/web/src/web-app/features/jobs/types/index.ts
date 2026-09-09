@@ -16,7 +16,9 @@ export interface PublicJob {
   id: number;
   title: string;
   slug: string;
-  location: string | null;
+  province: string | null;
+  district: string | null;
+  city: string | null;
   workMode: WorkMode | null;
   employmentType: EmploymentType | null;
   sector: string | null;

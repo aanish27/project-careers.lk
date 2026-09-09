@@ -15,11 +15,10 @@ import {
   WorkMode,
 } from "@careerslk/types";
 import { IconBuildingSkyscraper } from "@tabler/icons-react";
+import { IBreadcrumbItem } from "@web-app-features/ui/types";
 import { useMemo } from "react";
 import { JobFilters } from "../types";
 import { JobsBreadcrumb } from "./breadcrumb";
-import { Breadcrumb } from "@/components/ui/breadcrumb";
-import { IBreadcrumbItem } from "@web-app-features/ui/types";
 
 type JobFilterBarProps = {
   breadcrumbs?: IBreadcrumbItem[];
