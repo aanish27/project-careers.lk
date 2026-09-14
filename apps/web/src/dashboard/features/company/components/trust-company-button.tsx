@@ -5,6 +5,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { Company } from "@careerslk/types";
 import { useState } from "react";
 import { useTrustCompany, useUntrustCompany } from "../hooks/use-trust-company";
+import { DenyTrustDialog } from "./deny-trust-dialog";
 
 export function TrustCompanyButton({ company }: { company: Company }) {
   const trustCompany = useTrustCompany();
@@ -22,15 +23,10 @@ export function TrustCompanyButton({ company }: { company: Company }) {
         >
           {untrustCompany.isPending ? "Revoking…" : "Revoke trust"}
         </Button>
-        <ConfirmDialog
+        <DenyTrustDialog
+          company={company}
           open={confirmOpen}
           onOpenChange={setConfirmOpen}
-          title={`Revoke trust from ${company.name}?`}
-          description="Future job postings from this company will go back to requiring manual approval."
-          confirmLabel="Revoke trust"
-          variant="destructive"
-          isPending={untrustCompany.isPending}
-          onConfirm={() => untrustCompany.mutate(company.id)}
         />
       </>
     );

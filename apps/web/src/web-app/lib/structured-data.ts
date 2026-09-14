@@ -54,10 +54,9 @@ export function buildJobPostingSchema(
         "@type": "QuantitativeValue",
         ...(job.salaryMin ? { minValue: job.salaryMin } : {}),
         ...(job.salaryMax ? { maxValue: job.salaryMax } : {}),
-        // Sri Lankan job listings conventionally quote monthly salary; we
-        // have no per-job signal of pay period, so this is a market
-        // convention default rather than a fabricated number.
-        unitText: "MONTH",
+        // Sri Lankan job listings conventionally quote monthly salary; fall
+        // back to that market convention for older rows with no period set.
+        unitText: job.salaryPeriod === "annual" ? "YEAR" : "MONTH",
       },
     };
   }

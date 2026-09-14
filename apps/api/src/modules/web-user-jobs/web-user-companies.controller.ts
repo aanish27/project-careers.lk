@@ -73,6 +73,15 @@ export class WebUserCompaniesController {
     return this.webUserCompaniesService.uploadLogo(webUserId, file);
   }
 
+  @Post('me/br-image')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadBrImage(
+    @CurrentUser('webUserId') webUserId: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.webUserCompaniesService.uploadBrImage(webUserId, file);
+  }
+
   @Post('me/request-auto-approval')
   requestAutoApproval(@CurrentUser('webUserId') webUserId: number) {
     return this.webUserCompaniesService.requestAutoApproval(webUserId);

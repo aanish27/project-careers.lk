@@ -1,10 +1,6 @@
 "use server";
 
-import {
-  type Company,
-  createWebUserCompanySchema,
-  updateWebUserCompanySchema,
-} from "@careerslk/types";
+import { type Company, type CreateWebUserCompanyInput } from "@careerslk/types";
 import { toActionErrorMessage } from "@lib/api-client";
 import {
   claimCompanyRequest,
@@ -15,19 +11,14 @@ import {
   requestCompanyAutoApprovalRequest,
   searchCompaniesRequest,
   updateMyCompanyRequest,
+  uploadCompanyBrImageRequest,
   uploadCompanyLogoRequest,
 } from "@web-app-lib/web-user-client";
-import { fieldErrorsFromZod } from "@web-app-lib/form-validation";
 import {
   getValidWebUserAccessToken,
   updateWebUserSessionUser,
 } from "@web-app-lib/web-user-session";
 import { redirect } from "next/navigation";
-
-function optionalString(value: FormDataEntryValue | null): string | undefined {
-  if (typeof value !== "string" || value.trim() === "") return undefined;
-  return value.trim();
-}
 
 export type SearchCompaniesResult =
   | { ok: true; results: CompanySearchResult[] }
@@ -76,33 +67,17 @@ export async function claimCompany(
   }
 }
 
-export type CompanyFormState =
-  | { error?: string; fieldErrors?: Record<string, string> }
-  | undefined;
+export type CompanyFormState = { error?: string } | undefined;
 
 export async function createCompany(
   _state: CompanyFormState,
-  formData: FormData,
+  data: CreateWebUserCompanyInput,
 ): Promise<CompanyFormState> {
   const accessToken = await getValidWebUserAccessToken();
   if (!accessToken) redirect("/login");
 
-  const parsed = createWebUserCompanySchema.safeParse({
-    name: optionalString(formData.get("name")),
-    websiteUrl: optionalString(formData.get("websiteUrl")),
-    description: optionalString(formData.get("description")),
-    linkedinUrl: optionalString(formData.get("linkedinUrl")),
-    twitterUrl: optionalString(formData.get("twitterUrl")),
-    facebookUrl: optionalString(formData.get("facebookUrl")),
-    instagramUrl: optionalString(formData.get("instagramUrl")),
-  });
-  if (!parsed.success) {
-    return { fieldErrors: fieldErrorsFromZod(parsed.error) };
-  }
-  const input = parsed.data;
-
   try {
-    await createCompanyRequest(accessToken, input);
+    await createCompanyRequest(accessToken, data);
     const user = await fetchCurrentWebUser(accessToken);
     await updateWebUserSessionUser(user);
   } catch (err) {
@@ -119,27 +94,13 @@ export async function createCompany(
 
 export async function updateCompany(
   _state: CompanyFormState,
-  formData: FormData,
+  data: CreateWebUserCompanyInput,
 ): Promise<CompanyFormState> {
   const accessToken = await getValidWebUserAccessToken();
   if (!accessToken) redirect("/login");
 
-  const parsed = updateWebUserCompanySchema.safeParse({
-    name: optionalString(formData.get("name")),
-    websiteUrl: optionalString(formData.get("websiteUrl")),
-    description: optionalString(formData.get("description")),
-    linkedinUrl: optionalString(formData.get("linkedinUrl")),
-    twitterUrl: optionalString(formData.get("twitterUrl")),
-    facebookUrl: optionalString(formData.get("facebookUrl")),
-    instagramUrl: optionalString(formData.get("instagramUrl")),
-  });
-  if (!parsed.success) {
-    return { fieldErrors: fieldErrorsFromZod(parsed.error) };
-  }
-  const input = parsed.data;
-
   try {
-    await updateMyCompanyRequest(accessToken, input);
+    await updateMyCompanyRequest(accessToken, data);
   } catch (err) {
     return {
       error: toActionErrorMessage(
@@ -164,6 +125,30 @@ export async function uploadCompanyLogo(file: File): Promise<LogoUploadResult> {
   try {
     const company = await uploadCompanyLogoRequest(accessToken, file);
     return { ok: true, logoUrl: company.logoUrl };
+  } catch (err) {
+    return {
+      error: toActionErrorMessage(
+        err,
+        "Something went wrong. Please try again.",
+      ),
+    };
+  }
+}
+
+export type BrImageUploadResult =
+  | { ok: true; brImageUrl: string | null }
+  | { requiresAuth: true }
+  | { error: string };
+
+export async function uploadCompanyBrImage(
+  file: File,
+): Promise<BrImageUploadResult> {
+  const accessToken = await getValidWebUserAccessToken();
+  if (!accessToken) return { requiresAuth: true };
+
+  try {
+    const company = await uploadCompanyBrImageRequest(accessToken, file);
+    return { ok: true, brImageUrl: company.brImageUrl };
   } catch (err) {
     return {
       error: toActionErrorMessage(

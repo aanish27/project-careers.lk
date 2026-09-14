@@ -57,7 +57,7 @@ export function CompanyDetail({ companyId }: { companyId: number }) {
                 <AvatarImage src={company.logoUrl} alt={company.name} />
               )}
               <AvatarFallback>
-                {company.name.slice(0, 2).toUpperCase()}
+                <IconBuildingSkyscraper className="text-muted-foreground size-5" />
               </AvatarFallback>
             </Avatar>
             <IconBuildingSkyscraper className="text-primary size-4" />
@@ -112,6 +112,33 @@ export function CompanyDetail({ companyId }: { companyId: number }) {
             <div className="whitespace-pre-line">
               {company.description ?? "—"}
             </div>
+          </div>
+          <div>
+            <div className="text-muted-foreground">Address</div>
+            <div>{company.address ?? "—"}</div>
+          </div>
+          <div>
+            <div className="text-muted-foreground">Contact person</div>
+            <div>{company.contactPerson ?? "—"}</div>
+          </div>
+          <div>
+            <div className="text-muted-foreground">Contact number</div>
+            <div>{company.contactNumber ?? "—"}</div>
+          </div>
+          <div>
+            <div className="text-muted-foreground">Business registration</div>
+            {company.brImageUrl ? (
+              <a
+                href={company.brImageUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="underline"
+              >
+                View document
+              </a>
+            ) : (
+              <div>—</div>
+            )}
           </div>
           <div>
             <div className="text-muted-foreground">LinkedIn</div>

@@ -1,5 +1,5 @@
 import { PrismaService } from '@/database/prisma.service';
-import { CompanyStatus, JobStatus } from '@careerslk/types';
+import { CompanyStatus, JobApprovalStatus, JobStatus } from '@careerslk/types';
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 const COMPANY_JOBS_LIMIT = 50;
@@ -30,6 +30,7 @@ export class PublicCompaniesService {
       where: {
         companyId: company.id,
         status: JobStatus.ACTIVE,
+        approvalStatus: JobApprovalStatus.APPROVED,
         deletedAt: null,
         NOT: { employmentType: { equals: 'talent_pool', mode: 'insensitive' } },
       },
@@ -60,6 +61,7 @@ export class PublicCompaniesService {
       where: {
         companyId: company.id,
         status: JobStatus.ACTIVE,
+        approvalStatus: JobApprovalStatus.APPROVED,
         deletedAt: null,
         NOT: { employmentType: { equals: 'talent_pool', mode: 'insensitive' } },
       },

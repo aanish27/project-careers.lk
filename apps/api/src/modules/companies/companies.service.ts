@@ -1,7 +1,9 @@
 import { PrismaService } from '@/database/prisma.service';
 import { AUDIT_ACTIONS } from '@/modules/audit/audit.constant';
 import { AuditContext, AuditService } from '@/modules/audit/audit.service';
+import { WebUserNotificationsService } from '@/modules/web-user-notifications/web-user-notifications.service';
 import { MailService } from '@/shared/mail/mail.service';
+import { StorageService } from '@/shared/storage/storage.service';
 import { generateUniqueSlug } from '@careerslk/database';
 import { assertNotSsrf, SsrfValidationError } from '@careerslk/lib/ssrf';
 import { slugify } from '@careerslk/lib/slugify';
@@ -10,7 +12,9 @@ import {
   CompanyAutoApprovalStatus,
   CompanyScrapeSummary,
   CreateCompanyInput,
+  DenyTrustInput,
   UpdateCompanyInput,
+  WebUserNotificationType,
 } from '@careerslk/types';
 import {
   BadRequestException,
@@ -34,6 +38,8 @@ export class CompaniesService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly mail: MailService,
+    private readonly webUserNotifications: WebUserNotificationsService,
+    private readonly storage: StorageService,
   ) {}
 
   async getScrapeSummaries(
@@ -183,8 +189,13 @@ export class CompaniesService {
       where: { id, deletedAt: null },
     });
     const [scrapeSummary] = await this.getScrapeSummaries([id]);
+    const { brImageKey, ...rest } = company;
 
-    return { ...company, scrapeSummary: scrapeSummary ?? null };
+    return {
+      ...rest,
+      brImageUrl: brImageKey ? await this.storage.getUrl(brImageKey) : null,
+      scrapeSummary: scrapeSummary ?? null,
+    };
   }
 
   async update(id: number, dto: UpdateCompanyInput, context: AuditContext) {
@@ -284,19 +295,26 @@ export class CompaniesService {
       });
       if (creator) {
         await this.mail.sendTrustGrantedEmail(creator.email, company.name);
+        void this.webUserNotifications.create(
+          company.createdByWebUserId,
+          WebUserNotificationType.TRUST_GRANTED,
+          'Auto-approval granted',
+          `${company.name} can now post jobs without manual review.`,
+        );
       }
     }
 
     return company;
   }
 
-  async untrust(id: number, context: AuditContext) {
-    return await this.prisma.$transaction(async (tx) => {
+  async untrust(id: number, dto: DenyTrustInput, context: AuditContext) {
+    const company = await this.prisma.$transaction(async (tx) => {
       const company = await tx.company.update({
         where: { id },
         data: {
           autoApproveJobs: false,
           autoApprovalStatus: CompanyAutoApprovalStatus.DENIED,
+          autoApprovalDenialReason: dto.reason,
         },
       });
 
@@ -306,13 +324,35 @@ export class CompaniesService {
           action: AUDIT_ACTIONS.COMPANY_TRUST_REVOKED,
           entityType: 'company',
           entityId: company.id,
-          newValue: { autoApproveJobs: false },
+          newValue: { autoApproveJobs: false, reason: dto.reason },
         },
         tx,
       );
 
       return company;
     });
+
+    if (company.createdByWebUserId) {
+      const creator = await this.prisma.webUser.findUnique({
+        where: { id: company.createdByWebUserId },
+        select: { email: true },
+      });
+      if (creator) {
+        await this.mail.sendTrustDeniedEmail(
+          creator.email,
+          company.name,
+          dto.reason,
+        );
+        void this.webUserNotifications.create(
+          company.createdByWebUserId,
+          WebUserNotificationType.TRUST_DENIED,
+          'Auto-approval denied',
+          `Your auto-approval request for ${company.name} was not granted: ${dto.reason}`,
+        );
+      }
+    }
+
+    return company;
   }
 
   async listClaims(status?: ClaimStatus) {

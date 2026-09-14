@@ -97,4 +97,23 @@ export class MailService {
 
     this.logger.log(`Sent trust-granted email to ${email}`);
   }
+
+  async sendTrustDeniedEmail(
+    email: string,
+    companyName: string,
+    reason: string,
+  ): Promise<void> {
+    const fromEmail = this.config.getOrThrow<string>('mail.fromEmail');
+    const fromName = this.config.get<string>('mail.fromName');
+
+    await this.getTransporter().sendMail({
+      from: `"${fromName}" <${fromEmail}>`,
+      to: email,
+      subject: `Auto-approval request for ${companyName} was denied`,
+      text: `Your request to auto-approve job postings for ${companyName} on careers.lk was not granted: ${reason}. Your job postings will continue to go through manual review.`,
+      html: `<p>Your request to auto-approve job postings for <strong>${companyName}</strong> on careers.lk was not granted:</p><blockquote>${reason}</blockquote><p>Your job postings will continue to go through manual review.</p>`,
+    });
+
+    this.logger.log(`Sent trust-denied email to ${email}`);
+  }
 }

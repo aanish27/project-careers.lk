@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@ui/badge";
 import { Button } from "@ui/button";
 import {
   IconBolt,
@@ -20,13 +21,19 @@ export function JobDetailActions({
   title,
   url,
   applyUrl,
+  cvEmail,
+  walkIn,
+  initialSaved = false,
 }: {
   jobId: number;
   title: string;
   url: string;
   applyUrl?: string | null;
+  cvEmail?: string | null;
+  walkIn?: boolean;
+  initialSaved?: boolean;
 }) {
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(initialSaved);
   const [isPending, startTransition] = useTransition();
   const requireAuth = useRequireAuth();
 
@@ -79,6 +86,19 @@ export function JobDetailActions({
           <IconBolt className="size-4" aria-hidden="true" />
           Quick apply
         </a>
+      )}
+      {cvEmail && (
+        <a
+          href={`mailto:${cvEmail}?subject=${encodeURIComponent(`Application for ${title}`)}`}
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-input px-4 text-sm font-medium transition-colors hover:bg-muted"
+        >
+          Email your CV
+        </a>
+      )}
+      {walkIn && (
+        <Badge variant="secondary" className="h-9 gap-1.5 px-3">
+          Walk-in interview
+        </Badge>
       )}
     </div>
   );

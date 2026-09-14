@@ -1,11 +1,14 @@
 "use client";
 
-import type { Company } from "@careerslk/types";
+import { type Company, createWebUserCompanySchema } from "@careerslk/types";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@ui/field";
 import { Input } from "@ui/input";
 import { Textarea } from "@ui/textarea";
-import { useActionState } from "react";
+import { startTransition, useActionState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import type { z } from "zod";
 import { createCompany, updateCompany } from "../api/company.actions";
 
 export function CompanyForm({ company }: { company?: Company }) {
@@ -14,98 +17,197 @@ export function CompanyForm({ company }: { company?: Company }) {
     isEdit ? updateCompany : createCompany,
     undefined,
   );
+  const form = useForm<z.infer<typeof createWebUserCompanySchema>>({
+    resolver: zodResolver(createWebUserCompanySchema),
+    defaultValues: {
+      name: company?.name ?? "",
+      websiteUrl: company?.websiteUrl ?? "",
+      description: company?.description ?? "",
+      address: company?.address ?? "",
+      contactPerson: company?.contactPerson ?? "",
+      contactNumber: company?.contactNumber ?? "",
+      linkedinUrl: company?.linkedinUrl ?? "",
+      twitterUrl: company?.twitterUrl ?? "",
+      facebookUrl: company?.facebookUrl ?? "",
+      instagramUrl: company?.instagramUrl ?? "",
+    },
+  });
 
   return (
-    <form action={formAction}>
+    <form
+      noValidate
+      onSubmit={form.handleSubmit((data) =>
+        startTransition(() => formAction(data)),
+      )}
+    >
       <FieldGroup>
-        <Field data-invalid={!!state?.fieldErrors?.name}>
-          <FieldLabel htmlFor="name">Company name</FieldLabel>
-          <Input
-            id="name"
-            name="name"
-            required
-            defaultValue={company?.name}
-            aria-invalid={!!state?.fieldErrors?.name}
-          />
-          <FieldError>{state?.fieldErrors?.name}</FieldError>
-        </Field>
+        <Controller
+          name="name"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="name" required>
+                Company name
+              </FieldLabel>
+              <Input {...field} id="name" aria-invalid={fieldState.invalid} />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          )}
+        />
 
-        <Field data-invalid={!!state?.fieldErrors?.websiteUrl}>
-          <FieldLabel htmlFor="websiteUrl">
-            Website URL{" "}
-            <span className="text-muted-foreground">(optional)</span>
-          </FieldLabel>
-          <Input
-            id="websiteUrl"
-            name="websiteUrl"
-            type="url"
-            placeholder="https://example.com"
-            defaultValue={company?.websiteUrl ?? undefined}
-            aria-invalid={!!state?.fieldErrors?.websiteUrl}
-          />
-          <FieldError>{state?.fieldErrors?.websiteUrl}</FieldError>
-        </Field>
+        <Controller
+          name="websiteUrl"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="websiteUrl">Website URL</FieldLabel>
+              <Input
+                {...field}
+                id="websiteUrl"
+                type="url"
+                placeholder="https://example.com"
+                aria-invalid={fieldState.invalid}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          )}
+        />
 
-        <Field data-invalid={!!state?.fieldErrors?.description}>
-          <FieldLabel htmlFor="description">Description</FieldLabel>
-          <Textarea
-            id="description"
-            name="description"
-            rows={4}
-            defaultValue={company?.description ?? undefined}
-            aria-invalid={!!state?.fieldErrors?.description}
+        <Controller
+          name="description"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="description">Description</FieldLabel>
+              <Textarea
+                {...field}
+                id="description"
+                rows={4}
+                aria-invalid={fieldState.invalid}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          )}
+        />
+
+        <Controller
+          name="address"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="address">Address</FieldLabel>
+              <Input
+                {...field}
+                id="address"
+                aria-invalid={fieldState.invalid}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          )}
+        />
+
+        <Field orientation="responsive">
+          <Controller
+            name="contactPerson"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="contactPerson">Contact person</FieldLabel>
+                <Input
+                  {...field}
+                  id="contactPerson"
+                  aria-invalid={fieldState.invalid}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
           />
-          <FieldError>{state?.fieldErrors?.description}</FieldError>
+          <Controller
+            name="contactNumber"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="contactNumber">Contact number</FieldLabel>
+                <Input
+                  {...field}
+                  id="contactNumber"
+                  type="tel"
+                  aria-invalid={fieldState.invalid}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
         </Field>
 
         <Field orientation="responsive">
-          <Field data-invalid={!!state?.fieldErrors?.linkedinUrl}>
-            <FieldLabel htmlFor="linkedinUrl">LinkedIn</FieldLabel>
-            <Input
-              id="linkedinUrl"
-              name="linkedinUrl"
-              type="url"
-              defaultValue={company?.linkedinUrl ?? undefined}
-              aria-invalid={!!state?.fieldErrors?.linkedinUrl}
-            />
-            <FieldError>{state?.fieldErrors?.linkedinUrl}</FieldError>
-          </Field>
-          <Field data-invalid={!!state?.fieldErrors?.twitterUrl}>
-            <FieldLabel htmlFor="twitterUrl">Twitter / X</FieldLabel>
-            <Input
-              id="twitterUrl"
-              name="twitterUrl"
-              type="url"
-              defaultValue={company?.twitterUrl ?? undefined}
-              aria-invalid={!!state?.fieldErrors?.twitterUrl}
-            />
-            <FieldError>{state?.fieldErrors?.twitterUrl}</FieldError>
-          </Field>
+          <Controller
+            name="linkedinUrl"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="linkedinUrl">LinkedIn</FieldLabel>
+                <Input
+                  {...field}
+                  id="linkedinUrl"
+                  type="url"
+                  aria-invalid={fieldState.invalid}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+          <Controller
+            name="twitterUrl"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="twitterUrl">Twitter / X</FieldLabel>
+                <Input
+                  {...field}
+                  id="twitterUrl"
+                  type="url"
+                  aria-invalid={fieldState.invalid}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
         </Field>
 
         <Field orientation="responsive">
-          <Field data-invalid={!!state?.fieldErrors?.facebookUrl}>
-            <FieldLabel htmlFor="facebookUrl">Facebook</FieldLabel>
-            <Input
-              id="facebookUrl"
-              name="facebookUrl"
-              type="url"
-              defaultValue={company?.facebookUrl ?? undefined}
-              aria-invalid={!!state?.fieldErrors?.facebookUrl}
-            />
-            <FieldError>{state?.fieldErrors?.facebookUrl}</FieldError>
-          </Field>
-          <Field data-invalid={!!state?.fieldErrors?.instagramUrl}>
-            <FieldLabel htmlFor="instagramUrl">Instagram</FieldLabel>
-            <Input
-              id="instagramUrl"
-              name="instagramUrl"
-              type="url"
-              defaultValue={company?.instagramUrl ?? undefined}
-              aria-invalid={!!state?.fieldErrors?.instagramUrl}
-            />
-            <FieldError>{state?.fieldErrors?.instagramUrl}</FieldError>
-          </Field>
+          <Controller
+            name="facebookUrl"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="facebookUrl">Facebook</FieldLabel>
+                <Input
+                  {...field}
+                  id="facebookUrl"
+                  type="url"
+                  aria-invalid={fieldState.invalid}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+          <Controller
+            name="instagramUrl"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="instagramUrl">Instagram</FieldLabel>
+                <Input
+                  {...field}
+                  id="instagramUrl"
+                  type="url"
+                  aria-invalid={fieldState.invalid}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
         </Field>
 
         <Field data-invalid={!!state?.error}>

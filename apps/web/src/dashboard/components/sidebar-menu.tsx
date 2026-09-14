@@ -74,15 +74,13 @@ export function SidebarMenu({
                       <Link
                         key={href}
                         href={href}
-                        className={buttonVariants({
-                          variant: "ghost",
-                          className: cn(
-                            "flex justify-start gap-2 rounded-md text-xs font-medium transition-all",
-                            activeItem === label
-                              ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
-                              : "text-foreground hover:bg-accent/50",
-                          ),
-                        })}
+                        className={cn(
+                          buttonVariants({ variant: "ghost" }),
+                          "flex w-full justify-start gap-2 rounded-md text-xs font-medium transition-all",
+                          activeItem === label
+                            ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+                            : "text-foreground hover:bg-accent/50",
+                        )}
                       >
                         <Icon className="h-4 w-4" />
                         <span className="capitalize">{label}</span>

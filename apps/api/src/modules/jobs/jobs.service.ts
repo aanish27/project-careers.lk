@@ -2,6 +2,7 @@ import { PrismaService } from '@/database/prisma.service';
 import { AUDIT_ACTIONS } from '@/modules/audit/audit.constant';
 import { AuditContext, AuditService } from '@/modules/audit/audit.service';
 import { WebRevalidationService } from '@/modules/web-revalidation/web-revalidation.service';
+import { WebUserNotificationsService } from '@/modules/web-user-notifications/web-user-notifications.service';
 import {
   getCitySlug,
   getDistrictSlug,
@@ -10,6 +11,7 @@ import {
   JobStatus,
   RejectJobInput,
   UpdateJobInput,
+  WebUserNotificationType,
 } from '@careerslk/types';
 import { Injectable } from '@nestjs/common';
 
@@ -28,6 +30,7 @@ export class JobsService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly webRevalidation: WebRevalidationService,
+    private readonly webUserNotifications: WebUserNotificationsService,
   ) {}
 
   async findAll(filters: JobFilters) {
@@ -171,6 +174,15 @@ export class JobsService {
 
     void this.webRevalidation.revalidateTags(['pseo-jobs']);
 
+    if (job.postedByWebUserId) {
+      void this.webUserNotifications.create(
+        job.postedByWebUserId,
+        WebUserNotificationType.JOB_APPROVED,
+        'Job approved',
+        `"${job.title}" is now live.`,
+      );
+    }
+
     return job;
   }
 
@@ -206,6 +218,15 @@ export class JobsService {
     });
 
     void this.webRevalidation.revalidateTags(['pseo-jobs']);
+
+    if (job.postedByWebUserId) {
+      void this.webUserNotifications.create(
+        job.postedByWebUserId,
+        WebUserNotificationType.JOB_REJECTED,
+        'Job rejected',
+        `"${job.title}" was not approved: ${dto.reason}`,
+      );
+    }
 
     return job;
   }

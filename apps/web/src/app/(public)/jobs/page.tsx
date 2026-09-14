@@ -25,13 +25,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function JobsPage({ searchParams }: JobsPageProps) {
-  const { title, location } = await searchParams;
   const filters = await loadJobFilters(searchParams);
 
   const [firstPage, seoContent] = await Promise.all([
     jobsApi.list({
-      title: title,
-      location: location,
       ...filters,
       slug: "jobs",
     }),

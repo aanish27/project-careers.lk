@@ -26,11 +26,14 @@ export interface PublicJob {
   salaryMin: number | null;
   salaryMax: number | null;
   salaryCurrency: string | null;
+  salaryPeriod: string | null;
   salaryRaw: string | null;
   description: string | null;
   imageUrl: string | null;
   deadline: string | null;
   applyUrl: string | null;
+  cvEmail: string | null;
+  walkIn: boolean;
   lastSeenAt: string;
   source: "SCRAPED" | "POSTED";
   company: PublicJobCompany;

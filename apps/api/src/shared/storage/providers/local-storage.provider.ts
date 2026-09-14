@@ -75,4 +75,8 @@ export class LocalStorageProvider implements IStorageProvider {
     this.safePath(key);
     return `/uploads/${key}`;
   }
+
+  getPublicUrl(key: string): string {
+    return this.getUrl(key);
+  }
 }

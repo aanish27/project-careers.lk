@@ -28,10 +28,15 @@ export interface Company {
   twitterUrl: string | null;
   facebookUrl: string | null;
   instagramUrl: string | null;
+  address: string | null;
+  contactPerson: string | null;
+  contactNumber: string | null;
+  brImageUrl: string | null;
   createdByWebUserId: number | null;
   autoApproveJobs: boolean;
   autoApprovalStatus: CompanyAutoApprovalStatus;
   autoApprovalRequestedAt: string | null;
+  autoApprovalDenialReason: string | null;
 }
 
 export interface CompanyScrapeSummary {

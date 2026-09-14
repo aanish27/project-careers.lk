@@ -1,6 +1,7 @@
 "use client";
 
 import { buttonVariants } from "@/components/ui/button";
+import { stripHtmlToText } from "@/lib/sanitize-html";
 import {
   formatEnumLabel,
   formatLocation,
@@ -96,7 +97,7 @@ const JobCard = ({ job, index }: { job: PublicJob; index: number }) => {
         )}
         {job.description && (
           <p className="mb-5 line-clamp-2 text-sm text-neutral-700 leading-relaxed">
-            {job.description}
+            {stripHtmlToText(job.description)}
           </p>
         )}
 

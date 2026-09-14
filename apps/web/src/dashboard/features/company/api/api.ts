@@ -52,8 +52,10 @@ export const companyApi = {
       .then((res) => res.data),
   trust: (id: number) =>
     api.post<Company>(`/admin/companies/${id}/trust`).then((res) => res.data),
-  untrust: (id: number) =>
-    api.post<Company>(`/admin/companies/${id}/untrust`).then((res) => res.data),
+  untrust: (id: number, reason: string) =>
+    api
+      .post<Company>(`/admin/companies/${id}/untrust`, { reason })
+      .then((res) => res.data),
 };
 
 export const companyClaimsApi = {

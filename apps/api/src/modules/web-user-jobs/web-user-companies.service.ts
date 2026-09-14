@@ -143,9 +143,16 @@ export class WebUserCompaniesService {
     });
     if (!webUser.companyId) return null;
 
-    return this.prisma.company.findUnique({
+    const company = await this.prisma.company.findUnique({
       where: { id: webUser.companyId },
     });
+    if (!company) return null;
+
+    const { brImageKey, ...rest } = company;
+    return {
+      ...rest,
+      brImageUrl: brImageKey ? await this.storage.getUrl(brImageKey) : null,
+    };
   }
 
   private async requireOwnCompanyId(webUserId: number): Promise<number> {
@@ -184,8 +191,24 @@ export class WebUserCompaniesService {
 
     return this.prisma.company.update({
       where: { id: companyId },
-      data: { logoUrl: result.url },
+      data: { logoUrl: this.storage.getPublicUrl(result.key) },
     });
+  }
+
+  async uploadBrImage(webUserId: number, file: Express.Multer.File) {
+    const companyId = await this.requireOwnCompanyId(webUserId);
+
+    const result = await this.storage.upload(file, 'company-br-images');
+
+    const { brImageKey, ...company } = await this.prisma.company.update({
+      where: { id: companyId },
+      data: { brImageKey: result.key },
+    });
+
+    return {
+      ...company,
+      brImageUrl: await this.storage.getUrl(brImageKey!),
+    };
   }
 
   async requestAutoApproval(webUserId: number) {

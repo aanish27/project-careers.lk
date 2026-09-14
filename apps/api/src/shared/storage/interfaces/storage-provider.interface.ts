@@ -11,4 +11,5 @@ export interface IStorageProvider {
   upload(file: Express.Multer.File, folder?: string): Promise<UploadResult>;
   delete(key: string): Promise<void>;
   getUrl(key: string): Promise<string> | string;
+  getPublicUrl(key: string): string;
 }

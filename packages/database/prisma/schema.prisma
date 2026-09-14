@@ -79,10 +79,11 @@ model WebUser {
   companyId Int?
   company   Company? @relation(fields: [companyId], references: [id])
 
-  createdCompanies Company[]      @relation("CompanyCreatedByWebUser")
+  createdCompanies Company[]             @relation("CompanyCreatedByWebUser")
   postedJobs       Job[]
   savedJobs        SavedJob[]
   companyClaims    CompanyClaim[]
+  notifications    WebUserNotification[]
 
   freelanceProfile FreelanceProfile?
   postedGigs       Gig[]             @relation("GigPostedBy")
@@ -220,12 +221,20 @@ model Company {
   facebookUrl  String?
   instagramUrl String?
 
+  address       String?
+  contactPerson String?
+  contactNumber String?
+  // S3 key, not a URL — BR documents are private; a fresh signed URL is
+  // minted on every read instead of persisting one that would expire.
+  brImageKey    String?
+
   createdByWebUserId Int?
   createdByWebUser   WebUser? @relation("CompanyCreatedByWebUser", fields: [createdByWebUserId], references: [id])
 
-  autoApproveJobs         Boolean                   @default(false)
-  autoApprovalStatus      CompanyAutoApprovalStatus @default(NONE)
-  autoApprovalRequestedAt DateTime?
+  autoApproveJobs          Boolean                   @default(false)
+  autoApprovalStatus       CompanyAutoApprovalStatus @default(NONE)
+  autoApprovalRequestedAt  DateTime?
+  autoApprovalDenialReason String?
 
   jobs          Job[]
   scrapeLogs    ScrapeLog[]
@@ -288,11 +297,14 @@ model Job {
   salaryMin       Int?
   salaryMax       Int?
   salaryCurrency  String?
+  salaryPeriod    String?
   salaryRaw       String?
   description     String?
   imageUrl        String?
   deadline        DateTime?
   applyUrl        String?
+  cvEmail         String?
+  walkIn          Boolean     @default(false)
   status          JobStatus   @default(ACTIVE)
   lastSeenAt      DateTime
   deletedAt       DateTime?
@@ -506,6 +518,24 @@ model Notification {
 
   @@index([readAt])
   @@index([createdAt])
+}
+
+// `type` is a plain string (app-level enum in @careerslk/types), not a
+// Prisma enum, so new notification types can be added without a migration.
+model WebUserNotification {
+  id        Int       @id @default(autoincrement())
+  webUserId Int
+  webUser   WebUser   @relation(fields: [webUserId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  message   String
+  metadata  Json?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([webUserId])
+  @@index([webUserId, readAt])
+  @@map("web_user_notifications")
 }
 
 enum PackageType {

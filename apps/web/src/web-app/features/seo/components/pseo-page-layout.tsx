@@ -22,6 +22,13 @@ export default function PseoPageLayout({
   children,
   breadcrumbs,
 }: IPseoPageLayout) {
+  // Skill pSEO pages are no longer publicly visible — don't link into them
+  // from other pSEO pages' "Related searches" even if backend-generated
+  // related-links data still contains one.
+  const visibleRelatedLinks = relatedLinks.filter(
+    (link) => !link.slug.startsWith("jobs/skills/"),
+  );
+
   const breadcrumbSchema = buildBreadcrumbListSchema(breadcrumbs);
   const collectionSchema = buildCollectionPageSchema({
     name: page.h1,
@@ -38,11 +45,11 @@ export default function PseoPageLayout({
 
       {children}
 
-      {relatedLinks.length > 0 && (
+      {visibleRelatedLinks.length > 0 && (
         <section className="mb-10">
           <h2 className="mb-3 text-lg font-bold">Related searches</h2>
           <div className="flex flex-wrap gap-2">
-            {relatedLinks.map((link: SeoRelatedLink) => (
+            {visibleRelatedLinks.map((link: SeoRelatedLink) => (
               <Link
                 key={link.slug}
                 href={`/${link.slug}`}

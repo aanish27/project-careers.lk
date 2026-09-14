@@ -21,10 +21,19 @@ export function formatSalary(job: {
   salaryMin: number | null;
   salaryMax: number | null;
   salaryCurrency: string | null;
+  salaryPeriod?: string | null;
 }): string | null {
   if (!job.salaryRaw && !job.salaryMin) return null;
-  const amount =
-    job.salaryRaw ??
-    `${job.salaryMin?.toLocaleString()} - ${job.salaryMax?.toLocaleString()}`;
+  const period = job.salaryPeriod
+    ? job.salaryPeriod === "annual"
+      ? "/year"
+      : "/month"
+    : "";
+  if (job.salaryRaw) {
+    const amount = `${job.salaryRaw}${period}`;
+    return job.salaryCurrency ? `${job.salaryCurrency} ${amount}` : amount;
+  }
+  const range = `${job.salaryMin?.toLocaleString()} - ${job.salaryMax?.toLocaleString()}`;
+  const amount = `${range}${period}`;
   return job.salaryCurrency ? `${job.salaryCurrency} ${amount}` : amount;
 }

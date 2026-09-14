@@ -16,6 +16,18 @@ export interface SeoPageDimensions {
 }
 
 /**
+ * Base visibility filter every public-facing job query must apply: live,
+ * non-deleted, admin-approved. Reuse this rather than repeating the three
+ * fields inline — a query that skips `approvalStatus` will silently leak
+ * pending/rejected web-user-submitted jobs to the public site.
+ */
+export const PUBLIC_JOB_VISIBILITY_WHERE: JobWhereInput = {
+  status: JobStatus.ACTIVE,
+  deletedAt: null,
+  approvalStatus: JobApprovalStatus.APPROVED,
+};
+
+/**
  * Single source of truth for "what jobs does this page represent" — used
  * both to aggregate SEO Input Object stats and to list jobs on the public
  * page itself, so the displayed count always matches the displayed jobs.
@@ -27,11 +39,7 @@ export interface SeoPageDimensions {
  * columns instead.
  */
 export function buildJobWhereForPage(dims: SeoPageDimensions): JobWhereInput {
-  const where: JobWhereInput = {
-    status: JobStatus.ACTIVE,
-    deletedAt: null,
-    approvalStatus: JobApprovalStatus.APPROVED,
-  };
+  const where: JobWhereInput = { ...PUBLIC_JOB_VISIBILITY_WHERE };
 
   // Talent-pool postings aren't open roles — keep them off every page
   // except their own dedicated hub.

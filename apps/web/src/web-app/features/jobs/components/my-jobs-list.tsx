@@ -91,6 +91,8 @@ export function MyJobsList({ jobs }: { jobs: JobWithCompany[] }) {
       <ul className="flex flex-col gap-3">
         {items.map((job) => {
           const isWithdrawn = job.deletedAt !== null;
+          const isRejected = job.approvalStatus === "REJECTED";
+          const canOnlyDelete = isWithdrawn || isRejected;
           return (
             <li key={job.id} className="rounded-md border border-border p-4">
               <div className="flex items-start justify-between gap-3">
@@ -131,7 +133,7 @@ export function MyJobsList({ jobs }: { jobs: JobWithCompany[] }) {
                     View job <ExternalLink className="size-3.5" />
                   </Link>
                 )}
-                {isWithdrawn ? (
+                {canOnlyDelete ? (
                   <Button
                     type="button"
                     variant="outline"

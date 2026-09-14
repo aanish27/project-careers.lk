@@ -11,5 +11,5 @@ allowBuilds:
   msgpackr-extract: true
   msw: true
   prisma: true
-  sharp: false
+  sharp: true
   unrs-resolver: false

@@ -132,7 +132,7 @@ export function JobDetail({ jobId }: { jobId: number }) {
             <div>
               {job.salaryRaw ??
                 (job.salaryMin || job.salaryMax
-                  ? `${job.salaryMin ?? "?"} - ${job.salaryMax ?? "?"} ${job.salaryCurrency ?? ""}`
+                  ? `${job.salaryMin ?? "?"} - ${job.salaryMax ?? "?"} ${job.salaryCurrency ?? ""} ${job.salaryPeriod ?? ""}`
                   : "—")}
             </div>
           </div>
@@ -154,6 +154,35 @@ export function JobDetail({ jobId }: { jobId: number }) {
                 className="underline"
               >
                 {job.applyUrl}
+              </a>
+            ) : (
+              <div>—</div>
+            )}
+          </div>
+          <div>
+            <div className="text-muted-foreground">CV email</div>
+            {job.cvEmail ? (
+              <a href={`mailto:${job.cvEmail}`} className="underline">
+                {job.cvEmail}
+              </a>
+            ) : (
+              <div>—</div>
+            )}
+          </div>
+          <div>
+            <div className="text-muted-foreground">Walk-in role</div>
+            <div>{job.walkIn ? "Yes" : "No"}</div>
+          </div>
+          <div>
+            <div className="text-muted-foreground">Image</div>
+            {job.imageUrl ? (
+              <a
+                href={job.imageUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="underline"
+              >
+                View image
               </a>
             ) : (
               <div>—</div>

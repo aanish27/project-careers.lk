@@ -97,7 +97,6 @@ export class DeepSeekService {
             await prisma.company.update({
               where: { id: companyId },
               data: {
-                logoUrl: company?.logo_url,
                 atsPlatform: company?.ats_platform,
                 htmlSelector: container?.selector,
                 htmlSelectorReason: container?.reason,

@@ -28,6 +28,12 @@ COPY --from=builder --chown=node:node /usr/local/app/dist ./dist
 COPY --from=builder --chown=node:node /usr/local/app/node_modules ./node_modules
 COPY --from=builder --chown=node:node /usr/local/app/package*.json ./
 
+# sharp ships a platform+libc-specific native binary resolved at install
+# time — the builder stage above is glibc (bookworm) but this runner stage
+# is musl (alpine), so the binary installed there won't load here. Refetch
+# just sharp's binary for this stage's actual platform.
+RUN npm install --cpu=x64 --os=linux --libc=musl sharp
+
 USER node
 
 EXPOSE 3000

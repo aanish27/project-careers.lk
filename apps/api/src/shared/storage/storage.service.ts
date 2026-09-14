@@ -5,6 +5,7 @@ import {
   UploadResult,
 } from './interfaces/storage-provider.interface';
 import { ConfigService } from '@nestjs/config';
+import { ImageCompressionService } from './image-compression.service';
 @Injectable()
 export class StorageService {
   private readonly maxFileSize: number;
@@ -14,6 +15,7 @@ export class StorageService {
     @Inject(STORAGE_PROVIDER)
     private readonly provider: IStorageProvider,
     private readonly config: ConfigService,
+    private readonly imageCompression: ImageCompressionService,
   ) {
     this.maxFileSize =
       this.config.get<number>('storage.maxFileSize') || 5 * 1024 * 1024;
@@ -36,7 +38,11 @@ export class StorageService {
       );
     }
 
-    return this.provider.upload(file, folder);
+    const processedFile = file.mimetype.startsWith('image/')
+      ? await this.imageCompression.compress(file)
+      : file;
+
+    return this.provider.upload(processedFile, folder);
   }
 
   async delete(key: string): Promise<void> {
@@ -45,5 +51,9 @@ export class StorageService {
 
   async getUrl(key: string): Promise<string> {
     return this.provider.getUrl(key);
+  }
+
+  getPublicUrl(key: string): string {
+    return this.provider.getPublicUrl(key);
   }
 }

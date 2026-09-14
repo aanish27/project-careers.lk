@@ -12,7 +12,6 @@ const SITEMAP_BUCKETS = [
   "roles",
   "locations",
   "role-location",
-  "skills",
   "companies",
   "misc",
   "freelancer-detail",
@@ -29,7 +28,6 @@ const PAGE_TYPES_BY_BUCKET: Record<
   roles: ["ROLE"],
   locations: ["LOCATION"],
   "role-location": ["ROLE_LOCATION"],
-  skills: ["SKILL"],
   companies: ["COMPANY"],
   misc: ["REMOTE", "INTERNSHIP", "TALENT_POOL", "ALL_JOBS", "HOME"],
 };

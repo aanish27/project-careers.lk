@@ -3,12 +3,12 @@ import { Public } from '@/common/decorators/public.decorator';
 import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
 import { WebUserJwtAuthGuard } from '@/modules/web-user-auth/guards/web-user-jwt-auth.guard';
 import {
-  CreateWebUserJobInput,
-  createWebUserJobSchema,
+  postJobRequestSchema,
   UpdateWebUserJobInput,
   updateWebUserJobSchema,
 } from '@careerslk/types';
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -31,14 +31,26 @@ import { WebUserJobsService } from './web-user-jobs.service';
 export class WebUserJobsController {
   constructor(private readonly webUserJobsService: WebUserJobsService) {}
 
+  // Always multipart — the client sends the structured company/job data as
+  // a JSON string in `payload` (a plain `@Body()` can't carry both a typed
+  // JSON shape and a file in the same request) plus an optional `file`.
   @Post()
   @Throttle({ default: { ttl: 60000, limit: 10 } })
+  @UseInterceptors(FileInterceptor('file'))
   submit(
     @CurrentUser('webUserId') webUserId: number,
-    @Body(new ZodValidationPipe(createWebUserJobSchema))
-    dto: CreateWebUserJobInput,
+    @Body('payload') payloadRaw: string,
+    @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.webUserJobsService.submit(webUserId, dto);
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(payloadRaw);
+    } catch {
+      throw new BadRequestException('Invalid request payload');
+    }
+
+    const dto = new ZodValidationPipe(postJobRequestSchema).transform(parsed);
+    return this.webUserJobsService.submit(webUserId, dto, file);
   }
 
   @Get('mine')
@@ -101,5 +113,13 @@ export class WebUserJobsController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     return this.webUserJobsService.unsave(webUserId, id);
+  }
+
+  @Get(':id/save')
+  async isSaved(
+    @CurrentUser('webUserId') webUserId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return { saved: await this.webUserJobsService.isSaved(webUserId, id) };
   }
 }

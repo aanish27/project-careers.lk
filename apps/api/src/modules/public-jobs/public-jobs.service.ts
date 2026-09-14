@@ -7,7 +7,10 @@ import {
   SeoPageType,
 } from '@careerslk/types';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { buildJobWhereForPage } from '../seo/seo-query.util';
+import {
+  buildJobWhereForPage,
+  PUBLIC_JOB_VISIBILITY_WHERE,
+} from '../seo/seo-query.util';
 import { FilterPublicJobsDto } from './dto/filter-public-jobs.dto';
 
 interface JobCursor {
@@ -56,10 +59,12 @@ export class PublicJobsService {
         }),
       );
     } else {
-      // No page context at all — default to the same exclusion every other
-      // page type gets via buildJobWhereForPage (talent pools only ever show
-      // on their own jobs/talent-pools hub).
+      // No page context at all — default to the same base visibility filter
+      // and talent-pool exclusion every other page type gets via
+      // buildJobWhereForPage (talent pools only ever show on their own
+      // jobs/talent-pools hub).
       and.push({
+        ...PUBLIC_JOB_VISIBILITY_WHERE,
         NOT: { employmentType: { equals: 'talent_pool', mode: 'insensitive' } },
       });
     }

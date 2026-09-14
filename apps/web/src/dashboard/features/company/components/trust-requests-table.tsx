@@ -16,7 +16,8 @@ import type { Company } from "@careerslk/types";
 import { IconShieldCheck } from "@tabler/icons-react";
 import Link from "next/link";
 import { useCompanies } from "../hooks/use-companies";
-import { useTrustCompany, useUntrustCompany } from "../hooks/use-trust-company";
+import { useTrustCompany } from "../hooks/use-trust-company";
+import { DenyTrustDialog } from "./deny-trust-dialog";
 
 function formatDate(value: string | null) {
   return value ? new Date(value).toLocaleString() : "—";
@@ -24,10 +25,8 @@ function formatDate(value: string | null) {
 
 function RowActions({ company }: { company: Company }) {
   const trustCompany = useTrustCompany();
-  const untrustCompany = useUntrustCompany();
-  const [confirmAction, setConfirmAction] = useState<"trust" | "deny" | null>(
-    null,
-  );
+  const [confirmTrust, setConfirmTrust] = useState(false);
+  const [denyOpen, setDenyOpen] = useState(false);
 
   return (
     <>
@@ -35,42 +34,31 @@ function RowActions({ company }: { company: Company }) {
         <Button
           size="sm"
           disabled={trustCompany.isPending}
-          onClick={() => setConfirmAction("trust")}
+          onClick={() => setConfirmTrust(true)}
         >
           Trust
         </Button>
         <Button
           size="sm"
           variant="destructive"
-          disabled={untrustCompany.isPending}
-          onClick={() => setConfirmAction("deny")}
+          onClick={() => setDenyOpen(true)}
         >
           Deny
         </Button>
       </div>
       <ConfirmDialog
-        open={confirmAction !== null}
-        onOpenChange={(open) => !open && setConfirmAction(null)}
-        title={
-          confirmAction === "deny"
-            ? `Deny auto-approval for ${company.name}?`
-            : `Trust ${company.name}?`
-        }
-        description={
-          confirmAction === "deny"
-            ? "This company's job postings will continue to require manual approval."
-            : "This grants auto-approval for this company's future job postings — they'll go live without manual review. Note: this change may take 1-2 business days to take effect."
-        }
-        confirmLabel={confirmAction === "deny" ? "Deny" : "Trust company"}
-        variant={confirmAction === "deny" ? "destructive" : "default"}
-        isPending={trustCompany.isPending || untrustCompany.isPending}
-        onConfirm={() => {
-          if (confirmAction === "deny") {
-            untrustCompany.mutate(company.id);
-          } else if (confirmAction === "trust") {
-            trustCompany.mutate(company.id);
-          }
-        }}
+        open={confirmTrust}
+        onOpenChange={setConfirmTrust}
+        title={`Trust ${company.name}?`}
+        description="This grants auto-approval for this company's future job postings — they'll go live without manual review. Note: this change may take 1-2 business days to take effect."
+        confirmLabel="Trust company"
+        isPending={trustCompany.isPending}
+        onConfirm={() => trustCompany.mutate(company.id)}
+      />
+      <DenyTrustDialog
+        company={company}
+        open={denyOpen}
+        onOpenChange={setDenyOpen}
       />
     </>
   );

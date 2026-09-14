@@ -1,5 +1,6 @@
 import { ApiError } from "@/lib/api-client";
 import { AutoApprovalStatus } from "@web-app-features/company/components/auto-approval-status";
+import { CompanyBrUpload } from "@web-app-features/company/components/company-br-upload";
 import { CompanyForm } from "@web-app-features/company/components/company-form";
 import { CompanyLogoUpload } from "@web-app-features/company/components/company-logo-upload";
 import { CompanySetup } from "@web-app-features/company/components/company-setup";
@@ -51,6 +52,7 @@ export default async function CompanyPage() {
         />
       </div>
       <CompanyForm company={company} />
+      <CompanyBrUpload brImageUrl={company.brImageUrl} />
       <AutoApprovalStatus status={company.autoApprovalStatus} />
     </div>
   );

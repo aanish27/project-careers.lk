@@ -1,5 +1,7 @@
 import { Badge } from "@/components/ui/badge";
+import { sanitizeRichText, stripHtmlToText } from "@/lib/sanitize-html";
 import { StructuredData } from "@/web-app/components/structured-data";
+import { getJobSavedStatus } from "@/web-app/features/jobs/api/saved-jobs.actions";
 import { JobDetailActions } from "@/web-app/features/jobs/components/job-detail/job-detail-actions";
 import { DetailRow } from "@/web-app/features/jobs/components/job-detail/job-detail-row";
 import { isRetired, loadJob } from "@/web-app/features/jobs/utils/job-checks";
@@ -39,7 +41,7 @@ export async function generateMetadata({
 
   const { job } = result;
   const description = job.description
-    ? job.description.slice(0, 160)
+    ? stripHtmlToText(job.description).slice(0, 160)
     : `${job.title} at ${job.company.name} — apply now.`;
 
   return {
@@ -83,6 +85,7 @@ export default async function JobDetailPage({
 
   const canonicalUrl = `/job/${job.slug}`;
   const isExpired = job.status === "EXPIRED";
+  const isSaved = await getJobSavedStatus(job.id);
 
   const jobPostingSchema = buildJobPostingSchema(job, canonicalUrl);
   const breadcrumbSchema = buildBreadcrumbListSchema([
@@ -94,6 +97,8 @@ export default async function JobDetailPage({
   const salary = formatSalary(job);
   const location = formatLocation(job);
   const applyUrl = !isExpired ? job.applyUrl : null;
+  const cvEmail = !isExpired ? job.cvEmail : null;
+  const walkIn = !isExpired && job.walkIn;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
@@ -152,6 +157,9 @@ export default async function JobDetailPage({
               title={job.title}
               url={canonicalUrl}
               applyUrl={applyUrl}
+              cvEmail={cvEmail}
+              walkIn={walkIn}
+              initialSaved={isSaved}
             />
           </div>
 
@@ -189,9 +197,12 @@ export default async function JobDetailPage({
           </div>
 
           {job.description && (
-            <section className="prose prose-sm sm:prose-base max-w-none whitespace-pre-line prose-headings:font-bold prose-headings:text-foreground">
-              {job.description}
-            </section>
+            <section
+              className="prose prose-sm sm:prose-base max-w-none prose-headings:font-bold prose-headings:text-foreground"
+              dangerouslySetInnerHTML={{
+                __html: sanitizeRichText(job.description),
+              }}
+            />
           )}
           {job.imageUrl && (
             <Image
@@ -199,7 +210,8 @@ export default async function JobDetailPage({
               alt=""
               width={800}
               height={300}
-              className="mt-6 h-56 w-full rounded-xl object-cover"
+              sizes="(min-width: 768px) 700px, 100vw"
+              className="mt-6 aspect-auto h-auto w-full rounded-xl"
             />
           )}
 
@@ -294,7 +306,7 @@ export default async function JobDetailPage({
             />
           </div>
 
-          {applyUrl ? (
+          {applyUrl && (
             <a
               href={applyUrl}
               target="_blank"
@@ -305,7 +317,20 @@ export default async function JobDetailPage({
               Quick apply
               <IconExternalLink className="size-4" aria-hidden="true" />
             </a>
-          ) : null}
+          )}
+          {cvEmail && (
+            <a
+              href={`mailto:${cvEmail}?subject=${encodeURIComponent(`Application for ${job.title}`)}`}
+              className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-full border border-input px-6 py-3 text-sm font-semibold hover:bg-muted"
+            >
+              Email your CV
+            </a>
+          )}
+          {walkIn && (
+            <div className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-full bg-muted px-6 py-3 text-sm font-semibold">
+              Walk-in interview — no online application needed
+            </div>
+          )}
         </aside>
       </div>
     </div>

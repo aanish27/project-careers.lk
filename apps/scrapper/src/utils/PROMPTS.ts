@@ -38,7 +38,6 @@ OUTPUT SCHEMA:
   "company": {
     "name": string | null,
     "website_url": string | null,
-    "logo_url": string,
     "ats_platform" : string | null,
   },
   "container": {
@@ -68,12 +67,6 @@ website_url
 - If not found in metadata, infer from the career page URL provided.
 - Always return a clean root domain URL with no trailing slash.
 - null if cannot be determined.
-
-logo_url
-- Extract from og:image first — it is almost always a clean absolute URL.
-- Fall back to apple-touch-icon, then link rel="icon".
-- Return the value exactly as found — do not modify or resolve relative paths.
-- null if no logo source is found.
 
 ats_platform
 - Detect the ATS (Applicant Tracking System) powering the career page.
@@ -147,8 +140,7 @@ OUTPUT SCHEMA:
 {
   "company": {
     "name": string | null,
-    "website_url": string | null,
-    "logo_url": string | null
+    "website_url": string | null
   },
   "container": {
     "selector": string | null,
@@ -190,12 +182,6 @@ website_url
 - If not found in metadata, infer from the career page URL provided.
 - Always return a clean root domain URL with no trailing slash.
 - null if cannot be determined.
-
-logo_url
-- Extract from og:image first — it is almost always a clean absolute URL.
-- Fall back to apple-touch-icon, then link rel="icon".
-- Return the value exactly as found — do not modify or resolve relative paths.
-- null if no logo source is found.
 
 ---
 

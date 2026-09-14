@@ -17,11 +17,13 @@ import { Injectable } from '@nestjs/common';
 export class S3StorageProvider implements IStorageProvider {
   private readonly client: S3Client;
   private readonly bucket: string;
+  private readonly region: string;
 
   constructor(config: ConfigService) {
     this.bucket = config.get<string>('storage.s3.bucket') || '';
+    this.region = config.get<string>('storage.s3.region') || 'us-east-1';
     this.client = new S3Client({
-      region: config.get<string>('storage.s3.region') || 'us-east-1',
+      region: this.region,
       credentials: {
         accessKeyId: config.get<string>('storage.s3.accessKeyId') || '',
         secretAccessKey: config.get<string>('storage.s3.secretAccessKey') || '',
@@ -65,5 +67,12 @@ export class S3StorageProvider implements IStorageProvider {
       }),
       { expiresIn: 3600 },
     );
+  }
+
+  // Permanent, unsigned URL — only valid for keys under a prefix the bucket
+  // policy grants public read to (e.g. company-logos/, job-images/). Never
+  // use this for private documents; use getUrl() for those instead.
+  getPublicUrl(key: string): string {
+    return `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`;
   }
 }

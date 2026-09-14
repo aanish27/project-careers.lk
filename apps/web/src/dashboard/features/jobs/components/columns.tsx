@@ -1,3 +1,4 @@
+import { stripHtmlToText } from "@/lib/sanitize-html";
 import { JobWithCompany } from "@careerslk/types";
 import type { ColumnDef } from "@tanstack/react-table";
 
@@ -45,8 +46,18 @@ export const columns: ColumnDef<JobWithCompany>[] = [
     header: "Salary Currency",
   },
   {
+    accessorKey: "salaryPeriod",
+    header: "Salary Period",
+  },
+  {
     accessorKey: "description",
     header: "Description",
+    // Stored as HTML from the poster's rich-text editor — show plain text
+    // in this table cell rather than raw tags.
+    cell: ({ getValue }) => {
+      const value = getValue<string | null>();
+      return value ? stripHtmlToText(value) : "";
+    },
   },
   {
     accessorKey: "deadline",
@@ -55,6 +66,15 @@ export const columns: ColumnDef<JobWithCompany>[] = [
   {
     accessorKey: "applyUrl",
     header: "Apply Url",
+  },
+  {
+    accessorKey: "cvEmail",
+    header: "CV Email",
+  },
+  {
+    accessorKey: "walkIn",
+    header: "Walk-in",
+    cell: ({ getValue }) => (getValue<boolean>() ? "Yes" : "No"),
   },
   {
     accessorKey: "salaryRaw",

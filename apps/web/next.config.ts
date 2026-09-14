@@ -12,10 +12,10 @@ const nextConfig: NextConfig = {
   },
   transpilePackages: ["@careerslk/types"],
   images: {
-    // Company logos are scraped from arbitrary company websites, so the
-    // host can't be known ahead of time — allow any https host rather than
-    // disabling optimization (images.unoptimized) entirely.
-    remotePatterns: [{ protocol: "https", hostname: "**" }],
+    // Every image the app renders (company logos, job images, etc.) is our
+    // own S3-hosted asset — scope the allowlist to that host pattern rather
+    // than wildcarding every https host.
+    remotePatterns: [{ protocol: "https", hostname: "*.s3.*.amazonaws.com" }],
   },
 };
 

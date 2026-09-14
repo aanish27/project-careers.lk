@@ -113,6 +113,14 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* The compact form-field editor (MinimalRichTextEditor) — starts small and
+   grows with content instead of the full-page editor's 100vh floor. */
+.minimal-tiptap-editor .ProseMirror {
+  min-height: 20rem;
+  max-width: none;
+  padding: 0;
+}
+
 .ProseMirror:focus {
   outline: none;
   box-shadow: none;

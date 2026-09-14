@@ -4,9 +4,12 @@ import type {
   CreateWebUserJobInput,
   Job,
   JobWithCompany,
+  PostJobCompanyInput,
   UpdateWebUserCompanyInput,
   UpdateWebUserJobInput,
   UpdateWebUserProfileInput,
+  WebUserNotification,
+  WebUserNotificationListResponse,
 } from "@careerslk/types";
 import { ClaimStatus } from "@careerslk/types";
 import { ApiError, apiFetch, extractCookieValue } from "@lib/api-client";
@@ -131,7 +134,7 @@ export async function updateWebUserProfileRequest(
   accessToken: string,
   input: UpdateWebUserProfileInput,
 ): Promise<WebUser> {
-  const { data } = await apiFetch<WebUser>("/web-users/me", {
+  const { data } = await apiFetch<WebUser>("/web-users/auth/me", {
     method: "PATCH",
     body: JSON.stringify(input),
     headers: { Authorization: `Bearer ${accessToken}` },
@@ -197,6 +200,57 @@ export async function uploadJobImageRequest(
   );
 }
 
+// Company creation + job creation + the optional image, all as one request
+// — the API creates the company (if any) and the job in a single database
+// transaction, so a failure partway through can't leave an orphaned company
+// with no job. Multipart, like `uploadJobImageRequest` above, since a
+// `File` can't travel in a JSON body; the structured company/job data rides
+// along as a JSON string in the `payload` field.
+export async function submitJobPostingRequest(
+  accessToken: string,
+  input: {
+    company?: PostJobCompanyInput;
+    job: CreateWebUserJobInput;
+    image?: File;
+  },
+): Promise<{ job: Job; webUser: WebUser }> {
+  const formData = new FormData();
+  formData.append(
+    "payload",
+    JSON.stringify({ company: input.company, job: input.job }),
+  );
+  if (input.image) formData.append("file", input.image);
+
+  let res: Response;
+  try {
+    res = await fetch(`${process.env.API_URL}/web-users/jobs`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}` },
+      body: formData,
+    });
+  } catch {
+    throw new ApiError(0, "NETWORK_ERROR", "Unable to reach the API server");
+  }
+
+  const body = (await res.json()) as
+    | { success: true; data: { job: Job; webUser: WebUser } }
+    | {
+        success: false;
+        error: { code: string; message: string; details?: unknown };
+      };
+
+  if (body.success) {
+    return body.data;
+  }
+
+  throw new ApiError(
+    res.status,
+    body.error.code,
+    body.error.message,
+    body.error.details,
+  );
+}
+
 export async function fetchMyJobsRequest(
   accessToken: string,
 ): Promise<JobWithCompany[]> {
@@ -235,6 +289,36 @@ export async function removeJobFromProfileRequest(
 ): Promise<void> {
   await apiFetch(`/web-users/jobs/${jobId}/profile`, {
     method: "DELETE",
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+}
+
+export async function fetchMyNotificationsRequest(
+  accessToken: string,
+): Promise<WebUserNotificationListResponse> {
+  const { data } = await apiFetch<WebUserNotificationListResponse>(
+    "/web-users/notifications",
+    { headers: { Authorization: `Bearer ${accessToken}` } },
+  );
+  return data;
+}
+
+export async function markNotificationReadRequest(
+  accessToken: string,
+  id: number,
+): Promise<WebUserNotification> {
+  const { data } = await apiFetch<WebUserNotification>(
+    `/web-users/notifications/${id}/read`,
+    { method: "PATCH", headers: { Authorization: `Bearer ${accessToken}` } },
+  );
+  return data;
+}
+
+export async function markAllNotificationsReadRequest(
+  accessToken: string,
+): Promise<void> {
+  await apiFetch("/web-users/notifications/read-all", {
+    method: "PATCH",
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 }
@@ -345,6 +429,48 @@ export async function uploadCompanyLogoRequest(
       headers: { Authorization: `Bearer ${accessToken}` },
       body: formData,
     });
+  } catch {
+    throw new ApiError(0, "NETWORK_ERROR", "Unable to reach the API server");
+  }
+
+  const body = (await res.json()) as
+    | { success: true; data: Company }
+    | {
+        success: false;
+        error: { code: string; message: string; details?: unknown };
+      };
+
+  if (body.success) {
+    return body.data;
+  }
+
+  throw new ApiError(
+    res.status,
+    body.error.code,
+    body.error.message,
+    body.error.details,
+  );
+}
+
+// Multipart upload can't go through `apiFetch` for the same reason as
+// uploadCompanyLogoRequest above.
+export async function uploadCompanyBrImageRequest(
+  accessToken: string,
+  file: File,
+): Promise<Company> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  let res: Response;
+  try {
+    res = await fetch(
+      `${process.env.API_URL}/web-users/companies/me/br-image`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body: formData,
+      },
+    );
   } catch {
     throw new ApiError(0, "NETWORK_ERROR", "Unable to reach the API server");
   }

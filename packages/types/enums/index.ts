@@ -102,6 +102,18 @@ export const JobApprovalStatus = {
 export type JobApprovalStatus =
   (typeof JobApprovalStatus)[keyof typeof JobApprovalStatus];
 
+// App-level enum only — the `WebUserNotification.type` column is a plain
+// string so new notification types can be added without a migration.
+export const WebUserNotificationType = {
+  JOB_APPROVED: 'JOB_APPROVED',
+  JOB_REJECTED: 'JOB_REJECTED',
+  TRUST_GRANTED: 'TRUST_GRANTED',
+  TRUST_DENIED: 'TRUST_DENIED',
+} as const;
+
+export type WebUserNotificationType =
+  (typeof WebUserNotificationType)[keyof typeof WebUserNotificationType];
+
 export const CompanyAutoApprovalStatus = {
   NONE: 'NONE',
   REQUESTED: 'REQUESTED',

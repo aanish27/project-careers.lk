@@ -5,6 +5,7 @@ import { S3StorageProvider } from './providers/s3-storage.provider';
 import { LocalStorageProvider } from './providers/local-storage.provider';
 import { StorageService } from './storage.service';
 import { StorageController } from './storage.controller';
+import { ImageCompressionService } from './image-compression.service';
 
 @Module({
   controllers: [StorageController],
@@ -19,6 +20,7 @@ import { StorageController } from './storage.controller';
       },
       inject: [ConfigService],
     },
+    ImageCompressionService,
     StorageService,
   ],
   exports: [StorageService],

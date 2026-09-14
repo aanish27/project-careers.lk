@@ -34,11 +34,6 @@ export class HashService {
         metaParts.push($.html(el));
       });
 
-      // favicon / logo
-      $('link[rel="icon"], link[rel="apple-touch-icon"]').each((_, el) => {
-        metaParts.push($.html(el));
-      });
-
       companyMeta = metaParts.join('\n');
     }
 

@@ -10,9 +10,7 @@ export class ZodValidationPipe<T> implements PipeTransform {
     if (!result.success) {
       throw new BadRequestException({
         statusCode: 400,
-        message: result.error.issues.map(
-          (issue) => `${issue.path.join('.')}: ${issue.message}`,
-        ),
+        message: result.error.issues.map((issue) => issue.message),
         error: 'Bad Request',
       });
     }

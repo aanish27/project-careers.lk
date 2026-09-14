@@ -12,31 +12,39 @@ import {
 } from "@ui/dialog";
 import type { JobDetail } from "@careerslk/types";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useUpdateJob } from "../hooks/use-update-job";
+
+interface LocationFormValues {
+  province: string;
+  district: string;
+  city: string;
+}
 
 export function EditJobLocationDialog({ job }: { job: JobDetail }) {
   const [open, setOpen] = useState(false);
   const updateJob = useUpdateJob();
+  const form = useForm<LocationFormValues>({
+    defaultValues: {
+      province: job.province ?? "",
+      district: job.district ?? "",
+      city: job.city ?? "",
+    },
+  });
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const province = formData.get("province");
-    const district = formData.get("district");
-    const city = formData.get("city");
-
+  const onSubmit = form.handleSubmit((data) => {
     updateJob.mutate(
       {
         id: job.id,
         body: {
-          province: typeof province === "string" ? province : undefined,
-          district: typeof district === "string" ? district : undefined,
-          city: typeof city === "string" && city ? city : undefined,
+          province: data.province || undefined,
+          district: data.district || undefined,
+          city: data.city || undefined,
         },
       },
       { onSuccess: () => setOpen(false) },
     );
-  };
+  });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -51,11 +59,10 @@ export function EditJobLocationDialog({ job }: { job: JobDetail }) {
         <DialogHeader>
           <DialogTitle>Edit location</DialogTitle>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="flex flex-col gap-4">
+        <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
           <LocationPicker
-            defaultProvince={job.province ?? ""}
-            defaultDistrict={job.district ?? ""}
-            defaultCity={job.city ?? ""}
+            control={form.control}
+            disabled={updateJob.isPending}
           />
           <DialogFooter>
             <Button type="submit" disabled={updateJob.isPending}>

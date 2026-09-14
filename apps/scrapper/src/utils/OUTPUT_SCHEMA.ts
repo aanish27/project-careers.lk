@@ -19,10 +19,9 @@ export const CLAUDE_SCHEMA_COMPANY = {
           properties: {
             name: { type: ['string', 'null'] },
             website_url: { type: ['string', 'null'] },
-            logo_url: { type: ['string', 'null'] },
             ats_platform: { type: ['string', 'null'] },
           },
-          required: ['name', 'website_url', 'logo_url', 'ats_platform'],
+          required: ['name', 'website_url', 'ats_platform'],
           additionalProperties: false,
         },
         container: {
@@ -81,9 +80,8 @@ export const CLAUDE_SCHEMA_COMPANY_JOBS = {
           properties: {
             name: { type: ['string', 'null'] },
             website_url: { type: ['string', 'null'] },
-            logo_url: { type: ['string', 'null'] },
           },
-          required: ['name', 'website_url', 'logo_url'],
+          required: ['name', 'website_url'],
           additionalProperties: false,
         },
         container: {

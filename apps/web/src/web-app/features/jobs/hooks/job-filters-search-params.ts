@@ -8,6 +8,8 @@ import {
 import { WorkMode, EmploymentType } from "@careerslk/types";
 
 export const jobFiltersParsers = {
+  title: parseAsString.withDefault(""),
+  location: parseAsString.withDefault(""),
   province: parseAsArrayOf(parseAsString).withDefault([]),
   district: parseAsArrayOf(parseAsString).withDefault([]),
   workMode: parseAsArrayOf(

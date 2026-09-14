@@ -12,6 +12,8 @@ import {
   CompanyAutoApprovalStatus,
   CreateCompanyInput,
   createCompanySchema,
+  DenyTrustInput,
+  denyTrustSchema,
   UpdateCompanyInput,
   updateCompanySchema,
 } from '@careerslk/types';
@@ -151,8 +153,13 @@ export class CompaniesController {
   untrust(
     @CurrentPrincipal() actor: AuthenticatedPrincipal,
     @Param('id', ParseIntPipe) id: number,
+    @Body(new ZodValidationPipe(denyTrustSchema)) dto: DenyTrustInput,
     @Req() req: Request,
   ) {
-    return this.companiesService.untrust(id, this.auditContext(actor, req));
+    return this.companiesService.untrust(
+      id,
+      dto,
+      this.auditContext(actor, req),
+    );
   }
 }

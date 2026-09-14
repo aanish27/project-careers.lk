@@ -39,6 +39,7 @@ import { WebUserBlocksModule } from './modules/web-user-blocks/web-user-blocks.m
 import { WebUserChatModule } from './modules/web-user-chat/web-user-chat.module';
 import { WebUserFreelanceModule } from './modules/web-user-freelance/web-user-freelance.module';
 import { WebUserJobsModule } from './modules/web-user-jobs/web-user-jobs.module';
+import { WebUserNotificationsModule } from './modules/web-user-notifications/web-user-notifications.module';
 import { WebUserReportsModule } from './modules/web-user-reports/web-user-reports.module';
 import { WebUsersModule } from './modules/web-users/web-users.module';
 import { StorageModule } from './shared/storage/storage.module';
@@ -178,6 +179,7 @@ import { StorageModule } from './shared/storage/storage.module';
     WebUsersModule,
     WebUserAuthModule,
     WebUserJobsModule,
+    WebUserNotificationsModule,
     WebUserFreelanceModule,
     WebUserBlocksModule,
     WebUserChatModule,

@@ -20,7 +20,6 @@ export interface AiJob {
 export interface AiCompanyInfo {
   name: string | null;
   website_url: string | null;
-  logo_url: string | null;
   ats_platform: string | null;
 }
 

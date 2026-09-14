@@ -6,7 +6,6 @@ const SITEMAP_BUCKETS = [
   "roles",
   "locations",
   "role-location",
-  "skills",
   "companies",
   "misc",
   "freelancer-detail",
@@ -22,6 +21,7 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: [
         "/admin",
+        "/account",
         "/api",
         "/*?*sort=*",
         "/*?*salary=*",

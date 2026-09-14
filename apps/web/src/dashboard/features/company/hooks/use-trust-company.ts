@@ -23,7 +23,8 @@ export function useUntrustCompany() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number) => companyApi.untrust(id),
+    mutationFn: ({ id, reason }: { id: number; reason: string }) =>
+      companyApi.untrust(id, reason),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: companyKeys.lists() });
       queryClient.invalidateQueries({ queryKey: companyKeys.detail(data.id) });
