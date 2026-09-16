@@ -1,0 +1,77 @@
+enum FreelanceApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model FreelanceProfile {
+  id        Int     @id @default(autoincrement())
+  webUserId Int     @unique
+  webUser   WebUser @relation(fields: [webUserId], references: [id])
+
+  bio               String?
+  rate              Int?
+  rateCurrency      String?
+  category          String?
+  skills            String[]
+  portfolioLinks    String[]
+  workHistory       Json?
+  cvFileKey         String?
+  portfolioFileKeys String[] @default([])
+
+  approvalStatus      FreelanceApprovalStatus @default(PENDING)
+  approvedByAdminId   Int?
+  approvedByAdmin     AdminUser?              @relation("FreelanceProfileApprovedBy", fields: [approvedByAdminId], references: [id])
+  approvedAt          DateTime?
+  rejectionReason     String?
+  internalReviewNotes String?
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  slug String @unique
+
+  conversations Conversation[]
+
+  @@index([approvalStatus])
+  @@index([webUserId])
+  @@index([category])
+  @@map("freelance_profiles")
+}
+
+model Gig {
+  id                Int     @id @default(autoincrement())
+  postedByWebUserId Int
+  postedBy          WebUser @relation("GigPostedBy", fields: [postedByWebUserId], references: [id])
+
+  title              String
+  description        String?
+  category           String?
+  skills             String[]
+  budgetMin          Int?
+  budgetMax          Int?
+  budgetCurrency     String?
+  deadline           DateTime?
+  attachmentFileKeys String[]  @default([])
+
+  approvalStatus      FreelanceApprovalStatus @default(PENDING)
+  approvedByAdminId   Int?
+  approvedByAdmin     AdminUser?              @relation("GigApprovedBy", fields: [approvedByAdminId], references: [id])
+  approvedAt          DateTime?
+  rejectionReason     String?
+  internalReviewNotes String?
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  slug String @unique
+
+  conversations Conversation[]
+
+  @@index([approvalStatus])
+  @@index([postedByWebUserId])
+  @@index([category])
+  @@map("gigs")
+}

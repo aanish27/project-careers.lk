@@ -1,0 +1,103 @@
+enum ScrapeStatus {
+  ACTIVE
+  EMPTY
+  ERROR
+  CHECK
+  SKIPPED
+}
+
+// CHECK -> suspected failure
+
+enum CompanyStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum CompanyAutoApprovalStatus {
+  NONE
+  REQUESTED
+  GRANTED
+  DENIED
+}
+
+enum ClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Company {
+  id                     Int           @id @default(autoincrement())
+  name                   String
+  logoUrl                String?
+  websiteUrl             String?       @unique
+  careerUrl              String?
+  atsPlatform            String?
+  pageHash               String?
+  lastScrapedAt          DateTime?
+  status                 CompanyStatus @default(ACTIVE)
+  scrapeStatus           ScrapeStatus  @default(EMPTY)
+  htmlSelector           String?
+  htmlSelectorType       String?
+  htmlSelectorReason     String?
+  htmlSelectorConfidence String?
+  paginationType         String?
+  paginationBtn          String?
+  paginationReason       String?
+  deletedAt              DateTime?
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+
+  description  String?
+  linkedinUrl  String?
+  twitterUrl   String?
+  facebookUrl  String?
+  instagramUrl String?
+
+  address       String?
+  contactPerson String?
+  contactNumber String?
+  // S3 key, not a URL — BR documents are private; a fresh signed URL is
+  // minted on every read instead of persisting one that would expire.
+  brImageKey    String?
+
+  createdByWebUserId Int?
+  createdByWebUser   WebUser? @relation("CompanyCreatedByWebUser", fields: [createdByWebUserId], references: [id])
+
+  autoApproveJobs          Boolean                   @default(false)
+  autoApprovalStatus       CompanyAutoApprovalStatus @default(NONE)
+  autoApprovalRequestedAt  DateTime?
+  autoApprovalDenialReason String?
+
+  jobs          Job[]
+  scrapeLogs    ScrapeLog[]
+  aiLogs        AiLog[]
+  aiBatchLogs   AiBatchLog[]
+  seoPages      SeoPage[]
+  webUsers      WebUser[]
+  companyClaims CompanyClaim[]
+
+  slug String @unique
+
+  @@index([createdByWebUserId])
+}
+
+model CompanyClaim {
+  id        Int     @id @default(autoincrement())
+  webUserId Int
+  webUser   WebUser @relation(fields: [webUserId], references: [id])
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  status ClaimStatus @default(PENDING)
+
+  reviewedByAdminId Int?
+  reviewedByAdmin   AdminUser? @relation(fields: [reviewedByAdminId], references: [id])
+  reviewedAt        DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@unique([webUserId, companyId])
+  @@index([companyId, status])
+  @@map("company_claims")
+}

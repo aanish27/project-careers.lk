@@ -1,0 +1,138 @@
+model AdminUser {
+  id               Int       @id @default(autoincrement())
+  email            String    @unique
+  password         String
+  firstName        String
+  lastName         String
+  isActive         Boolean   @default(true)
+  refreshTokenHash String?
+  deletedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  lastLoginAt      DateTime  @default(now())
+
+  createdById  Int?
+  createdBy    AdminUser?  @relation("AdminUserCreatedBy", fields: [createdById], references: [id])
+  createdUsers AdminUser[] @relation("AdminUserCreatedBy")
+  auditLogs    AuditLog[]
+
+  roleAssignments RoleAssignment[]
+
+  approvedJobs          Job[]
+  reviewedCompanyClaims CompanyClaim[]
+
+  approvedFreelanceProfiles FreelanceProfile[] @relation("FreelanceProfileApprovedBy")
+  approvedGigs              Gig[]              @relation("GigApprovedBy")
+
+  reviewedAbuseReports AbuseReport[]
+
+  @@index([email])
+  @@map("admin_users")
+}
+
+model WebUser {
+  id               Int       @id @default(autoincrement())
+  email            String    @unique
+  googleId         String?   @unique
+  firstName        String?
+  lastName         String?
+  avatarUrl        String?
+  isActive         Boolean   @default(true)
+  refreshTokenHash String?
+  deletedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  lastLoginAt      DateTime  @default(now())
+
+  companyId Int?
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  createdCompanies Company[]             @relation("CompanyCreatedByWebUser")
+  postedJobs       Job[]
+  savedJobs        SavedJob[]
+  companyClaims    CompanyClaim[]
+  notifications    WebUserNotification[]
+
+  freelanceProfile FreelanceProfile?
+  postedGigs       Gig[]             @relation("GigPostedBy")
+
+  sentChatMessages              ChatMessage[]  @relation("ChatMessageSender")
+  conversationsAsParticipantOne Conversation[] @relation("ConversationParticipantOne")
+  conversationsAsParticipantTwo Conversation[] @relation("ConversationParticipantTwo")
+  blocksInitiated               WebUserBlock[] @relation("BlocksInitiated")
+  blocksReceived                WebUserBlock[] @relation("BlocksReceived")
+  abuseReportsFiled             AbuseReport[]
+
+  @@index([email])
+  @@index([googleId])
+  @@index([companyId])
+  @@map("web_users")
+}
+
+model WebUserEmailOtp {
+  id            Int       @id @default(autoincrement())
+  email         String
+  codeHash      String
+  expiresAt     DateTime
+  attempts      Int       @default(0)
+  consumedAt    DateTime?
+  invalidatedAt DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([email])
+  @@map("web_user_email_otps")
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  slug        String   @unique
+  name        String
+  description String?
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userAssignments       RoleAssignment[]
+  permissionAssignments RolePermission[]
+
+  @@index([slug])
+}
+
+model Permission {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  module      String
+  action      String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  roleAssignments RolePermission[]
+
+  @@index([module])
+}
+
+model RoleAssignment {
+  userId     Int
+  roleId     Int
+  assignedAt DateTime @default(now())
+
+  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role      @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  roleId       Int
+  permissionId Int
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}

@@ -1,0 +1,99 @@
+model SeoPage {
+  id               Int          @id @default(autoincrement())
+  pageType         String
+  slug             String       @unique
+  sector           String?
+  roleId           Int?
+  role             SeoRole?     @relation(fields: [roleId], references: [id])
+  locationId       Int?
+  location         SeoLocation? @relation(fields: [locationId], references: [id])
+  companyId        Int?
+  company          Company?     @relation(fields: [companyId], references: [id])
+  skillId          Int?
+  skill            SeoSkill?    @relation(fields: [skillId], references: [id])
+  title            String
+  metaDescription  String
+  h1               String
+  introText        String
+  bottomText       String
+  faqJson          Json?
+  canonicalUrl     String
+  relatedLinksJson Json
+  isIndexable      Boolean
+  contentVersion   Int          @default(1)
+  lastGeneratedAt  DateTime
+  lastReviewedAt   DateTime?
+  manualOverride   Boolean      @default(false)
+  lastmod          DateTime
+
+  jobCount              Int       @default(0)
+  companyCount          Int       @default(0)
+  firstBelowThresholdAt DateTime?
+  deactivatedAt         DateTime?
+  retiredAt             DateTime?
+  needsReview           Boolean   @default(false)
+  validationIssues      Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([pageType, roleId, locationId, companyId, skillId, sector])
+  @@index([pageType])
+  @@index([slug])
+  @@index([roleId])
+  @@index([locationId])
+  @@index([companyId])
+  @@index([skillId])
+  @@index([sector])
+}
+
+model SeoRole {
+  id   Int    @id @default(autoincrement())
+  name String
+  slug String @unique
+
+  jobs     Job[]
+  seoPages SeoPage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum LocationLevel {
+  PROVINCE
+  DISTRICT
+  CITY
+}
+
+model SeoLocation {
+  id      Int           @id @default(autoincrement())
+  name    String
+  slug    String        @unique
+  country String
+  level   LocationLevel
+
+  parentId Int?
+  parent   SeoLocation?  @relation("LocationHierarchy", fields: [parentId], references: [id])
+  children SeoLocation[] @relation("LocationHierarchy")
+
+  jobs     Job[]
+  seoPages SeoPage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([level])
+  @@index([parentId])
+}
+
+model SeoSkill {
+  id   Int    @id @default(autoincrement())
+  name String
+  slug String @unique
+
+  jobSkills JobSkill[]
+  seoPages  SeoPage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

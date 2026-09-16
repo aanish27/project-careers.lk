@@ -1,0 +1,69 @@
+enum ScrapeLogTrigger {
+  SCHEDULED
+  MANUAL
+}
+
+enum ScrapeLogStatus {
+  SUCCESS
+  EMPTY
+  SUSPECTED_FAILURE
+  ERROR
+}
+
+model ScrapeLog {
+  id           Int              @id @default(autoincrement())
+  companyId    Int
+  company      Company          @relation(fields: [companyId], references: [id])
+  triggeredBy  ScrapeLogTrigger
+  jobsFound    Int              @default(0)
+  status       ScrapeLogStatus
+  errorMessage String?
+  durationMs   Int              @default(0)
+  htmlLength   Int?
+  type         String
+  deletedAt    DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  aiLogs       AiLog[]
+
+  @@index([companyId])
+  @@index([createdAt])
+}
+
+model AiLog {
+  id           String      @id
+  companyId    Int
+  company      Company     @relation(fields: [companyId], references: [id])
+  scrapeLogId  Int
+  scrapeLog    ScrapeLog   @relation(fields: [scrapeLogId], references: [id])
+  batchId      String?
+  batchLog     AiBatchLog? @relation(fields: [batchId], references: [id])
+  status       String
+  stopReason   String?
+  model        String?
+  inputTokens  Int?
+  outputTokens Int?
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([companyId])
+  @@index([createdAt])
+}
+
+model AiBatchLog {
+  id        String    @id
+  status    String
+  response  Json
+  type      String
+  aiLogs    AiLog[]
+  jobs      Job[]
+  companies Company[]
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([createdAt])
+}

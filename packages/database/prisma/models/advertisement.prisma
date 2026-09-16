@@ -1,0 +1,34 @@
+enum PackageType {
+  ADSENSE
+  MODAL
+  SPONSORED_CARD
+}
+
+enum InvoiceStatus {
+  PENDING
+  SENT
+  PAID
+  OVERDUE
+}
+
+model Advertiser {
+  id             Int           @id @default(autoincrement())
+  name           String
+  contactEmail   String
+  packageType    PackageType
+  slotPosition   Int?
+  creativeUrl    String?
+  headline       String?
+  description    String?
+  ctaText        String?
+  destinationUrl String?
+  startDate      DateTime
+  endDate        DateTime
+  invoiceStatus  InvoiceStatus @default(PENDING)
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([isActive])
+  @@index([startDate, endDate])
+}

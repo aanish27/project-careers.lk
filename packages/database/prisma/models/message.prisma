@@ -1,0 +1,107 @@
+enum AbuseReportEntityType {
+  FREELANCE_PROFILE
+  GIG
+  CHAT_MESSAGE
+  CHAT_THREAD
+}
+
+enum AbuseReportCategory {
+  SPAM
+  SCAM_FRAUD
+  HARASSMENT
+  INAPPROPRIATE_CONTENT
+  OTHER
+}
+
+enum AbuseReportStatus {
+  PENDING
+  REVIEWED
+  DISMISSED
+}
+
+model Conversation {
+  id Int @id @default(autoincrement())
+
+  // Ordered pair — participantOneId is always the smaller WebUser.id, so
+  // (A,B) and (B,A) always collapse to the same row regardless of who
+  // initiates. Ordering happens once, in the service layer, never trusted
+  // from the client.
+  participantOneId Int
+  participantOne   WebUser @relation("ConversationParticipantOne", fields: [participantOneId], references: [id])
+  participantTwoId Int
+  participantTwo   WebUser @relation("ConversationParticipantTwo", fields: [participantTwoId], references: [id])
+
+  // "Regarding" display context — set once at creation from whichever entry
+  // point started the thread, never overwritten (one thread per pair).
+  contextGigId              Int?
+  contextGig                Gig?              @relation(fields: [contextGigId], references: [id])
+  contextFreelanceProfileId Int?
+  contextFreelanceProfile   FreelanceProfile? @relation(fields: [contextFreelanceProfileId], references: [id])
+
+  lastMessageAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  messages ChatMessage[]
+
+  @@unique([participantOneId, participantTwoId])
+  @@index([participantOneId])
+  @@index([participantTwoId])
+  @@index([lastMessageAt])
+  @@map("conversations")
+}
+
+model ChatMessage {
+  id             Int          @id @default(autoincrement())
+  conversationId Int
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  senderId       Int
+  sender         WebUser      @relation("ChatMessageSender", fields: [senderId], references: [id])
+  body           String
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+  @@map("chat_messages")
+}
+
+model WebUserBlock {
+  id        Int      @id @default(autoincrement())
+  blockerId Int
+  blocker   WebUser  @relation("BlocksInitiated", fields: [blockerId], references: [id])
+  blockedId Int
+  blocked   WebUser  @relation("BlocksReceived", fields: [blockedId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
+  @@map("web_user_blocks")
+}
+
+model AbuseReport {
+  id                Int     @id @default(autoincrement())
+  reporterWebUserId Int
+  reporter          WebUser @relation(fields: [reporterWebUserId], references: [id])
+
+  entityType      AbuseReportEntityType
+  entityId        Int
+  category        AbuseReportCategory
+  details         String?
+  // Snapshot of the reported content at filing time (profile bio, gig
+  // title+description, or chat message body) — the admin queue never needs
+  // a per-entity-type join, and the snapshot survives the source being
+  // later edited or soft-deleted.
+  contentSnapshot String
+
+  status            AbuseReportStatus @default(PENDING)
+  reviewedByAdminId Int?
+  reviewedByAdmin   AdminUser?        @relation(fields: [reviewedByAdminId], references: [id])
+  reviewedAt        DateTime?
+  resolutionNotes   String?
+
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([entityType, entityId])
+  @@index([reporterWebUserId])
+  @@map("abuse_reports")
+}
