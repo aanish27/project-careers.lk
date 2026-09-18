@@ -4,7 +4,7 @@ import {
 } from '@/common/decorators/rbac.decorator';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
 import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
-import { AuditContext } from '@/modules/audit/audit.service';
+import { buildAuditContext } from '@/modules/audit/audit-context.util';
 import type { AuthenticatedPrincipal } from '@/modules/auth/interfaces/jwt-payload.interface';
 import { PERMISSIONS } from '@careerslk/lib';
 import { ResolveReportInput, resolveReportSchema } from '@careerslk/types';
@@ -28,18 +28,6 @@ import { ReportsService } from './reports.service';
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
-  private auditContext(
-    principal: AuthenticatedPrincipal,
-    req: Request,
-  ): AuditContext {
-    return {
-      actorUserId: principal.userId,
-      actorEmail: principal.email,
-      ipAddress: req.ip ?? null,
-      userAgent: req.headers['user-agent']?.slice(0, 255) ?? null,
-    };
-  }
-
   @Get()
   @RequirePermissions(PERMISSIONS.REPORTS_READ)
   findAll(@Query() filters: FilterReportsDto) {
@@ -60,7 +48,7 @@ export class ReportsController {
     @Body(new ZodValidationPipe(resolveReportSchema)) dto: ResolveReportInput,
     @Req() req: Request,
   ) {
-    return this.reportsService.review(id, dto, this.auditContext(actor, req));
+    return this.reportsService.review(id, dto, buildAuditContext(actor, req));
   }
 
   @Post(':id/dismiss')
@@ -71,6 +59,6 @@ export class ReportsController {
     @Body(new ZodValidationPipe(resolveReportSchema)) dto: ResolveReportInput,
     @Req() req: Request,
   ) {
-    return this.reportsService.dismiss(id, dto, this.auditContext(actor, req));
+    return this.reportsService.dismiss(id, dto, buildAuditContext(actor, req));
   }
 }

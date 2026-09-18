@@ -6,7 +6,8 @@ import { PermissionsGuard } from '@/common/guards/permissions.guard';
 import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
 import { PrismaService } from '@/database/prisma.service';
 import { AUDIT_ACTIONS } from '@/modules/audit/audit.constant';
-import { AuditContext, AuditService } from '@/modules/audit/audit.service';
+import { AuditService } from '@/modules/audit/audit.service';
+import { buildAuditContext } from '@/modules/audit/audit-context.util';
 import { SeoGenerationService } from '@/modules/seo/seo-generation.service';
 import type { AuthenticatedPrincipal } from '@/modules/auth/interfaces/jwt-payload.interface';
 import { PERMISSIONS } from '@careerslk/lib';
@@ -38,18 +39,6 @@ export class SeoAdminController {
     private readonly seoGenerationService: SeoGenerationService,
     private readonly audit: AuditService,
   ) {}
-
-  private auditContext(
-    principal: AuthenticatedPrincipal,
-    req: Request,
-  ): AuditContext {
-    return {
-      actorUserId: principal.userId,
-      actorEmail: principal.email,
-      ipAddress: req.ip ?? null,
-      userAgent: req.headers['user-agent']?.slice(0, 255) ?? null,
-    };
-  }
 
   @Get()
   @RequirePermissions(PERMISSIONS.SEO_READ)
@@ -89,7 +78,7 @@ export class SeoAdminController {
       data: { ...dto, manualOverride: true, lastReviewedAt: new Date() },
     });
 
-    await this.audit.record(this.auditContext(actor, req), {
+    await this.audit.record(buildAuditContext(actor, req), {
       action: AUDIT_ACTIONS.SEO_PAGE_UPDATED,
       entityType: 'seo_page',
       entityId: page.id,
@@ -115,7 +104,7 @@ export class SeoAdminController {
   ) {
     await this.seoGenerationService.regenerateOne(id, force === 'true');
 
-    await this.audit.record(this.auditContext(actor, req), {
+    await this.audit.record(buildAuditContext(actor, req), {
       action: AUDIT_ACTIONS.SEO_PAGE_REGENERATED,
       entityType: 'seo_page',
       entityId: id,
@@ -136,7 +125,7 @@ export class SeoAdminController {
       data: { isIndexable: false, deactivatedAt: new Date() },
     });
 
-    await this.audit.record(this.auditContext(actor, req), {
+    await this.audit.record(buildAuditContext(actor, req), {
       action: AUDIT_ACTIONS.SEO_PAGE_DEACTIVATED,
       entityType: 'seo_page',
       entityId: page.id,
@@ -162,7 +151,7 @@ export class SeoAdminController {
       },
     });
 
-    await this.audit.record(this.auditContext(actor, req), {
+    await this.audit.record(buildAuditContext(actor, req), {
       action: AUDIT_ACTIONS.SEO_PAGE_REACTIVATED,
       entityType: 'seo_page',
       entityId: page.id,

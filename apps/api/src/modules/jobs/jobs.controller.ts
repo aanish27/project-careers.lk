@@ -4,7 +4,7 @@ import {
 } from '@/common/decorators/rbac.decorator';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
 import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
-import { AuditContext } from '@/modules/audit/audit.service';
+import { buildAuditContext } from '@/modules/audit/audit-context.util';
 import type { AuthenticatedPrincipal } from '@/modules/auth/interfaces/jwt-payload.interface';
 import { PERMISSIONS } from '@careerslk/lib';
 import {
@@ -35,18 +35,6 @@ import { JobsService } from './jobs.service';
 export class JobsController {
   constructor(private readonly jobsService: JobsService) {}
 
-  private auditContext(
-    principal: AuthenticatedPrincipal,
-    req: Request,
-  ): AuditContext {
-    return {
-      actorUserId: principal.userId,
-      actorEmail: principal.email,
-      ipAddress: req.ip ?? null,
-      userAgent: req.headers['user-agent']?.slice(0, 255) ?? null,
-    };
-  }
-
   @Get()
   @RequirePermissions(PERMISSIONS.JOBS_READ)
   findAll(@Query() filters: FilterJobsDto) {
@@ -67,7 +55,7 @@ export class JobsController {
     @Body(new ZodValidationPipe(updateJobSchema)) dto: UpdateJobInput,
     @Req() req: Request,
   ) {
-    return this.jobsService.update(id, dto, this.auditContext(actor, req));
+    return this.jobsService.update(id, dto, buildAuditContext(actor, req));
   }
 
   @Delete(':id')
@@ -77,7 +65,7 @@ export class JobsController {
     @Param('id', ParseIntPipe) id: number,
     @Req() req: Request,
   ) {
-    return this.jobsService.softDelete(id, this.auditContext(actor, req));
+    return this.jobsService.softDelete(id, buildAuditContext(actor, req));
   }
 
   @Post(':id/approve')
@@ -90,7 +78,7 @@ export class JobsController {
     return this.jobsService.approve(
       id,
       actor.userId,
-      this.auditContext(actor, req),
+      buildAuditContext(actor, req),
     );
   }
 
@@ -102,6 +90,6 @@ export class JobsController {
     @Body(new ZodValidationPipe(rejectJobSchema)) dto: RejectJobInput,
     @Req() req: Request,
   ) {
-    return this.jobsService.reject(id, dto, this.auditContext(actor, req));
+    return this.jobsService.reject(id, dto, buildAuditContext(actor, req));
   }
 }

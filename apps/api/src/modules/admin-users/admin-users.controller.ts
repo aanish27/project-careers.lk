@@ -4,7 +4,7 @@ import {
 } from '@/common/decorators/rbac.decorator';
 import { CursorPaginationDto } from '@/common/dto/pagination.dto';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
-import { AuditContext } from '@/modules/audit/audit.service';
+import { buildAuditContext } from '@/modules/audit/audit-context.util';
 import type { AuthenticatedPrincipal } from '@/modules/auth/interfaces/jwt-payload.interface';
 import { PERMISSIONS } from '@careerslk/lib';
 import {
@@ -58,18 +58,6 @@ export class AdminUsersController {
     private readonly usersService: AdminUsersService,
     private readonly userManagement: AdminUserManagementService,
   ) {}
-
-  private auditContext(
-    principal: AuthenticatedPrincipal,
-    req: Request,
-  ): AuditContext {
-    return {
-      actorUserId: principal.userId,
-      actorEmail: principal.email,
-      ipAddress: req.ip ?? null,
-      userAgent: req.headers['user-agent']?.slice(0, 255) ?? null,
-    };
-  }
 
   @Get()
   @RequirePermissions(PERMISSIONS.USERS_READ)
@@ -157,7 +145,7 @@ export class AdminUsersController {
     const user = await this.userManagement.create(
       actor,
       dto,
-      this.auditContext(actor, req),
+      buildAuditContext(actor, req),
     );
     return plainToInstance(UserResponseDto, user, {
       excludeExtraneousValues: true,
@@ -185,7 +173,7 @@ export class AdminUsersController {
       actor,
       id,
       dto,
-      this.auditContext(actor, req),
+      buildAuditContext(actor, req),
     );
     return plainToInstance(UserResponseDto, user, {
       excludeExtraneousValues: true,
@@ -215,7 +203,7 @@ export class AdminUsersController {
       actor,
       id,
       dto,
-      this.auditContext(actor, req),
+      buildAuditContext(actor, req),
     );
     return plainToInstance(UserResponseDto, user, {
       excludeExtraneousValues: true,
@@ -234,7 +222,7 @@ export class AdminUsersController {
     await this.userManagement.resetPassword(
       id,
       dto,
-      this.auditContext(actor, req),
+      buildAuditContext(actor, req),
     );
     return { success: true };
   }
@@ -252,6 +240,6 @@ export class AdminUsersController {
     @Param('id', ParseIntPipe) id: number,
     @Req() req: Request,
   ): Promise<void> {
-    await this.userManagement.remove(actor, id, this.auditContext(actor, req));
+    await this.userManagement.remove(actor, id, buildAuditContext(actor, req));
   }
 }

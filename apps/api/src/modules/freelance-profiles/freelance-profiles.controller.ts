@@ -4,7 +4,7 @@ import {
 } from '@/common/decorators/rbac.decorator';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
 import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
-import { AuditContext } from '@/modules/audit/audit.service';
+import { buildAuditContext } from '@/modules/audit/audit-context.util';
 import type { AuthenticatedPrincipal } from '@/modules/auth/interfaces/jwt-payload.interface';
 import { PERMISSIONS } from '@careerslk/lib';
 import {
@@ -34,18 +34,6 @@ export class FreelanceProfilesController {
     private readonly freelanceProfilesService: FreelanceProfilesService,
   ) {}
 
-  private auditContext(
-    principal: AuthenticatedPrincipal,
-    req: Request,
-  ): AuditContext {
-    return {
-      actorUserId: principal.userId,
-      actorEmail: principal.email,
-      ipAddress: req.ip ?? null,
-      userAgent: req.headers['user-agent']?.slice(0, 255) ?? null,
-    };
-  }
-
   @Get()
   @RequirePermissions(PERMISSIONS.FREELANCE_PROFILES_READ)
   findAll(@Query() filters: FilterFreelanceProfilesDto) {
@@ -67,7 +55,7 @@ export class FreelanceProfilesController {
   ) {
     return this.freelanceProfilesService.softDelete(
       id,
-      this.auditContext(actor, req),
+      buildAuditContext(actor, req),
     );
   }
 
@@ -81,7 +69,7 @@ export class FreelanceProfilesController {
     return this.freelanceProfilesService.approve(
       id,
       actor.userId,
-      this.auditContext(actor, req),
+      buildAuditContext(actor, req),
     );
   }
 
@@ -97,7 +85,7 @@ export class FreelanceProfilesController {
     return this.freelanceProfilesService.reject(
       id,
       dto,
-      this.auditContext(actor, req),
+      buildAuditContext(actor, req),
     );
   }
 }

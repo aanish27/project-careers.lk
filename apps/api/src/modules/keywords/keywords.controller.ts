@@ -4,7 +4,7 @@ import {
 } from '@/common/decorators/rbac.decorator';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
 import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
-import { AuditContext } from '@/modules/audit/audit.service';
+import { buildAuditContext } from '@/modules/audit/audit-context.util';
 import type { AuthenticatedPrincipal } from '@/modules/auth/interfaces/jwt-payload.interface';
 import { PERMISSIONS } from '@careerslk/lib';
 import {
@@ -37,18 +37,6 @@ import { KeywordsService } from './keywords.service';
 export class KeywordsController {
   constructor(private readonly keywordsService: KeywordsService) {}
 
-  private auditContext(
-    principal: AuthenticatedPrincipal,
-    req: Request,
-  ): AuditContext {
-    return {
-      actorUserId: principal.userId,
-      actorEmail: principal.email,
-      ipAddress: req.ip ?? null,
-      userAgent: req.headers['user-agent']?.slice(0, 255) ?? null,
-    };
-  }
-
   @Post()
   @RequirePermissions(PERMISSIONS.KEYWORDS_CREATE)
   create(
@@ -56,7 +44,7 @@ export class KeywordsController {
     @Body(new ZodValidationPipe(createKeywordSchema)) dto: CreateKeywordInput,
     @Req() req: Request,
   ) {
-    return this.keywordsService.create(dto, this.auditContext(actor, req));
+    return this.keywordsService.create(dto, buildAuditContext(actor, req));
   }
 
   @Get()
@@ -79,7 +67,7 @@ export class KeywordsController {
     @Body(new ZodValidationPipe(updateKeywordSchema)) dto: UpdateKeywordInput,
     @Req() req: Request,
   ) {
-    return this.keywordsService.update(id, dto, this.auditContext(actor, req));
+    return this.keywordsService.update(id, dto, buildAuditContext(actor, req));
   }
 
   @Delete(':id')
@@ -89,7 +77,7 @@ export class KeywordsController {
     @Param('id', ParseIntPipe) id: number,
     @Req() req: Request,
   ) {
-    return this.keywordsService.remove(id, this.auditContext(actor, req));
+    return this.keywordsService.remove(id, buildAuditContext(actor, req));
   }
 
   @Post('jobs/:jobId')
@@ -104,7 +92,7 @@ export class KeywordsController {
     return this.keywordsService.assignToJob(
       jobId,
       dto,
-      this.auditContext(actor, req),
+      buildAuditContext(actor, req),
     );
   }
 
@@ -122,7 +110,7 @@ export class KeywordsController {
       jobId,
       keywordId,
       dto,
-      this.auditContext(actor, req),
+      buildAuditContext(actor, req),
     );
   }
 
@@ -137,7 +125,7 @@ export class KeywordsController {
     return this.keywordsService.removeJobKeyword(
       jobId,
       keywordId,
-      this.auditContext(actor, req),
+      buildAuditContext(actor, req),
     );
   }
 }

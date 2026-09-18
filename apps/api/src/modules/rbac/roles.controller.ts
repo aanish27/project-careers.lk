@@ -26,7 +26,7 @@ import {
   RequirePermissions,
 } from '@/common/decorators/rbac.decorator';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
-import { AuditContext } from '@/modules/audit/audit.service';
+import { buildAuditContext } from '@/modules/audit/audit-context.util';
 import type { AuthenticatedPrincipal } from '@/modules/auth/interfaces/jwt-payload.interface';
 import {
   CreateRoleDto,
@@ -42,18 +42,6 @@ import { RolesService } from './roles.service';
 @UseGuards(PermissionsGuard)
 export class RolesController {
   constructor(private readonly roles: RolesService) {}
-
-  private auditContext(
-    principal: AuthenticatedPrincipal,
-    req: Request,
-  ): AuditContext {
-    return {
-      actorUserId: principal.userId,
-      actorEmail: principal.email,
-      ipAddress: req.ip ?? null,
-      userAgent: req.headers['user-agent']?.slice(0, 255) ?? null,
-    };
-  }
 
   @Get()
   @RequirePermissions(PERMISSIONS.ROLES_READ)
@@ -92,7 +80,7 @@ export class RolesController {
     const role = await this.roles.create(
       actor,
       dto,
-      this.auditContext(actor, req),
+      buildAuditContext(actor, req),
     );
     return RoleResponseDto.from(role);
   }
@@ -112,7 +100,7 @@ export class RolesController {
     const role = await this.roles.update(
       id,
       dto,
-      this.auditContext(actor, req),
+      buildAuditContext(actor, req),
     );
     return RoleResponseDto.from(role);
   }
@@ -140,7 +128,7 @@ export class RolesController {
       actor,
       id,
       dto,
-      this.auditContext(actor, req),
+      buildAuditContext(actor, req),
     );
     return RoleResponseDto.from(role);
   }
@@ -159,6 +147,6 @@ export class RolesController {
     @Param('id', ParseIntPipe) id: number,
     @Req() req: Request,
   ): Promise<void> {
-    await this.roles.remove(id, this.auditContext(actor, req));
+    await this.roles.remove(id, buildAuditContext(actor, req));
   }
 }
